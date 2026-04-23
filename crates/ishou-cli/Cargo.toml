@@ -1,0 +1,21 @@
+[package]
+name = "ishou-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "ishou — CLI for rendering pleme-io design tokens to any supported target"
+
+[[bin]]
+name = "ishou"
+path = "src/main.rs"
+
+[dependencies]
+ishou-tokens = { path = "../ishou-tokens" }
+ishou-render = { path = "../ishou-render" }
+clap.workspace = true
+anyhow.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true
