@@ -29,21 +29,20 @@
         devTools = [ rust pkgs.pkg-config pkgs.openssl fenixPkgs.latest.clippy fenixPkgs.latest.rustfmt ];
         binPath = pkgs.lib.makeBinPath devTools;
 
-        ishouBin = pkgs.stdenv.mkDerivation {
+        # rustPlatform.buildRustPackage vendors deps into the sandbox from
+        # Cargo.lock so crates.io-resolved deps (irodori) are reachable
+        # without network access during the build. The previous naive
+        # `cargo build` inside mkDerivation only worked while every dep was
+        # a local path-sibling — irodori moving to crates.io broke it.
+        ishouBin = pkgs.rustPlatform.buildRustPackage {
           pname = "ishou";
           version = "0.1.0";
           src = self;
-          nativeBuildInputs = devTools;
-          dontConfigure = true;
-          buildPhase = ''
-            export HOME=$(mktemp -d)
-            export CARGO_HOME=$HOME/.cargo
-            cargo build --release --bin ishou -p ishou-cli
-          '';
-          installPhase = ''
-            mkdir -p $out/bin
-            cp target/release/ishou $out/bin/ishou
-          '';
+          cargoLock.lockFile = ./Cargo.lock;
+          cargoBuildFlags = [ "--bin" "ishou" "-p" "ishou-cli" ];
+          doCheck = false;
+          nativeBuildInputs = [ pkgs.pkg-config ];
+          buildInputs = [ pkgs.openssl ];
         };
 
         mkRenderApp = target: {
