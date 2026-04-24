@@ -1,8 +1,8 @@
 //! Border radius tokens.
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Radius {
     pub none: u16,
     pub sm: u16,

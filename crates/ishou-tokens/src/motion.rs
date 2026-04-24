@@ -3,15 +3,15 @@
 //! Curves are inspired by blackmatter-ghostty's shader motion (sonic-boom,
 //! stardust, prompt-saber) so UI animation feels continuous with TUI effects.
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Motion {
     pub duration: Durations,
     pub easing: Easings,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Durations {
     pub instant_ms: u16,
     pub fast_ms: u16,
@@ -21,10 +21,10 @@ pub struct Durations {
 }
 
 /// CSS cubic-bezier tuples.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Serialize)]
 pub struct Cubic(pub f32, pub f32, pub f32, pub f32);
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Easings {
     pub standard: Cubic,
     pub decelerate: Cubic,

@@ -3,9 +3,9 @@
 //! role mapping used across web, TUI, and shader targets.
 
 use irodori::{Color, NORD};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize)]
 pub struct Rgb {
     pub r: u8,
     pub g: u8,
@@ -28,7 +28,7 @@ impl Rgb {
 }
 
 /// Every named color ishou recognises. Includes Nord + brand monochrome.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ColorPalette {
     // Nord polar night — dark backgrounds.
     pub polar_night_0: Rgb,
@@ -86,7 +86,7 @@ impl ColorPalette {
 
 /// Semantic color roles consumers bind to — keeps tokens stable when a
 /// palette value moves.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct SemanticRoles {
     pub background: &'static str,
     pub surface: &'static str,

@@ -6,9 +6,9 @@
 //! geometrically so renderers can stamp it into SVG, GLSL paths, or keep it
 //! as a reference to an external asset.
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Brand {
     pub name: &'static str,
     pub tagline: &'static str,
@@ -16,7 +16,7 @@ pub struct Brand {
     pub swerve: Swerve,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct LogoAssets {
     /// Full lockup (mark + wordmark) — primary.
     pub lockup: &'static str,
@@ -35,7 +35,7 @@ pub struct LogoAssets {
 /// The swerve is drawn as two mirrored cubic Bézier segments inside a 1:1
 /// viewBox. Renderers can expand this into an SVG path, a GLSL signed-
 /// distance field, or a Rust `lyon` path for custom rendering.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Swerve {
     pub viewbox: u16,          // e.g. 64 → "0 0 64 64"
     pub stroke_width: u16,     // in viewbox units
@@ -45,7 +45,7 @@ pub struct Swerve {
     pub path_d: &'static str,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize)]
 pub enum StrokeCap {
     Butt,
     Round,

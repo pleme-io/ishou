@@ -14,7 +14,10 @@ license = "MIT"
 repository = "https://github.com/pleme-io/ishou"
 
 [workspace.dependencies]
-irodori = { path = "../irodori" }
+# Published to crates.io — keeps FlakeHub-distributed ishou tarballs
+# standalone-buildable (the sibling path dep `{ path = "../irodori" }`
+# broke consumers the moment the tarball left the workspace).
+irodori = "0.1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"

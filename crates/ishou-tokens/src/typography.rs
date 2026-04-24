@@ -1,8 +1,8 @@
 //! Typography tokens — font stacks + modular scale.
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Typography {
     pub families: FontFamilies,
     pub scale: TypeScale,
@@ -10,7 +10,7 @@ pub struct Typography {
     pub line_height: LineHeights,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct FontFamilies {
     pub serif: &'static str,
     pub sans: &'static str,
@@ -19,7 +19,7 @@ pub struct FontFamilies {
 }
 
 /// 1.25 modular scale from 0.75rem base-ish, in em-style sizes.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct TypeScale {
     pub xs: f32,
     pub sm: f32,
@@ -32,7 +32,7 @@ pub struct TypeScale {
     pub x4: f32,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct FontWeights {
     pub light: u16,
     pub regular: u16,
@@ -41,7 +41,7 @@ pub struct FontWeights {
     pub bold: u16,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct LineHeights {
     pub tight: f32,
     pub base: f32,

@@ -7,9 +7,9 @@
 //! Names mirror the shader filenames in
 //! `blackmatter-ghostty/module/shaders/*.glsl` for 1:1 traceability.
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Shaders {
     pub background_pulse: BackgroundPulse,
     pub bloom: Bloom,
@@ -25,29 +25,29 @@ pub struct Shaders {
     pub stardust: Stardust,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct BackgroundPulse { pub intensity: f32, pub speed_hz: f32 }
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Bloom { pub threshold: f32, pub intensity: f32, pub radius: f32 }
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ChromaticAberration { pub magnitude: f32 }
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct CursorGlow { pub radius_px: f32, pub intensity: f32 }
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct CursorTrail { pub length_px: f32, pub decay: f32 }
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct FilmGrain { pub intensity: f32, pub size_px: f32 }
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct FrostHaze { pub intensity: f32, pub blur_px: f32 }
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct PromptSaber { pub thickness_px: f32, pub swoop_ms: u16 }
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ScreenCurvature { pub curvature: f32, pub vignette: f32 }
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct SonicBoom { pub intensity: f32, pub attack_ms: u16, pub settle_ms: u16 }
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Spotlight { pub radius_px: f32, pub softness: f32, pub dim: f32 }
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Stardust { pub particle_count: u32, pub twinkle_speed: f32, pub spread: f32 }
 
 impl Default for Shaders {

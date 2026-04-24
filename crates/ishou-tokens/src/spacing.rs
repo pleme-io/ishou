@@ -1,8 +1,8 @@
 //! Spacing scale — 4px base unit, modular multiples.
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Spacing {
     pub px_0: u16,
     pub px_1: u16,

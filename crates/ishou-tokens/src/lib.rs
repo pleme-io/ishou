@@ -28,19 +28,19 @@ pub mod shadow;
 pub mod spacing;
 pub mod typography;
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 pub use brand::Brand;
-pub use color::{ColorPalette, SemanticRoles};
+pub use color::{ColorPalette, Rgb, SemanticRoles};
 pub use motion::Motion;
 pub use radius::Radius;
 pub use shader::Shaders;
-pub use shadow::Shadow;
+pub use shadow::{Shadow, ShadowSpec};
 pub use spacing::Spacing;
 pub use typography::Typography;
 
 /// The complete ishou token set. Single source of truth for every render target.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct TokenSet {
     pub color: ColorPalette,
     pub roles: SemanticRoles,

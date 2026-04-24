@@ -4,9 +4,9 @@
 //! hard, slightly-offset drops. These tokens tune shadow geometry + Nord-tinted
 //! black so shadows always read as brand, not stock Material.
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Shadow {
     pub none: ShadowSpec,
     pub sm: ShadowSpec,
@@ -18,7 +18,7 @@ pub struct Shadow {
     pub brand_bold: ShadowSpec,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ShadowSpec {
     pub offset_x: i16,
     pub offset_y: i16,
