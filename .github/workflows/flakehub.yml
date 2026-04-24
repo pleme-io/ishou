@@ -5,11 +5,19 @@ on:
     branches: [main]
 
 jobs:
-  flakehub:
-    uses: pleme-io/substrate/.github/workflows/reusable-flakehub.yml@main
-    with:
-      visibility: public
-      rolling: true
+  publish:
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Publish to FlakeHub
+        uses: DeterminateSystems/flakehub-push@main
+        with:
+          visibility: public
+          rolling: true
