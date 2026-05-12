@@ -108,6 +108,7 @@ fn filename(t: Target) -> &'static str {
         Target::Svg => "mark.svg",
         Target::Stylix => "nord-dark.yaml",
         Target::Nix => "nord-palette.nix",
+        Target::StylixFonts => "stylix-fonts.nix",
     }
 }
 
@@ -124,5 +125,6 @@ fn target_name(t: Target) -> &'static str {
         Target::Svg => "svg",
         Target::Stylix => "stylix",
         Target::Nix => "nix",
+        Target::StylixFonts => "stylix-fonts",
     }
 }

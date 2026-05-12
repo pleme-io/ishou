@@ -55,6 +55,7 @@
       tui      = mk "tui";
       svg      = mk "svg";
       stylix   = mk "stylix";
+      stylix-fonts = mk "stylix-fonts";
       nix      = mk "nix";
       render-all = {
         type = "app";
@@ -93,6 +94,21 @@
     } ''
       ${ishouBin}/bin/ishou render --target nix > $out
     '';
+
+    # Typed font primitive rendered to stylix.fonts shape. Consumed
+    # in pleme-io/nix/darwinConfigurations/default.nix as:
+    #   stylix.fonts = import inputs.ishou.packages.${system}.stylix-fonts { inherit pkgs; };
+    # The single ishou Typography drives every foreign app stylix
+    # touches (GTK, GNOME, alacritty, kitty, …) AND every pleme-io
+    # GPU app via the typed `MonoFonts::pleme()` consumer pattern.
+    mkStylixFonts = system: let
+      pkgs = import nixpkgs { inherit system; };
+      ishouBin = toolOutputs.packages.${system}.default;
+    in pkgs.runCommand "ishou-stylix-fonts" {
+      meta.description = "ishou-rendered stylix.fonts attrset (Nerd Font + calligraphic italic)";
+    } ''
+      ${ishouBin}/bin/ishou render --target stylix-fonts > $out
+    '';
   in
     toolOutputs
     // {
@@ -111,6 +127,9 @@
           # files in blackmatter-{ghostty,mado,opencode} per M6.1 of
           # the theme architecture rollout.
           nord-palette-nix = mkNordPaletteNix system;
+          # Typed stylix.fonts attrset — sourced from ishou's
+          # Typography primitive. See pleme-io/theory/THEME-ARCHITECTURE.md.
+          stylix-fonts = mkStylixFonts system;
         }
       );
     };

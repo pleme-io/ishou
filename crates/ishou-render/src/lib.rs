@@ -26,6 +26,7 @@ pub mod nix;
 pub mod rust;
 pub mod scss;
 pub mod stylix;
+pub mod stylix_fonts;
 pub mod svg;
 pub mod tailwind;
 pub mod tui;
@@ -45,6 +46,7 @@ pub enum Target {
     Svg,
     Stylix,
     Nix,
+    StylixFonts,
 }
 
 impl Target {
@@ -60,6 +62,7 @@ impl Target {
             "tui" => Self::Tui,
             "svg" => Self::Svg,
             "stylix" | "stylix-base16" => Self::Stylix,
+            "stylix-fonts" | "fonts-nix" => Self::StylixFonts,
             "nix" | "nord-palette-nix" => Self::Nix,
             _ => return None,
         })
@@ -78,10 +81,11 @@ impl Target {
             Self::Svg => svg::render(tokens),
             Self::Stylix => stylix::render(tokens),
             Self::Nix => nix::render(tokens),
+            Self::StylixFonts => stylix_fonts::render(tokens),
         }
     }
 
-    pub fn all() -> [Target; 11] {
+    pub fn all() -> [Target; 12] {
         [
             Self::Css,
             Self::Tailwind,
@@ -94,6 +98,7 @@ impl Target {
             Self::Svg,
             Self::Stylix,
             Self::Nix,
+            Self::StylixFonts,
         ]
     }
 }
