@@ -25,6 +25,7 @@ pub mod motion;
 pub mod radius;
 pub mod shader;
 pub mod shadow;
+pub mod space;
 pub mod spacing;
 pub mod typography;
 
@@ -32,6 +33,7 @@ use serde::Serialize;
 
 pub use brand::Brand;
 pub use color::{ColorPalette, Rgb, SemanticRoles};
+pub use space::{linear_from_hex, Linear, LinearRgba, Srgb, SrgbA};
 pub use motion::Motion;
 pub use radius::Radius;
 pub use shader::Shaders;

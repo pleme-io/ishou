@@ -16,6 +16,7 @@
 //! | `TokenSet`     | Ghostty config block                   | `ghostty`    |
 //! | `TokenSet`     | TUI ratatui / crossterm Color table    | `tui`        |
 //! | `TokenSet`     | SVG (brand mark + swerve)              | `svg`        |
+//! | `TokenSet`     | stylix base16 YAML                     | `stylix`     |
 
 pub mod css;
 pub mod ghostty;
@@ -23,6 +24,7 @@ pub mod glsl;
 pub mod json;
 pub mod rust;
 pub mod scss;
+pub mod stylix;
 pub mod svg;
 pub mod tailwind;
 pub mod tui;
@@ -40,6 +42,7 @@ pub enum Target {
     Ghostty,
     Tui,
     Svg,
+    Stylix,
 }
 
 impl Target {
@@ -54,6 +57,7 @@ impl Target {
             "ghostty" => Self::Ghostty,
             "tui" => Self::Tui,
             "svg" => Self::Svg,
+            "stylix" | "stylix-base16" => Self::Stylix,
             _ => return None,
         })
     }
@@ -69,10 +73,11 @@ impl Target {
             Self::Ghostty => ghostty::render(tokens),
             Self::Tui => tui::render(tokens),
             Self::Svg => svg::render(tokens),
+            Self::Stylix => stylix::render(tokens),
         }
     }
 
-    pub fn all() -> [Target; 9] {
+    pub fn all() -> [Target; 10] {
         [
             Self::Css,
             Self::Tailwind,
@@ -83,6 +88,7 @@ impl Target {
             Self::Ghostty,
             Self::Tui,
             Self::Svg,
+            Self::Stylix,
         ]
     }
 }

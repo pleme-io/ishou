@@ -10,6 +10,18 @@ description = "ishou — pleme-io design system: typed tokens (colors, typograph
 irodori.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+# Opt-in `wgpu` feature exposes `From<LinearRgba> for wgpu_types::Color`
+# — the structural integration point for the pleme-io GPU stack. We
+# depend on `wgpu-types` (the small API-only crate) rather than `wgpu`
+# proper so non-GPU consumers don't pull the full GPU dependency tree.
+wgpu-types = { version = "25", optional = true }
+
+[features]
+default = []
+# Enable the `From<LinearRgba> for wgpu_types::Color` integration.
+# Consumed by every pleme-io GUI app (mado, hibiki, kagi, kekkai, fumi,
+# namimado, …) — see `pleme-io/theory/THEME-ARCHITECTURE.md`.
+wgpu = ["dep:wgpu-types"]
 
 [dev-dependencies]
 insta = { version = "1", features = ["json"] }

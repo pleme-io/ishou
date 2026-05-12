@@ -106,6 +106,7 @@ fn filename(t: Target) -> &'static str {
         Target::Ghostty => "ishou.ghostty",
         Target::Tui => "ishou_tui.rs",
         Target::Svg => "mark.svg",
+        Target::Stylix => "nord-dark.yaml",
     }
 }
 
@@ -120,5 +121,6 @@ fn target_name(t: Target) -> &'static str {
         Target::Ghostty => "ghostty",
         Target::Tui => "tui",
         Target::Svg => "svg",
+        Target::Stylix => "stylix",
     }
 }
