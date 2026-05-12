@@ -54,6 +54,7 @@
       ghostty  = mk "ghostty";
       tui      = mk "tui";
       svg      = mk "svg";
+      stylix   = mk "stylix";
       render-all = {
         type = "app";
         program = "${pkgs.writeShellScriptBin "ishou-render-all" ''
@@ -61,11 +62,36 @@
         ''}/bin/ishou-render-all";
       };
     };
+
+    # The stylix-base16 package output is the load-bearing piece that
+    # closes the foreign-app theme loop. After M2 lands in pleme-io/nix,
+    # `darwin-developer`'s `stylix.base16Scheme` is sourced from this
+    # path → every GTK / GNOME / alacritty / kitty / btop / k9s app
+    # stylix knows about inherits the ishou Nord. Build-time materialise
+    # so flake consumers don't pay the runtime cost.
+    mkStylixBase16 = system: let
+      pkgs = import nixpkgs { inherit system; };
+      ishouBin = toolOutputs.packages.${system}.default;
+    in pkgs.runCommand "ishou-stylix-base16-nord-dark" {
+      meta.description = "ishou-rendered base16 YAML for stylix consumers (Nord Dark)";
+    } ''
+      ${ishouBin}/bin/ishou render --target stylix > $out
+    '';
   in
     toolOutputs
     // {
       apps = nixpkgs.lib.genAttrs systems (system:
         (toolOutputs.apps.${system} or {}) // (mkRenderApps system)
+      );
+      packages = nixpkgs.lib.genAttrs systems (system:
+        (toolOutputs.packages.${system} or {}) // {
+          stylix-base16 = mkStylixBase16 system;
+          # Alias under the explicit theme name so consumers can
+          # eventually switch schemes by changing the attribute name
+          # (e.g. `stylix-base16-dracula`) without editing the
+          # consumer-side reference shape.
+          stylix-base16-nord-dark = mkStylixBase16 system;
+        }
       );
     };
 }
