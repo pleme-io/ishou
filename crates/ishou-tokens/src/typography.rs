@@ -204,19 +204,33 @@ impl MonoFonts {
     pub const fn pleme() -> Self {
         Self {
             primary: "JetBrainsMono Nerd Font",
-            italic: "Iosevka Etoile",
+            italic: "Iosevka",
             bold: "JetBrainsMono Nerd Font",
             italic_style: ItalicStyle::Calligraphic,
             fallback: &[
-                "Symbols Nerd Font",
+                "Symbols Nerd Font Mono",
+                "FiraCode Nerd Font",
                 "JetBrains Mono",
                 "SF Mono",
                 "Menlo",
                 "Apple Color Emoji",
                 "monospace",
             ],
+            // The Nerd-Font-patched JetBrains Mono is shipped by
+            // nixpkgs as `pkgs.nerd-fonts.jetbrains-mono`. The HM
+            // module of every fleet GUI app consumes ishou's
+            // `fleet-fonts` render target to install this declaratively
+            // — without that install, glyphon's font_system can't
+            // resolve "JetBrainsMono Nerd Font" and falls back to the
+            // first-installed mono family (currently FiraCode), which
+            // produces the cell_width-vs-actual-advance mismatch the
+            // operator saw in the 2026-05-13 mado screenshots.
             nerd_font_package_attr: Some("jetbrains-mono"),
-            italic_package_attr: Some("iosevka-comfy"),
+            // Iosevka ships the regular + italic faces from
+            // `pkgs.iosevka`; the calligraphic-style "Etoile" subfamily
+            // is selected via Family::Name("Iosevka") + Style::Italic
+            // in the cosmic-text fontdb.
+            italic_package_attr: Some("iosevka"),
         }
     }
 }

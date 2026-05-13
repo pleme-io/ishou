@@ -1,0 +1,225 @@
+//! Fleet-fonts renderer — typed Nix attrset every pleme-io GUI app's
+//! home-manager module imports to (a) name the canonical font family
+//! and (b) install the underlying nixpkgs package via `home.packages`.
+//!
+//! Why this exists separately from `stylix_fonts`:
+//!
+//! - `stylix_fonts` produces the **stylix-shaped** `{ monospace,
+//!   sansSerif, serif, emoji }` attrset that foreign apps (GTK,
+//!   alacritty, kitty, btop, k9s, …) read via the stylix theme.
+//!   Stylix has exactly four font slots.
+//!
+//! - `fleet_fonts` produces a **GPU-app-shaped** `{ primary, italic,
+//!   bold, symbols, emoji, fallback_chain }` attrset that pleme-io's
+//!   own terminal emulators (mado today; fumi / kagi / hibiki /
+//!   namimado / nami next) consume directly via flake input. It
+//!   carries the italic + symbols faces stylix doesn't model, plus
+//!   the explicit package reference each HM module needs to
+//!   `home.packages = [ … ]` so the underlying font is actually
+//!   installed on the operator's machine.
+//!
+//! The two surfaces are sibling projections of the same typed
+//! Typography token — changing `MonoFonts::pleme()` in ishou-tokens
+//! is the single source of truth for both. Adding a new font slot
+//! is a one-line edit in typography.rs; both renderers regenerate
+//! in lockstep.
+//!
+//! ## Output shape
+//!
+//! ```nix
+//! { pkgs }:
+//! {
+//!   primary = { name = "JetBrainsMono Nerd Font"; package = pkgs.nerd-fonts.jetbrains-mono; };
+//!   italic  = { name = "Iosevka"; style_intent = "calligraphic"; package = pkgs.iosevka; };
+//!   bold    = { name = "JetBrainsMono Nerd Font"; package = pkgs.nerd-fonts.jetbrains-mono; };
+//!   symbols = { name = "Symbols Nerd Font Mono"; package = pkgs.nerd-fonts.symbols-only; };
+//!   emoji   = { name = "Apple Color Emoji"; fallback_name = "Noto Color Emoji"; package = null; };
+//!   fallback_chain = [ "Symbols Nerd Font Mono" "FiraCode Nerd Font" … ];
+//! }
+//! ```
+//!
+//! ## Consumer pattern
+//!
+//! Every fleet GUI app's HM module imports this attrset and uses it to
+//! (a) name the canonical family in its `font.family` default and
+//! (b) install the underlying package(s) declaratively:
+//!
+//! ```nix
+//! let fonts = import inputs.ishou.packages.${system}.fleet-fonts
+//!               { inherit pkgs; };
+//! in {
+//!   options.myapp.font.family = lib.mkOption {
+//!     default = fonts.primary.name;
+//!   };
+//!   config.home.packages = [
+//!     fonts.primary.package
+//!     fonts.italic.package
+//!     fonts.symbols.package
+//!   ];
+//! }
+//! ```
+
+use ishou_tokens::TokenSet;
+use ishou_tokens::typography::{ItalicStyle, MonoFonts};
+
+use crate::nix_ast::{AttrEntry, NixExpr, NixFile, attrset, lambda, list, raw, str_};
+
+/// Render the canonical fleet-fonts Nix attrset.
+#[must_use]
+pub fn render(t: &TokenSet) -> String {
+    let mono = &t.typography.mono_fonts;
+
+    let primary = attrset(vec![
+        AttrEntry::new("name", str_(mono.primary)),
+        AttrEntry::new("package", primary_pkg(mono)),
+    ]);
+
+    let italic = attrset(vec![
+        AttrEntry::new("name", str_(mono.italic)),
+        AttrEntry::new("style_intent", str_(italic_style_name(mono.italic_style))),
+        AttrEntry::new("package", italic_pkg(mono)),
+    ]);
+
+    let bold = attrset(vec![
+        AttrEntry::new("name", str_(mono.bold)),
+        AttrEntry::new("package", primary_pkg(mono)),
+    ]);
+
+    let symbols = attrset(vec![
+        AttrEntry::new("name", str_("Symbols Nerd Font Mono")),
+        AttrEntry::new("package", raw("pkgs.nerd-fonts.symbols-only")),
+    ]);
+
+    let emoji = attrset(vec![
+        AttrEntry::new("name", str_("Apple Color Emoji")),
+        AttrEntry::new("fallback_name", str_("Noto Color Emoji")),
+        AttrEntry::new("package", NixExpr::Null),
+    ]);
+
+    let fallback_chain = list(
+        mono.fallback
+            .iter()
+            .map(|name| str_(*name))
+            .collect(),
+    );
+
+    let body = attrset(vec![
+        AttrEntry::new("primary", primary)
+            .with_comment(["Primary monospace family.", "Source of every cell's regular glyph."]),
+        AttrEntry::new("italic", italic)
+            .with_comment(["Italic face — calligraphic by default per fleet."]),
+        AttrEntry::new("bold", bold)
+            .with_comment(["Bold face — shares the primary package."]),
+        AttrEntry::new("symbols", symbols)
+            .with_comment(["Nerd Font icons (powerline / starship / atuin)."]),
+        AttrEntry::new("emoji", emoji)
+            .with_comment([
+                "macOS uses Apple Color Emoji at the OS layer;",
+                "Linux substitutes Noto Color Emoji (operator-installed).",
+            ]),
+        AttrEntry::new("fallback_chain", fallback_chain)
+            .with_comment(["Ordered fallback list cosmic-text walks for missing codepoints."]),
+    ]);
+
+    let file = NixFile::new(
+        [
+            "Generated by ishou-render::fleet_fonts — DO NOT EDIT",
+            "Source of truth: pleme-io/ishou/crates/ishou-tokens/src/typography.rs",
+            "Architecture:    pleme-io/theory/THEME-ARCHITECTURE.md",
+            "",
+            "Consumed as `let fonts = import this { inherit pkgs; }; in …`",
+            "by every pleme-io GPU app's HM module (mado, ghostty, fumi, …).",
+        ],
+        lambda(vec!["pkgs"], body),
+    );
+
+    file.render()
+}
+
+fn primary_pkg(mono: &MonoFonts) -> NixExpr {
+    match mono.nerd_font_package_attr {
+        Some(attr) => raw(format!("pkgs.nerd-fonts.{attr}")),
+        None => NixExpr::Null,
+    }
+}
+
+fn italic_pkg(mono: &MonoFonts) -> NixExpr {
+    match mono.italic_package_attr {
+        Some(attr) => raw(format!("pkgs.{attr}")),
+        None => NixExpr::Null,
+    }
+}
+
+fn italic_style_name(s: ItalicStyle) -> &'static str {
+    match s {
+        ItalicStyle::MatchesPrimary => "matches_primary",
+        ItalicStyle::Calligraphic => "calligraphic",
+        ItalicStyle::Cursive => "cursive",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn output_is_deterministic() {
+        let t = TokenSet::pleme();
+        assert_eq!(render(&t), render(&t));
+    }
+
+    #[test]
+    fn output_contains_all_canonical_slots() {
+        let out = render(&TokenSet::pleme());
+        for slot in ["primary", "italic", "bold", "symbols", "emoji", "fallback_chain"] {
+            assert!(out.contains(&format!("{slot} = ")), "missing slot {slot}\n{out}");
+        }
+    }
+
+    #[test]
+    fn primary_pins_jetbrains_mono_nerd_font_with_correct_package() {
+        let out = render(&TokenSet::pleme());
+        assert!(out.contains("name = \"JetBrainsMono Nerd Font\""));
+        assert!(out.contains("package = pkgs.nerd-fonts.jetbrains-mono"));
+    }
+
+    #[test]
+    fn italic_carries_style_intent() {
+        let out = render(&TokenSet::pleme());
+        assert!(out.contains("style_intent = \"calligraphic\""));
+    }
+
+    #[test]
+    fn symbols_slot_points_at_symbols_only_nerd_font() {
+        let out = render(&TokenSet::pleme());
+        assert!(out.contains("package = pkgs.nerd-fonts.symbols-only"));
+    }
+
+    #[test]
+    fn header_documents_provenance() {
+        let out = render(&TokenSet::pleme());
+        assert!(out.contains("ishou-render::fleet_fonts"));
+        assert!(out.contains("typography.rs"));
+    }
+
+    #[test]
+    fn fallback_chain_is_emitted_in_order() {
+        let out = render(&TokenSet::pleme());
+        let ts = TokenSet::pleme();
+        for name in ts.typography.mono_fonts.fallback {
+            assert!(out.contains(&format!("\"{name}\"")), "missing fallback {name}");
+        }
+    }
+
+    #[test]
+    fn output_starts_with_pkgs_lambda() {
+        let out = render(&TokenSet::pleme());
+        // After the comment header, the first non-comment line should
+        // be the lambda. Lambda printer renders `{ pkgs }:`.
+        let body = out
+            .lines()
+            .find(|l| !l.starts_with('#'))
+            .unwrap_or("");
+        assert_eq!(body, "{ pkgs }:");
+    }
+}

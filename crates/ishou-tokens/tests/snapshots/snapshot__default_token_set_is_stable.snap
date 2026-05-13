@@ -141,8 +141,25 @@ expression: tokens
     "families": {
       "serif": "'Iowan Old Style', 'Charter', 'Georgia', 'Cambria', Times, serif",
       "sans": "'Inter', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif",
-      "mono": "'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace",
+      "mono": "'JetBrainsMono Nerd Font', 'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace",
       "display": "'Inter', system-ui, sans-serif"
+    },
+    "mono_fonts": {
+      "primary": "JetBrainsMono Nerd Font",
+      "italic": "Iosevka",
+      "bold": "JetBrainsMono Nerd Font",
+      "italic_style": "calligraphic",
+      "fallback": [
+        "Symbols Nerd Font Mono",
+        "FiraCode Nerd Font",
+        "JetBrains Mono",
+        "SF Mono",
+        "Menlo",
+        "Apple Color Emoji",
+        "monospace"
+      ],
+      "nerd_font_package_attr": "jetbrains-mono",
+      "italic_package_attr": "iosevka"
     },
     "scale": {
       "xs": 0.75,
@@ -167,6 +184,13 @@ expression: tokens
       "base": 1.5,
       "relaxed": 1.65,
       "prose": 1.7
+    },
+    "features": {
+      "calt": true,
+      "liga": true,
+      "dlig": null,
+      "tnum": true,
+      "zero_slashed": true
     }
   },
   "spacing": {

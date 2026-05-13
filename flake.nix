@@ -56,6 +56,7 @@
       svg      = mk "svg";
       stylix   = mk "stylix";
       stylix-fonts = mk "stylix-fonts";
+      fleet-fonts = mk "fleet-fonts";
       nix      = mk "nix";
       render-all = {
         type = "app";
@@ -109,6 +110,36 @@
     } ''
       ${ishouBin}/bin/ishou render --target stylix-fonts > $out
     '';
+
+    # GPU-app-shaped fleet-fonts attrset — `{ primary, italic, bold,
+    # symbols, emoji, fallback_chain }` consumed directly by every
+    # pleme-io GPU app's HM module (blackmatter-mado today; future
+    # blackmatter-ghostty / blackmatter-fumi / blackmatter-kagi …)
+    # to name the canonical face AND install the underlying nixpkgs
+    # font package via `home.packages`. Sibling of `stylix-fonts` —
+    # same typed Typography source, different consumer-side shape.
+    #
+    # Consumed as:
+    #   let fonts = import inputs.ishou.packages.${system}.fleet-fonts
+    #                 { inherit pkgs; };
+    #   in {
+    #     options.myapp.font.family = lib.mkOption {
+    #       default = fonts.primary.name;
+    #     };
+    #     config.home.packages = [
+    #       fonts.primary.package
+    #       fonts.italic.package
+    #       fonts.symbols.package
+    #     ];
+    #   }
+    mkFleetFonts = system: let
+      pkgs = import nixpkgs { inherit system; };
+      ishouBin = toolOutputs.packages.${system}.default;
+    in pkgs.runCommand "ishou-fleet-fonts" {
+      meta.description = "ishou-rendered fleet-fonts attrset (primary + italic + bold + symbols + emoji + fallback chain) for every pleme-io GPU app's HM module";
+    } ''
+      ${ishouBin}/bin/ishou render --target fleet-fonts > $out
+    '';
   in
     toolOutputs
     // {
@@ -130,6 +161,11 @@
           # Typed stylix.fonts attrset — sourced from ishou's
           # Typography primitive. See pleme-io/theory/THEME-ARCHITECTURE.md.
           stylix-fonts = mkStylixFonts system;
+          # GPU-app-shaped fleet-fonts attrset. Every pleme-io GPU
+          # app's HM module (mado, ghostty, fumi, kagi, …) imports
+          # this to name the canonical font AND install the
+          # underlying nixpkgs package via home.packages.
+          fleet-fonts = mkFleetFonts system;
         }
       );
     };

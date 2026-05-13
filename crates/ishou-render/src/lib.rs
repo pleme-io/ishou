@@ -19,10 +19,12 @@
 //! | `TokenSet`     | stylix base16 YAML                     | `stylix`     |
 
 pub mod css;
+pub mod fleet_fonts;
 pub mod ghostty;
 pub mod glsl;
 pub mod json;
 pub mod nix;
+pub mod nix_ast;
 pub mod rust;
 pub mod scss;
 pub mod stylix;
@@ -47,6 +49,13 @@ pub enum Target {
     Stylix,
     Nix,
     StylixFonts,
+    /// Fleet-fonts attrset — `{ primary, italic, bold, symbols, emoji,
+    /// fallback_chain }` consumed directly by every pleme-io GPU app
+    /// HM module (mado, blackmatter-ghostty, fumi, kagi, …) to name
+    /// the canonical family AND install the underlying nixpkgs
+    /// package via `home.packages`. Sibling of `StylixFonts` — same
+    /// typed Typography source, different consumer-side shape.
+    FleetFonts,
 }
 
 impl Target {
@@ -64,6 +73,7 @@ impl Target {
             "stylix" | "stylix-base16" => Self::Stylix,
             "stylix-fonts" | "fonts-nix" => Self::StylixFonts,
             "nix" | "nord-palette-nix" => Self::Nix,
+            "fleet-fonts" | "fleet_fonts" => Self::FleetFonts,
             _ => return None,
         })
     }
@@ -82,10 +92,11 @@ impl Target {
             Self::Stylix => stylix::render(tokens),
             Self::Nix => nix::render(tokens),
             Self::StylixFonts => stylix_fonts::render(tokens),
+            Self::FleetFonts => fleet_fonts::render(tokens),
         }
     }
 
-    pub fn all() -> [Target; 12] {
+    pub fn all() -> [Target; 13] {
         [
             Self::Css,
             Self::Tailwind,
@@ -99,6 +110,7 @@ impl Target {
             Self::Stylix,
             Self::Nix,
             Self::StylixFonts,
+            Self::FleetFonts,
         ]
     }
 }

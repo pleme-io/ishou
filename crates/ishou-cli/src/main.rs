@@ -109,6 +109,7 @@ fn filename(t: Target) -> &'static str {
         Target::Stylix => "nord-dark.yaml",
         Target::Nix => "nord-palette.nix",
         Target::StylixFonts => "stylix-fonts.nix",
+        Target::FleetFonts => "fleet-fonts.nix",
     }
 }
 
@@ -126,5 +127,6 @@ fn target_name(t: Target) -> &'static str {
         Target::Stylix => "stylix",
         Target::Nix => "nix",
         Target::StylixFonts => "stylix-fonts",
+        Target::FleetFonts => "fleet-fonts",
     }
 }
