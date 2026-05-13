@@ -160,7 +160,7 @@ impl Typography {
                 // consumers (lilitu, zuihitsu) read this stack into
                 // `font-family`; GPU consumers (mado, hibikine, kagibako)
                 // resolve via `mono_fonts.primary` directly.
-                mono: "'JetBrainsMono Nerd Font', 'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace",
+                mono: "'JetBrainsMono Nerd Font Mono', 'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace",
                 // Display = used for brand titles / hero headings; swerve-forward.
                 display: "'Inter', system-ui, sans-serif",
             },
@@ -196,20 +196,31 @@ impl Typography {
 
 impl MonoFonts {
     /// The canonical pleme-io mono font surface: JetBrainsMono Nerd
-    /// Font as the primary (covers every powerline / starship / nerd
-    /// symbol glyph the fleet's shell config assumes); Iosevka Etoile
-    /// as the calligraphic italic; nerd-symbols + Apple Color Emoji
-    /// as fallback for codepoints the primary doesn't carry.
+    /// Font **Mono** as the primary — the `Mono`-suffixed Nerd Fonts
+    /// family forces every glyph (icons included) into a single-cell
+    /// advance equal to plain `JetBrains Mono`. The non-`Mono` variant
+    /// widens ASCII advance to ~0.83em to accommodate double-cell
+    /// icons; that's correct for editor/web monospace but produces
+    /// the 2026-05-13 wide-gap rendering bug in mado/ghostty because
+    /// terminal cell_width measurement (advance of "MM") then
+    /// disagrees with the natural advance of an ASCII glyph in any
+    /// downstream layout. For every consumer where a single cell ==
+    /// one glyph is the hard invariant (terminals, by definition),
+    /// the `Mono` variant is correct. Iosevka stays as the
+    /// calligraphic italic (no `Mono` distinction in Iosevka — every
+    /// face is already strict-monospace). Symbols Nerd Font **Mono**
+    /// + FiraCode Nerd Font **Mono** make up the fallback chain for
+    /// glyphs the primary doesn't carry, both forced to single-cell.
     #[must_use]
     pub const fn pleme() -> Self {
         Self {
-            primary: "JetBrainsMono Nerd Font",
+            primary: "JetBrainsMono Nerd Font Mono",
             italic: "Iosevka",
-            bold: "JetBrainsMono Nerd Font",
+            bold: "JetBrainsMono Nerd Font Mono",
             italic_style: ItalicStyle::Calligraphic,
             fallback: &[
                 "Symbols Nerd Font Mono",
-                "FiraCode Nerd Font",
+                "FiraCode Nerd Font Mono",
                 "JetBrains Mono",
                 "SF Mono",
                 "Menlo",
@@ -217,14 +228,10 @@ impl MonoFonts {
                 "monospace",
             ],
             // The Nerd-Font-patched JetBrains Mono is shipped by
-            // nixpkgs as `pkgs.nerd-fonts.jetbrains-mono`. The HM
-            // module of every fleet GUI app consumes ishou's
-            // `fleet-fonts` render target to install this declaratively
-            // — without that install, glyphon's font_system can't
-            // resolve "JetBrainsMono Nerd Font" and falls back to the
-            // first-installed mono family (currently FiraCode), which
-            // produces the cell_width-vs-actual-advance mismatch the
-            // operator saw in the 2026-05-13 mado screenshots.
+            // nixpkgs as `pkgs.nerd-fonts.jetbrains-mono`. Both the
+            // `JetBrainsMono Nerd Font` (variable-advance) AND
+            // `JetBrainsMono Nerd Font Mono` (strict-monospace) family
+            // names resolve from the same package — no install delta.
             nerd_font_package_attr: Some("jetbrains-mono"),
             // Iosevka ships the regular + italic faces from
             // `pkgs.iosevka`; the calligraphic-style "Etoile" subfamily

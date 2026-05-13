@@ -141,17 +141,17 @@ expression: tokens
     "families": {
       "serif": "'Iowan Old Style', 'Charter', 'Georgia', 'Cambria', Times, serif",
       "sans": "'Inter', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif",
-      "mono": "'JetBrainsMono Nerd Font', 'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace",
+      "mono": "'JetBrainsMono Nerd Font Mono', 'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace",
       "display": "'Inter', system-ui, sans-serif"
     },
     "mono_fonts": {
-      "primary": "JetBrainsMono Nerd Font",
+      "primary": "JetBrainsMono Nerd Font Mono",
       "italic": "Iosevka",
-      "bold": "JetBrainsMono Nerd Font",
+      "bold": "JetBrainsMono Nerd Font Mono",
       "italic_style": "calligraphic",
       "fallback": [
         "Symbols Nerd Font Mono",
-        "FiraCode Nerd Font",
+        "FiraCode Nerd Font Mono",
         "JetBrains Mono",
         "SF Mono",
         "Menlo",
