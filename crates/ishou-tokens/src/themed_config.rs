@@ -111,7 +111,7 @@ impl FleetDefaults {
 /// padding/cursor/scrollback).
 pub mod convergence {
     use crate::fleet_defaults::FleetDefaults;
-    use crate::fleet_keybinds::FleetKeybinds;
+    use crate::fleet_keybinds::{FleetKeybinds, normalize_chord};
     use crate::fleet_theme::FleetTheme;
 
     /// Builder-style guard. Each `expect_*` call adds one assertion;
@@ -327,10 +327,18 @@ pub mod convergence {
         }
 
         fn check_chord(&mut self, intent: &str, actual: &str, expected: &str) {
-            if actual != expected {
+            // Canonicalize both sides through `normalize_chord` so apps
+            // that store the long form ("ctrl+b") match the atlas's
+            // short form ("C-b") and vice versa. The normalizer is
+            // idempotent so already-long-form input passes through; the
+            // chord identity (modifier+key) is what we're asserting,
+            // not the syntactic notation.
+            let actual_norm = normalize_chord(actual);
+            let expected_norm = normalize_chord(expected);
+            if actual_norm != expected_norm {
                 self.failures.push(format!(
-                    "{}: {} chord drift — actual {:?} != fleet {:?}",
-                    self.app, intent, actual, expected
+                    "{}: {} chord drift — actual {:?} (normalized {:?}) != fleet {:?} (normalized {:?})",
+                    self.app, intent, actual, actual_norm, expected, expected_norm,
                 ));
             }
         }
@@ -429,6 +437,44 @@ pub mod convergence {
         #[should_panic(expected = "multiplexer_prefix chord drift")]
         fn divergent_multiplexer_prefix_panics() {
             Guard::for_app("fixture").expect_multiplexer_prefix("C-a").run();
+        }
+
+        #[test]
+        fn guard_matches_long_form_chord_against_short_form_atlas() {
+            // Atlas declares `multiplexer_prefix = "C-b"`; tear (and any
+            // other consumer that stores the long form) supplies
+            // "ctrl+b". The Guard normalizes both sides so the chord
+            // identity matches, not the syntactic surface. Closes the
+            // 2026-05-21 tear-tear-config Guard-normalization gap.
+            Guard::for_app("tear-fixture")
+                .expect_multiplexer_prefix("ctrl+b")
+                .run();
+        }
+
+        #[test]
+        fn guard_matches_short_form_chord_against_short_form_atlas() {
+            // Sanity — supplying the atlas's own form also matches.
+            Guard::for_app("frostmourne-fixture")
+                .expect_history_picker("C-r")
+                .run();
+        }
+
+        #[test]
+        fn guard_matches_long_form_history_picker_against_atlas() {
+            // The full short ↔ long match for non-multiplexer chords too.
+            Guard::for_app("future-consumer")
+                .expect_history_picker("ctrl+r")
+                .run();
+        }
+
+        #[test]
+        #[should_panic(expected = "history_picker chord drift")]
+        fn guard_rejects_genuinely_different_chord_even_with_normalization() {
+            // C-q is a real, different chord — must still fail even
+            // though the notation game succeeds.
+            Guard::for_app("fixture")
+                .expect_history_picker("ctrl+q")
+                .run();
         }
     }
 }

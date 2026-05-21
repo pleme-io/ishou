@@ -202,6 +202,68 @@ impl Default for FleetKeybinds {
     }
 }
 
+/// Normalize an atlas chord string into the canonical long form.
+///
+/// The atlas declares chords in the concise emacs/tmux short-form
+/// (`"C-r"`, `"M-c"`, `"C-x e"`) — this matches frost-lisp,
+/// blackmatter-shell, blzsh, and every operator's muscle memory.
+/// Consumers that need the explicit long form (`"ctrl+r"`, `"alt+c"`)
+/// — tear's prefix-key matcher, awase's hotkey parser when it lands
+/// — pass the atlas value through this helper to get the verbose
+/// notation. The two forms are interchangeable at the consumer
+/// layer; lifting the normalizer here means no consumer has to
+/// reinvent it and every consumer agrees on the canonical mapping.
+///
+/// Mapping (idempotent — long-form input passes through unchanged):
+///
+/// - `C-` / `c-` → `ctrl+`
+/// - `M-` / `m-` → `alt+`
+/// - `S-` / `s-` → `shift+`
+/// - `D-` / `d-` → `super+`
+///
+/// Multi-key chords (`"C-x e"`) keep their internal whitespace —
+/// the normalization runs per space-separated chord segment, so
+/// `"C-x e"` becomes `"ctrl+x e"`.
+#[must_use]
+pub fn normalize_chord(input: &str) -> String {
+    input
+        .split_whitespace()
+        .map(normalize_single_chord)
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn normalize_single_chord(chord: &str) -> String {
+    // If the chord already contains '+' it's long-form; pass through
+    // lowercased so case-only drift normalizes too.
+    if chord.contains('+') {
+        return chord.to_ascii_lowercase();
+    }
+    let segments: Vec<&str> = chord.split('-').collect();
+    // Single-segment input is a bare key (`"tab"`, `"f10"`, `"r"`).
+    if segments.len() == 1 {
+        return segments[0].to_ascii_lowercase();
+    }
+    // Multi-segment input: the LAST segment is the key (regardless of
+    // case — "C-c" means "ctrl+c", not "ctrl+ctrl"); every earlier
+    // segment is a modifier letter.
+    let key = segments.last().unwrap().to_ascii_lowercase();
+    let modifiers = &segments[..segments.len() - 1];
+    let mut parts: Vec<String> = modifiers
+        .iter()
+        .filter_map(|seg| match *seg {
+            "C" | "c" => Some("ctrl"),
+            "M" | "m" => Some("alt"),
+            "S" | "s" => Some("shift"),
+            "D" | "d" => Some("super"),
+            _ => None,
+        })
+        .map(String::from)
+        .collect();
+    parts.push(key);
+    parts.join("+")
+}
+
 /// Marker + factory trait. Any pleme-io Rust app config with
 /// keybinding fields impls this so its prescribed tier is
 /// mechanically derived from `FleetKeybinds` instead of hand-rolled.
@@ -287,6 +349,58 @@ mod tests {
         let s = serde_yaml::to_string(&p).unwrap();
         assert!(s.contains("history_picker: C-r"), "yaml: {s}");
         assert!(s.contains("multiplexer_prefix: C-b"), "yaml: {s}");
+    }
+
+    #[test]
+    fn normalize_chord_short_form_expands_to_long_form() {
+        assert_eq!(normalize_chord("C-r"), "ctrl+r");
+        assert_eq!(normalize_chord("M-c"), "alt+c");
+        assert_eq!(normalize_chord("S-tab"), "shift+tab");
+        assert_eq!(normalize_chord("D-space"), "super+space");
+    }
+
+    #[test]
+    fn normalize_chord_long_form_passes_through() {
+        // Idempotent — feeding the long form back in keeps it stable
+        // (with lowercase normalization).
+        assert_eq!(normalize_chord("ctrl+r"), "ctrl+r");
+        assert_eq!(normalize_chord("Ctrl+R"), "ctrl+r");
+        assert_eq!(normalize_chord("alt+left"), "alt+left");
+    }
+
+    #[test]
+    fn normalize_chord_multi_key_normalizes_each_segment() {
+        // Two-key chords like `C-x e` keep their internal whitespace
+        // but each segment normalizes independently.
+        assert_eq!(normalize_chord("C-x e"), "ctrl+x e");
+        assert_eq!(normalize_chord("C-x C-c"), "ctrl+x ctrl+c");
+    }
+
+    #[test]
+    fn normalize_chord_empty_input_yields_empty() {
+        assert_eq!(normalize_chord(""), "");
+        assert_eq!(normalize_chord("   "), "");
+    }
+
+    #[test]
+    fn normalize_chord_lone_key_no_modifier() {
+        // Plain keys like `tab`, `f10` carry no modifier — the
+        // normalizer should keep them intact.
+        assert_eq!(normalize_chord("tab"), "tab");
+        assert_eq!(normalize_chord("f10"), "f10");
+    }
+
+    #[test]
+    fn normalize_chord_atlas_round_trip_matches_tear_form() {
+        // The whole reason this lives in ishou-tokens: tear's
+        // `KeyChord::from_tmux` produces exactly this. Pinning the
+        // contract here means tear (and every future consumer) can
+        // stop reinventing the wheel and route through atlas helpers.
+        let atlas = FleetKeybinds::prescribed();
+        assert_eq!(normalize_chord(atlas.multiplexer_prefix), "ctrl+b");
+        assert_eq!(normalize_chord(atlas.history_picker), "ctrl+r");
+        assert_eq!(normalize_chord(atlas.dir_picker), "alt+c");
+        assert_eq!(normalize_chord(atlas.edit_in_editor), "ctrl+x e");
     }
 
     #[test]
