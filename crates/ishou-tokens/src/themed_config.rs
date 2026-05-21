@@ -93,6 +93,199 @@ impl FleetDefaults {
     }
 }
 
+/// One-line fleet-convergence guard for themed apps. Drop a single
+/// `#[test]` calling this into your app's tests:
+///
+/// ```rust,ignore
+/// #[test]
+/// fn fleet_convergence() {
+///     ishou_tokens::convergence::assert_themed(MyAppConfig::default());
+/// }
+/// ```
+///
+/// Asserts that the supplied config — typically the app's
+/// `prescribed_default()` or `Default::default()` — has visual
+/// fields matching `FleetDefaults::prescribed()`. The closure-based
+/// API lets each app expose exactly which fields participate (apps
+/// vary in coverage; some have font + theme, others have full
+/// padding/cursor/scrollback).
+pub mod convergence {
+    use crate::fleet_defaults::FleetDefaults;
+    use crate::fleet_theme::FleetTheme;
+
+    /// Builder-style guard. Each `expect_*` call adds one assertion;
+    /// `run()` panics on the first divergence with a clear message
+    /// naming the field + the drift.
+    ///
+    /// Example:
+    ///
+    /// ```rust,ignore
+    /// #[test]
+    /// fn mado_converges_with_fleet() {
+    ///     ishou_tokens::convergence::Guard::for_app("mado")
+    ///         .expect_font_family(MadoConfig::default().font_family.as_str())
+    ///         .expect_font_size(MadoConfig::default().font_size)
+    ///         .expect_padding(MadoConfig::default().padding)
+    ///         .run();
+    /// }
+    /// ```
+    #[must_use]
+    pub struct Guard {
+        app: &'static str,
+        fd: FleetDefaults,
+        failures: Vec<String>,
+    }
+
+    impl Guard {
+        /// Start a guard for `app_name` (used in panic messages).
+        #[must_use]
+        pub fn for_app(app_name: &'static str) -> Self {
+            Self {
+                app: app_name,
+                fd: FleetDefaults::prescribed(),
+                failures: Vec::new(),
+            }
+        }
+
+        /// Assert `actual` matches `FleetDefaults::prescribed().font_family`.
+        #[must_use]
+        pub fn expect_font_family(mut self, actual: &str) -> Self {
+            if actual != self.fd.font_family {
+                self.failures.push(format!(
+                    "{}: font_family drift — actual {:?} != fleet {:?}",
+                    self.app, actual, self.fd.font_family
+                ));
+            }
+            self
+        }
+
+        /// Assert `actual` matches `FleetDefaults::prescribed().font_size`
+        /// (within 0.001 epsilon — f32 round-trips through serde).
+        #[must_use]
+        pub fn expect_font_size(mut self, actual: f32) -> Self {
+            if (actual - self.fd.font_size).abs() >= 0.001 {
+                self.failures.push(format!(
+                    "{}: font_size drift — actual {} != fleet {}",
+                    self.app, actual, self.fd.font_size
+                ));
+            }
+            self
+        }
+
+        /// Assert `actual` matches `FleetDefaults::prescribed().padding`.
+        #[must_use]
+        pub fn expect_padding(mut self, actual: u32) -> Self {
+            if actual != self.fd.padding {
+                self.failures.push(format!(
+                    "{}: padding drift — actual {} != fleet {}",
+                    self.app, actual, self.fd.padding
+                ));
+            }
+            self
+        }
+
+        /// Assert `actual` matches `FleetDefaults::prescribed().cursor_style`.
+        #[must_use]
+        pub fn expect_cursor_style(mut self, actual: &str) -> Self {
+            if actual != self.fd.cursor_style {
+                self.failures.push(format!(
+                    "{}: cursor_style drift — actual {:?} != fleet {:?}",
+                    self.app, actual, self.fd.cursor_style
+                ));
+            }
+            self
+        }
+
+        /// Assert `actual` matches `FleetDefaults::prescribed().scrollback_lines`.
+        #[must_use]
+        pub fn expect_scrollback_lines(mut self, actual: usize) -> Self {
+            if actual != self.fd.scrollback_lines {
+                self.failures.push(format!(
+                    "{}: scrollback_lines drift — actual {} != fleet {}",
+                    self.app, actual, self.fd.scrollback_lines
+                ));
+            }
+            self
+        }
+
+        /// Assert `actual` matches `FleetDefaults::prescribed().theme`.
+        #[must_use]
+        pub fn expect_theme(mut self, actual: FleetTheme) -> Self {
+            if actual != self.fd.theme {
+                self.failures.push(format!(
+                    "{}: theme drift — actual {:?} != fleet {:?}",
+                    self.app, actual, self.fd.theme
+                ));
+            }
+            self
+        }
+
+        /// Run all collected assertions. Panics on the first failure
+        /// with a multi-line message naming every drift; use in tests.
+        ///
+        /// # Panics
+        ///
+        /// Panics if any `expect_*` call recorded a drift, with a
+        /// message listing every field that drifted from the fleet
+        /// baseline.
+        pub fn run(self) {
+            assert!(
+                self.failures.is_empty(),
+                "{} drifted from FleetDefaults::prescribed():\n  - {}",
+                self.app,
+                self.failures.join("\n  - ")
+            );
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn empty_guard_passes() {
+            Guard::for_app("fixture").run();
+        }
+
+        #[test]
+        fn matching_font_family_passes() {
+            let fd = FleetDefaults::prescribed();
+            Guard::for_app("fixture")
+                .expect_font_family(&fd.font_family)
+                .run();
+        }
+
+        #[test]
+        #[should_panic(expected = "font_family drift")]
+        fn divergent_font_family_panics_with_clear_message() {
+            Guard::for_app("fixture")
+                .expect_font_family("NotTheFleetFont")
+                .run();
+        }
+
+        #[test]
+        fn full_guard_chain_on_prescribed_defaults_passes() {
+            let fd = FleetDefaults::prescribed();
+            Guard::for_app("fixture")
+                .expect_font_family(&fd.font_family)
+                .expect_font_size(fd.font_size)
+                .expect_padding(fd.padding)
+                .expect_cursor_style(&fd.cursor_style)
+                .expect_scrollback_lines(fd.scrollback_lines)
+                .expect_theme(fd.theme)
+                .run();
+        }
+
+        #[test]
+        #[should_panic(expected = "scrollback_lines drift")]
+        fn divergence_message_names_the_drifting_field() {
+            Guard::for_app("fixture")
+                .expect_scrollback_lines(42)
+                .run();
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
