@@ -326,6 +326,92 @@ pub mod convergence {
             self
         }
 
+        // ── GUI terminal expectations (mado / namimado / …) ──────
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().copy`.
+        #[must_use]
+        pub fn expect_copy(mut self, actual: &str) -> Self {
+            self.check_chord("copy", actual, self.kb.copy);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().paste`.
+        #[must_use]
+        pub fn expect_paste(mut self, actual: &str) -> Self {
+            self.check_chord("paste", actual, self.kb.paste);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().select_all`.
+        #[must_use]
+        pub fn expect_select_all(mut self, actual: &str) -> Self {
+            self.check_chord("select_all", actual, self.kb.select_all);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().search_open`.
+        #[must_use]
+        pub fn expect_search_open(mut self, actual: &str) -> Self {
+            self.check_chord("search_open", actual, self.kb.search_open);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().search_close`.
+        #[must_use]
+        pub fn expect_search_close(mut self, actual: &str) -> Self {
+            self.check_chord("search_close", actual, self.kb.search_close);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().search_next`.
+        #[must_use]
+        pub fn expect_search_next(mut self, actual: &str) -> Self {
+            self.check_chord("search_next", actual, self.kb.search_next);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().search_prev`.
+        #[must_use]
+        pub fn expect_search_prev(mut self, actual: &str) -> Self {
+            self.check_chord("search_prev", actual, self.kb.search_prev);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().font_increase`.
+        #[must_use]
+        pub fn expect_font_increase(mut self, actual: &str) -> Self {
+            self.check_chord("font_increase", actual, self.kb.font_increase);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().font_decrease`.
+        #[must_use]
+        pub fn expect_font_decrease(mut self, actual: &str) -> Self {
+            self.check_chord("font_decrease", actual, self.kb.font_decrease);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().font_reset`.
+        #[must_use]
+        pub fn expect_font_reset(mut self, actual: &str) -> Self {
+            self.check_chord("font_reset", actual, self.kb.font_reset);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().toggle_fullscreen`.
+        #[must_use]
+        pub fn expect_toggle_fullscreen(mut self, actual: &str) -> Self {
+            self.check_chord("toggle_fullscreen", actual, self.kb.toggle_fullscreen);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().clear_screen`.
+        #[must_use]
+        pub fn expect_clear_screen(mut self, actual: &str) -> Self {
+            self.check_chord("clear_screen", actual, self.kb.clear_screen);
+            self
+        }
+
         fn check_chord(&mut self, intent: &str, actual: &str, expected: &str) {
             // Canonicalize both sides through `normalize_chord` so apps
             // that store the long form ("ctrl+b") match the atlas's

@@ -139,6 +139,41 @@ pub struct FleetKeybinds {
     /// Prefix-key for tear multiplexer commands (`prefix + c` =
     /// new window, etc.).
     pub multiplexer_prefix: &'static str,
+
+    // ── GUI terminals (mado / namimado / escriba / …) ────────────
+    //
+    // Cmd-modifier chords using the atlas `D-` short-form (= cmd
+    // on macOS, super elsewhere). Every cross-GUI-terminal intent
+    // lands here so operator muscle memory carries across mado,
+    // namimado, escriba, hibiki, hikki, fumi, kekkai, taimen. App-
+    // specific chords (e.g. mado's tear-attach split nav) stay in
+    // the app's own config and don't belong on the atlas.
+
+    /// Copy selection to system clipboard. macOS Cmd-C / Linux Ctrl-C.
+    pub copy: &'static str,
+    /// Paste from system clipboard. Cmd-V / Ctrl-V.
+    pub paste: &'static str,
+    /// Select everything on the current screen.
+    pub select_all: &'static str,
+    /// Open the in-app search overlay.
+    pub search_open: &'static str,
+    /// Close the in-app search overlay (ESC, no modifier — same
+    /// across every fleet GUI).
+    pub search_close: &'static str,
+    /// Jump to next search match.
+    pub search_next: &'static str,
+    /// Jump to previous search match.
+    pub search_prev: &'static str,
+    /// Increase font size one step.
+    pub font_increase: &'static str,
+    /// Decrease font size one step.
+    pub font_decrease: &'static str,
+    /// Reset font size to the prescribed default.
+    pub font_reset: &'static str,
+    /// Toggle fullscreen window state.
+    pub toggle_fullscreen: &'static str,
+    /// Clear the visible screen (alternate-screen-respecting).
+    pub clear_screen: &'static str,
 }
 
 impl FleetKeybinds {
@@ -161,6 +196,19 @@ impl FleetKeybinds {
             toggle_sudo: "",
             insert_last_arg: "",
             multiplexer_prefix: "",
+            // GUI terminal intents — bare = empty.
+            copy: "",
+            paste: "",
+            select_all: "",
+            search_open: "",
+            search_close: "",
+            search_next: "",
+            search_prev: "",
+            font_increase: "",
+            font_decrease: "",
+            font_reset: "",
+            toggle_fullscreen: "",
+            clear_screen: "",
         }
     }
 
@@ -192,6 +240,29 @@ impl FleetKeybinds {
             // tear multiplexer — tmux-conventional C-b. Operators
             // moving from tmux find their prefix in the same place.
             multiplexer_prefix: "C-b",
+            // GUI terminals — Cmd-modifier (atlas D- short-form =
+            // cmd on macOS, super elsewhere). Matches mado's
+            // long-standing curated defaults + every other macOS
+            // terminal convention (iTerm2, Terminal.app, ghostty).
+            copy: "D-c",
+            paste: "D-v",
+            select_all: "D-a",
+            search_open: "D-f",
+            // search_close uses ESC alone (no modifier) — universal
+            // muscle memory across every modal UI.
+            search_close: "escape",
+            search_next: "D-g",
+            // search_prev: Cmd+Shift+G — atlas short-form puts shift
+            // as a chained modifier prefix.
+            search_prev: "D-S-g",
+            font_increase: "D-=",
+            font_decrease: "D--",
+            font_reset: "D-0",
+            // toggle_fullscreen: Cmd+Ctrl+F (macOS-native fullscreen
+            // gesture).
+            toggle_fullscreen: "D-C-f",
+            // clear_screen: Cmd+K (iTerm2-canonical; ghostty-parity).
+            clear_screen: "D-k",
         }
     }
 }
@@ -315,6 +386,19 @@ mod tests {
         assert_eq!(b.toggle_sudo, "");
         assert_eq!(b.insert_last_arg, "");
         assert_eq!(b.multiplexer_prefix, "");
+        // GUI terminal intents.
+        assert_eq!(b.copy, "");
+        assert_eq!(b.paste, "");
+        assert_eq!(b.select_all, "");
+        assert_eq!(b.search_open, "");
+        assert_eq!(b.search_close, "");
+        assert_eq!(b.search_next, "");
+        assert_eq!(b.search_prev, "");
+        assert_eq!(b.font_increase, "");
+        assert_eq!(b.font_decrease, "");
+        assert_eq!(b.font_reset, "");
+        assert_eq!(b.toggle_fullscreen, "");
+        assert_eq!(b.clear_screen, "");
     }
 
     #[test]
@@ -334,6 +418,19 @@ mod tests {
         assert_eq!(p.toggle_sudo, "M-s");
         assert_eq!(p.insert_last_arg, "M-.");
         assert_eq!(p.multiplexer_prefix, "C-b");
+        // GUI terminals — Cmd-modifier chord set.
+        assert_eq!(p.copy, "D-c");
+        assert_eq!(p.paste, "D-v");
+        assert_eq!(p.select_all, "D-a");
+        assert_eq!(p.search_open, "D-f");
+        assert_eq!(p.search_close, "escape");
+        assert_eq!(p.search_next, "D-g");
+        assert_eq!(p.search_prev, "D-S-g");
+        assert_eq!(p.font_increase, "D-=");
+        assert_eq!(p.font_decrease, "D--");
+        assert_eq!(p.font_reset, "D-0");
+        assert_eq!(p.toggle_fullscreen, "D-C-f");
+        assert_eq!(p.clear_screen, "D-k");
     }
 
     #[test]
@@ -424,6 +521,19 @@ mod tests {
             p.toggle_sudo,
             p.insert_last_arg,
             p.multiplexer_prefix,
+            // GUI terminal intents.
+            p.copy,
+            p.paste,
+            p.select_all,
+            p.search_open,
+            p.search_close,
+            p.search_next,
+            p.search_prev,
+            p.font_increase,
+            p.font_decrease,
+            p.font_reset,
+            p.toggle_fullscreen,
+            p.clear_screen,
         ];
         let mut sorted: Vec<&str> = chords.to_vec();
         sorted.sort_unstable();
