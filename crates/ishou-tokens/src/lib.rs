@@ -25,6 +25,7 @@ pub mod fleet_defaults;
 pub mod fleet_theme;
 pub mod motion;
 pub mod radius;
+pub mod refined;
 pub mod shader;
 pub mod shadow;
 pub mod space;
