@@ -38,7 +38,7 @@ pub use brand::Brand;
 pub use color::{ColorPalette, Rgb, SemanticRoles};
 pub use fleet_defaults::FleetDefaults;
 pub use fleet_theme::{FleetTheme, ResolvedTheme};
-pub use themed_config::FleetThemedConfig;
+pub use themed_config::{convergence, FleetThemedConfig};
 pub use space::{linear_from_hex, Linear, LinearRgba, Srgb, SrgbA};
 pub use motion::Motion;
 pub use radius::Radius;
