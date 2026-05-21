@@ -29,6 +29,7 @@ pub mod shader;
 pub mod shadow;
 pub mod space;
 pub mod spacing;
+pub mod themed_config;
 pub mod typography;
 
 use serde::Serialize;
@@ -37,6 +38,7 @@ pub use brand::Brand;
 pub use color::{ColorPalette, Rgb, SemanticRoles};
 pub use fleet_defaults::FleetDefaults;
 pub use fleet_theme::{FleetTheme, ResolvedTheme};
+pub use themed_config::FleetThemedConfig;
 pub use space::{linear_from_hex, Linear, LinearRgba, Srgb, SrgbA};
 pub use motion::Motion;
 pub use radius::Radius;
