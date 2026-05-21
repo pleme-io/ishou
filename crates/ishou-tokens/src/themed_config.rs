@@ -111,11 +111,17 @@ impl FleetDefaults {
 /// padding/cursor/scrollback).
 pub mod convergence {
     use crate::fleet_defaults::FleetDefaults;
+    use crate::fleet_keybinds::FleetKeybinds;
     use crate::fleet_theme::FleetTheme;
 
     /// Builder-style guard. Each `expect_*` call adds one assertion;
     /// `run()` panics on the first divergence with a clear message
     /// naming the field + the drift.
+    ///
+    /// Asserts against the union of `FleetDefaults::prescribed()`
+    /// (visual: font / theme / padding / cursor / scrollback) and
+    /// `FleetKeybinds::prescribed()` (input: history_picker /
+    /// files_picker / clear_buffer / …).
     ///
     /// Example:
     ///
@@ -126,6 +132,7 @@ pub mod convergence {
     ///         .expect_font_family(MadoConfig::default().font_family.as_str())
     ///         .expect_font_size(MadoConfig::default().font_size)
     ///         .expect_padding(MadoConfig::default().padding)
+    ///         .expect_history_picker(MadoConfig::default().keys.history_picker.as_str())
     ///         .run();
     /// }
     /// ```
@@ -133,6 +140,7 @@ pub mod convergence {
     pub struct Guard {
         app: &'static str,
         fd: FleetDefaults,
+        kb: FleetKeybinds,
         failures: Vec<String>,
     }
 
@@ -143,6 +151,7 @@ pub mod convergence {
             Self {
                 app: app_name,
                 fd: FleetDefaults::prescribed(),
+                kb: FleetKeybinds::prescribed(),
                 failures: Vec::new(),
             }
         }
@@ -220,6 +229,112 @@ pub mod convergence {
             self
         }
 
+        // ── Keybind intent expectations ──────────────────────────
+        //
+        // One method per `FleetKeybinds` field. Asserts the app's
+        // bound chord for that intent matches the fleet canonical
+        // chord. Drift is the 2026-05-21 Ctrl-R class of bug.
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().history_picker`.
+        #[must_use]
+        pub fn expect_history_picker(mut self, actual: &str) -> Self {
+            self.check_chord("history_picker", actual, self.kb.history_picker);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().files_picker`.
+        #[must_use]
+        pub fn expect_files_picker(mut self, actual: &str) -> Self {
+            self.check_chord("files_picker", actual, self.kb.files_picker);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().dir_picker`.
+        #[must_use]
+        pub fn expect_dir_picker(mut self, actual: &str) -> Self {
+            self.check_chord("dir_picker", actual, self.kb.dir_picker);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().content_picker`.
+        #[must_use]
+        pub fn expect_content_picker(mut self, actual: &str) -> Self {
+            self.check_chord("content_picker", actual, self.kb.content_picker);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().clear_buffer`.
+        #[must_use]
+        pub fn expect_clear_buffer(mut self, actual: &str) -> Self {
+            self.check_chord("clear_buffer", actual, self.kb.clear_buffer);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().kill_line`.
+        #[must_use]
+        pub fn expect_kill_line(mut self, actual: &str) -> Self {
+            self.check_chord("kill_line", actual, self.kb.kill_line);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().edit_in_editor`.
+        #[must_use]
+        pub fn expect_edit_in_editor(mut self, actual: &str) -> Self {
+            self.check_chord("edit_in_editor", actual, self.kb.edit_in_editor);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().help`.
+        #[must_use]
+        pub fn expect_help(mut self, actual: &str) -> Self {
+            self.check_chord("help", actual, self.kb.help);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().clipboard_copy`.
+        #[must_use]
+        pub fn expect_clipboard_copy(mut self, actual: &str) -> Self {
+            self.check_chord("clipboard_copy", actual, self.kb.clipboard_copy);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().clipboard_paste`.
+        #[must_use]
+        pub fn expect_clipboard_paste(mut self, actual: &str) -> Self {
+            self.check_chord("clipboard_paste", actual, self.kb.clipboard_paste);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().toggle_sudo`.
+        #[must_use]
+        pub fn expect_toggle_sudo(mut self, actual: &str) -> Self {
+            self.check_chord("toggle_sudo", actual, self.kb.toggle_sudo);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().insert_last_arg`.
+        #[must_use]
+        pub fn expect_insert_last_arg(mut self, actual: &str) -> Self {
+            self.check_chord("insert_last_arg", actual, self.kb.insert_last_arg);
+            self
+        }
+
+        /// Assert `actual` matches `FleetKeybinds::prescribed().multiplexer_prefix`.
+        #[must_use]
+        pub fn expect_multiplexer_prefix(mut self, actual: &str) -> Self {
+            self.check_chord("multiplexer_prefix", actual, self.kb.multiplexer_prefix);
+            self
+        }
+
+        fn check_chord(&mut self, intent: &str, actual: &str, expected: &str) {
+            if actual != expected {
+                self.failures.push(format!(
+                    "{}: {} chord drift — actual {:?} != fleet {:?}",
+                    self.app, intent, actual, expected
+                ));
+            }
+        }
+
         /// Run all collected assertions. Panics on the first failure
         /// with a multi-line message naming every drift; use in tests.
         ///
@@ -282,6 +397,38 @@ pub mod convergence {
             Guard::for_app("fixture")
                 .expect_scrollback_lines(42)
                 .run();
+        }
+
+        #[test]
+        fn full_keybind_chain_on_prescribed_passes() {
+            let kb = FleetKeybinds::prescribed();
+            Guard::for_app("fixture")
+                .expect_history_picker(kb.history_picker)
+                .expect_files_picker(kb.files_picker)
+                .expect_dir_picker(kb.dir_picker)
+                .expect_content_picker(kb.content_picker)
+                .expect_clear_buffer(kb.clear_buffer)
+                .expect_kill_line(kb.kill_line)
+                .expect_edit_in_editor(kb.edit_in_editor)
+                .expect_help(kb.help)
+                .expect_clipboard_copy(kb.clipboard_copy)
+                .expect_clipboard_paste(kb.clipboard_paste)
+                .expect_toggle_sudo(kb.toggle_sudo)
+                .expect_insert_last_arg(kb.insert_last_arg)
+                .expect_multiplexer_prefix(kb.multiplexer_prefix)
+                .run();
+        }
+
+        #[test]
+        #[should_panic(expected = "history_picker chord drift")]
+        fn divergent_history_picker_panics_with_clear_message() {
+            Guard::for_app("fixture").expect_history_picker("C-z").run();
+        }
+
+        #[test]
+        #[should_panic(expected = "multiplexer_prefix chord drift")]
+        fn divergent_multiplexer_prefix_panics() {
+            Guard::for_app("fixture").expect_multiplexer_prefix("C-a").run();
         }
     }
 }

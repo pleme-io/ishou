@@ -22,6 +22,7 @@
 pub mod brand;
 pub mod color;
 pub mod fleet_defaults;
+pub mod fleet_keybinds;
 pub mod fleet_theme;
 pub mod motion;
 pub mod radius;
@@ -38,6 +39,7 @@ use serde::Serialize;
 pub use brand::Brand;
 pub use color::{ColorPalette, Rgb, SemanticRoles};
 pub use fleet_defaults::FleetDefaults;
+pub use fleet_keybinds::{FleetKeybinds, FleetKeybindsConsumer};
 pub use fleet_theme::{FleetTheme, ResolvedTheme};
 pub use refined::{Bounds, Refined};
 pub use themed_config::{convergence, FleetThemedConfig};
