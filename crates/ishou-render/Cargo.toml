@@ -7,7 +7,7 @@ license.workspace = true
 description = "ishou — target-specific renderers for the pleme-io design token set"
 
 [dependencies]
-ishou-tokens = { path = "../ishou-tokens" }
+ishou-tokens = { version = "0.1.0", path = "../ishou-tokens" }
 serde.workspace = true
 serde_json.workspace = true
 

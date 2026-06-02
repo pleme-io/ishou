@@ -11,8 +11,8 @@ name = "ishou"
 path = "src/main.rs"
 
 [dependencies]
-ishou-tokens = { path = "../ishou-tokens" }
-ishou-render = { path = "../ishou-render" }
+ishou-tokens = { version = "0.1.0", path = "../ishou-tokens" }
+ishou-render = { version = "0.1.0", path = "../ishou-render" }
 clap.workspace = true
 anyhow.workspace = true
 serde_json.workspace = true
