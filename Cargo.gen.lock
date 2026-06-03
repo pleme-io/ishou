@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "cargo_lock_sha256": "7c0a6aad82a2561c21dac87788a9a862cdfb28c0d062c527079a24599665b5e5",
+  "cargo_lock_sha256": "d958704323cac7bdfba01a0ac149bba331e1b3901d6a54a8d90f52a18c8d94dd",
   "target_resolves": {
     "base": {
       "aho-corasick-1.1.4": {
@@ -614,7 +614,7 @@
           "default"
         ]
       },
-      "ishou-cli-0.1.1": {
+      "ishou-cli-0.1.3": {
         "runtime_dependencies": [
           {
             "name": "anyhow",
@@ -640,7 +640,7 @@
           },
           {
             "name": "ishou_render",
-            "package_key": "ishou-render-0.1.1",
+            "package_key": "ishou-render-0.1.3",
             "kind": "normal",
             "features": [],
             "uses_default_features": true,
@@ -650,7 +650,7 @@
           },
           {
             "name": "ishou_tokens",
-            "package_key": "ishou-tokens-0.1.1",
+            "package_key": "ishou-tokens-0.1.3",
             "kind": "normal",
             "features": [],
             "uses_default_features": true,
@@ -672,11 +672,11 @@
         "build_dependencies": [],
         "features": []
       },
-      "ishou-render-0.1.1": {
+      "ishou-render-0.1.3": {
         "runtime_dependencies": [
           {
             "name": "ishou_tokens",
-            "package_key": "ishou-tokens-0.1.1",
+            "package_key": "ishou-tokens-0.1.3",
             "kind": "normal",
             "features": [],
             "uses_default_features": true,
@@ -710,7 +710,7 @@
         "build_dependencies": [],
         "features": []
       },
-      "ishou-tokens-0.1.1": {
+      "ishou-tokens-0.1.3": {
         "runtime_dependencies": [
           {
             "name": "irodori",
@@ -1938,7 +1938,7 @@
     "is_terminal_polyfill-1.70.2": {
       "edition": "2021"
     },
-    "ishou-cli-0.1.1": {
+    "ishou-cli-0.1.3": {
       "edition": "2024",
       "binaries": [
         {
@@ -1947,14 +1947,14 @@
         }
       ]
     },
-    "ishou-render-0.1.1": {
+    "ishou-render-0.1.3": {
       "edition": "2024",
       "lib_target": {
         "name": "ishou_render",
         "path": "src/lib.rs"
       }
     },
-    "ishou-tokens-0.1.1": {
+    "ishou-tokens-0.1.3": {
       "edition": "2024",
       "lib_target": {
         "name": "ishou_tokens",
@@ -1967,6 +1967,9 @@
     "libc-0.2.186": {
       "edition": "2021",
       "build_script": "build.rs"
+    },
+    "linux-raw-sys-0.12.1": {
+      "edition": "2021"
     },
     "memchr-2.8.0": {
       "edition": "2021"
@@ -2051,9 +2054,6 @@
     "zmij-1.0.21": {
       "edition": "2021",
       "build_script": "build.rs"
-    },
-    "linux-raw-sys-0.12.1": {
-      "edition": "2021"
     }
   },
   "git_nar_sha256": {},
