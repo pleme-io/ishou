@@ -58,6 +58,10 @@
       stylix-fonts = mk "stylix-fonts";
       fleet-fonts = mk "fleet-fonts";
       nix      = mk "nix";
+      # Borealis (the prescribed fleet theme) render apps.
+      stylix-borealis = mk "stylix-borealis";
+      stylix-borealis-base24 = mk "stylix-borealis-base24";
+      svg-borealis-palette = mk "svg-borealis-palette";
       render-all = {
         type = "app";
         program = "${pkgs.writeShellScriptBin "ishou-render-all" ''
@@ -79,6 +83,38 @@
       meta.description = "ishou-rendered base16 YAML for stylix consumers (Nord Dark)";
     } ''
       ${ishouBin}/bin/ishou render --target stylix > $out
+    '';
+
+    # Borealis-night base16 scheme — the prescribed fleet theme, built
+    # FROM ishou (never committed by hand). The nix-repo darwin/HM
+    # stylix wiring points `stylix.base16Scheme` at this path.
+    mkStylixBorealis = system: let
+      pkgs = import nixpkgs { inherit system; };
+      ishouBin = toolOutputs.packages.${system}.default;
+    in pkgs.runCommand "ishou-stylix-base16-borealis-night" {
+      meta.description = "ishou-rendered base16 YAML for stylix consumers (Borealis Night)";
+    } ''
+      ${ishouBin}/bin/ishou render --target stylix-borealis > $out
+    '';
+
+    # Borealis-night base24 scheme — base16 + the real two-tier brights.
+    mkStylixBorealisBase24 = system: let
+      pkgs = import nixpkgs { inherit system; };
+      ishouBin = toolOutputs.packages.${system}.default;
+    in pkgs.runCommand "ishou-stylix-base24-borealis-night" {
+      meta.description = "ishou-rendered base24 YAML for stylix consumers (Borealis Night)";
+    } ''
+      ${ishouBin}/bin/ishou render --target stylix-borealis-base24 > $out
+    '';
+
+    # Borealis palette preview SVG — one labelled chip per BORN token.
+    mkBorealisPaletteSvg = system: let
+      pkgs = import nixpkgs { inherit system; };
+      ishouBin = toolOutputs.packages.${system}.default;
+    in pkgs.runCommand "ishou-borealis-palette-svg" {
+      meta.description = "ishou-rendered Borealis palette preview (one chip per token)";
+    } ''
+      ${ishouBin}/bin/ishou render --target svg-borealis-palette > $out
     '';
 
     # Importable Nix attrset replacing every retiring
@@ -154,6 +190,12 @@
           # (e.g. `stylix-base16-dracula`) without editing the
           # consumer-side reference shape.
           stylix-base16-nord-dark = mkStylixBase16 system;
+          # Borealis — the prescribed fleet theme. The nix-repo stylix
+          # wiring sources `stylix.base16Scheme` from this path; the
+          # base24 sibling + the palette-preview SVG ship alongside.
+          stylix-base16-borealis-night = mkStylixBorealis system;
+          stylix-base24-borealis-night = mkStylixBorealisBase24 system;
+          borealis-palette-svg = mkBorealisPaletteSvg system;
           # Replaces the retiring foreign `themes/nord/colors.nix`
           # files in blackmatter-{ghostty,mado,opencode} per M6.1 of
           # the theme architecture rollout.
