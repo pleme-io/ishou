@@ -157,10 +157,32 @@ impl FleetDefaults {
             // so a future prescribed-theme change propagates here on the
             // next compile rather than being re-asserted.
             theme: FleetTheme::prescribed_default(),
-            font_family: "JetBrainsMono Nerd Font Mono".into(),
-            font_italic: "Iosevka".into(),
-            font_size: 14.0,
-            line_height: 1.2,
+            // ── Font alignment to ghostty's known-good look ──────────
+            // The operator's ground-truth baseline is ghostty rendering
+            // JetBrains Mono at size 13 with +25% cell height. These
+            // four values reproduce that rhythm fleet-wide:
+            //
+            // * `font_family` — the NON-Mono Nerd variant. Text
+            //   advances are identical to the Mono variant (M / E0B0 /
+            //   F300 all measure 60/100em on both faces), so this does
+            //   NOT regress monospacing; the only difference is that the
+            //   non-Mono face lets WIDE Nerd icons keep their designed
+            //   double-width proportions instead of squishing them to a
+            //   single cell. Closer to ghostty's inline-glyph look.
+            // * `font_italic` — set EQUAL to `font_family`. ghostty has
+            //   no italic-family override; it synthesizes the slant from
+            //   the same JetBrainsMono face. Pointing italics at a
+            //   different typeface (the old Iosevka) is exactly the
+            //   "inconsistent italics" divergence the operator sees.
+            // * `font_size` — 13.0, exact match to ghostty's config.
+            // * `line_height` — 1.65 = JetBrainsMono's native line
+            //   height (1.32, measured live) × ghostty's adjust-cell-
+            //   height(+25%). Reproduces ghostty's 21.45px cell at 13pt
+            //   instead of the cramped 1.4×font tradition.
+            font_family: "JetBrainsMono Nerd Font".into(),
+            font_italic: "JetBrainsMono Nerd Font".into(),
+            font_size: 13.0,
+            line_height: 1.65,
             // Window — opinionated but minimal.
             padding: 0,
             decorations_macos: true,  // keep traffic-lights on mac
@@ -220,9 +242,14 @@ mod tests {
         // Borealis-night is the prescribed fleet theme.
         assert_eq!(p.theme, FleetTheme::BorealisNight);
         assert_eq!(p.theme, FleetTheme::prescribed_default());
-        assert_eq!(p.font_family, "JetBrainsMono Nerd Font Mono");
-        assert_eq!(p.font_italic, "Iosevka");
-        assert_eq!(p.font_size, 14.0);
+        // Font alignment to ghostty's known-good look: NON-Mono Nerd
+        // family (icons keep designed width), italics on the SAME
+        // family (synthesized slant, not a foreign typeface), size 13
+        // (ghostty parity), 1.65 line-height (native 1.32 × +25% cell).
+        assert_eq!(p.font_family, "JetBrainsMono Nerd Font");
+        assert_eq!(p.font_italic, "JetBrainsMono Nerd Font");
+        assert_eq!(p.font_size, 13.0);
+        assert_eq!(p.line_height, 1.65);
         assert!(p.cursor_blink);
         assert!(p.link_url_detect);
         assert!(p.mouse_reporting);

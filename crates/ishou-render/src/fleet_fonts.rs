@@ -107,7 +107,7 @@ pub fn render(t: &TokenSet) -> String {
         AttrEntry::new("primary", primary)
             .with_comment(["Primary monospace family.", "Source of every cell's regular glyph."]),
         AttrEntry::new("italic", italic)
-            .with_comment(["Italic face — calligraphic by default per fleet."]),
+            .with_comment(["Italic face — same family slanted (ghostty's model)."]),
         AttrEntry::new("bold", bold)
             .with_comment(["Bold face — shares the primary package."]),
         AttrEntry::new("symbols", symbols)
@@ -186,7 +186,10 @@ mod tests {
     #[test]
     fn italic_carries_style_intent() {
         let out = render(&TokenSet::pleme());
-        assert!(out.contains("style_intent = \"calligraphic\""));
+        // Italics now slant the same JetBrainsMono face (ghostty's
+        // model), so the intent is `matches_primary`, not a separate
+        // calligraphic typeface.
+        assert!(out.contains("style_intent = \"matches_primary\""));
     }
 
     #[test]

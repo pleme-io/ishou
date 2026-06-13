@@ -181,6 +181,40 @@ pub mod convergence {
             self
         }
 
+        /// Assert `actual` matches `FleetDefaults::prescribed().font_italic`.
+        ///
+        /// Italics drift is the "foreign-typeface italics" class — when
+        /// an app routes italic runs to a different family than the
+        /// fleet prescribes (the old Iosevka-vs-JetBrainsMono mismatch).
+        #[must_use]
+        pub fn expect_font_italic(mut self, actual: &str) -> Self {
+            if actual != self.fd.font_italic {
+                self.failures.push(format!(
+                    "{}: font_italic drift — actual {:?} != fleet {:?}",
+                    self.app, actual, self.fd.font_italic
+                ));
+            }
+            self
+        }
+
+        /// Assert `actual` matches `FleetDefaults::prescribed().line_height`
+        /// (within 0.001 epsilon — f32 round-trips through serde).
+        ///
+        /// Line-height drift is the "cramped vs airy" class — when an
+        /// app hardcodes a cell-height multiplier (mado's old `* 1.4`)
+        /// instead of consuming the fleet rhythm (ghostty's native ×
+        /// +25% = 1.65).
+        #[must_use]
+        pub fn expect_line_height(mut self, actual: f32) -> Self {
+            if (actual - self.fd.line_height).abs() >= 0.001 {
+                self.failures.push(format!(
+                    "{}: line_height drift — actual {} != fleet {}",
+                    self.app, actual, self.fd.line_height
+                ));
+            }
+            self
+        }
+
         /// Assert `actual` matches `FleetDefaults::prescribed().padding`.
         #[must_use]
         pub fn expect_padding(mut self, actual: u32) -> Self {
@@ -612,8 +646,9 @@ mod tests {
         let fd = FleetDefaults::prescribed();
         let cfg = TestAppConfig::from_fleet(&fd);
         assert_eq!(cfg.theme, FleetTheme::BorealisNight);
-        assert_eq!(cfg.font_family, "JetBrainsMono Nerd Font Mono");
-        assert_eq!(cfg.font_size, 14.0);
+        // Ghostty-aligned fleet font (see fleet_defaults.rs prescribed()).
+        assert_eq!(cfg.font_family, "JetBrainsMono Nerd Font");
+        assert_eq!(cfg.font_size, 13.0);
         assert_eq!(cfg.padding, 0);
         assert_eq!(cfg.cursor_style, "block");
     }
