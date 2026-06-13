@@ -110,6 +110,9 @@ fn filename(t: Target) -> &'static str {
         Target::Nix => "nord-palette.nix",
         Target::StylixFonts => "stylix-fonts.nix",
         Target::FleetFonts => "fleet-fonts.nix",
+        Target::StylixBorealis => "borealis-night.yaml",
+        Target::StylixBorealisBase24 => "borealis-night-base24.yaml",
+        Target::SvgBorealisPalette => "borealis-palette.svg",
     }
 }
 
@@ -128,5 +131,8 @@ fn target_name(t: Target) -> &'static str {
         Target::Nix => "nix",
         Target::StylixFonts => "stylix-fonts",
         Target::FleetFonts => "fleet-fonts",
+        Target::StylixBorealis => "stylix-borealis",
+        Target::StylixBorealisBase24 => "stylix-borealis-base24",
+        Target::SvgBorealisPalette => "svg-borealis-palette",
     }
 }

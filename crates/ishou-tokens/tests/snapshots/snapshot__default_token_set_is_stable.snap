@@ -118,7 +118,16 @@ expression: tokens
     "border": "polar_night_2",
     "shadow": "shadow_tone",
     "ink": "ink",
-    "paper": "paper"
+    "paper": "paper",
+    "text_secondary": "snow_storm_0",
+    "text_bright": "snow_storm_2",
+    "agent": "aurora_purple",
+    "agent_attention": "aurora_purple",
+    "link": "frost_2",
+    "selection": "polar_night_2",
+    "cursor": "frost_1",
+    "search": "aurora_yellow",
+    "structural": "frost_3"
   },
   "brand": {
     "name": "pleme-io",

@@ -86,6 +86,13 @@ impl ColorPalette {
 
 /// Semantic color roles consumers bind to — keeps tokens stable when a
 /// palette value moves.
+///
+/// Role-keys resolve through `ColorPalette::get` (Nord) for the
+/// `pleme_dark` binding and through `BorealisPalette::get` for the
+/// `borealis_night` binding. The Borealis binding adds nine new roles
+/// (`text_secondary` … `structural`) — spec §7 — that the Nord binding
+/// fills with the nearest legacy palette key so every consumer
+/// iterating `pairs()` sees a populated value on both themes.
 #[derive(Debug, Clone, Serialize)]
 pub struct SemanticRoles {
     pub background: &'static str,
@@ -105,10 +112,33 @@ pub struct SemanticRoles {
     pub shadow: &'static str,
     pub ink: &'static str,
     pub paper: &'static str,
+    // ── Borealis additions (spec §7 — the complete struct diff) ──────
+    /// Secondary body text (Borealis `snow0`).
+    pub text_secondary: &'static str,
+    /// Brightest body text (Borealis `snow2`).
+    pub text_bright: &'static str,
+    /// AGENT-RESERVED accent — vigy / MCP / AI surfaces (Borealis
+    /// `fable_violet`). Downstream references THIS role, never the hex.
+    pub agent: &'static str,
+    /// Agent attention state (Borealis `violet_bright`).
+    pub agent_attention: &'static str,
+    /// Links / function names (Borealis `ice_steel`).
+    pub link: &'static str,
+    /// Selection background (Borealis `selection` — the violet glass).
+    pub selection: &'static str,
+    /// Block cursor (Borealis `green_bright`).
+    pub cursor: &'static str,
+    /// Search-current background (Borealis `first_light`).
+    pub search: &'static str,
+    /// Structural-only accent — never body text (Borealis `ice_deep`).
+    pub structural: &'static str,
 }
 
 impl SemanticRoles {
     /// Dark-first binding used across every pleme-io product.
+    /// The nine Borealis-only roles map to the nearest Nord palette key
+    /// so a `pleme_dark` consumer iterating `pairs()` never sees an
+    /// unresolvable role.
     #[must_use]
     pub const fn pleme_dark() -> Self {
         Self {
@@ -129,13 +159,61 @@ impl SemanticRoles {
             shadow: "shadow_tone",
             ink: "ink",
             paper: "paper",
+            // Borealis additions — nearest Nord key for legacy theme.
+            text_secondary: "snow_storm_0",
+            text_bright: "snow_storm_2",
+            agent: "aurora_purple",
+            agent_attention: "aurora_purple",
+            link: "frost_2",
+            selection: "polar_night_2",
+            cursor: "frost_1",
+            search: "aurora_yellow",
+            structural: "frost_3",
+        }
+    }
+
+    /// Borealis dark binding — `borealis-night` (spec §7). Every role
+    /// resolves through `BorealisPalette::get`. M3 resolution: `info`
+    /// is `ice_teal` (one token, one duty). The agent accent
+    /// (`fable_violet`) is named via the `agent` role so downstream
+    /// references the SEMANTIC, never the hex.
+    #[must_use]
+    pub const fn borealis_night() -> Self {
+        Self {
+            background: "night0",
+            surface: "night1",
+            surface_elevated: "night2",
+            text: "snow1",
+            text_muted: "shadow1",
+            text_dim: "shadow0",
+            primary: "ice_cyan",
+            primary_hover: "cyan_bright",
+            accent: "fable_violet",
+            error: "aurora_red",
+            warning: "first_light",
+            success: "aurora_green",
+            info: "ice_teal", // M3 — info IS ice_teal, everywhere.
+            border: "night3",
+            shadow: "shadow_tone",
+            ink: "ink",
+            paper: "paper",
+            // Borealis-native roles.
+            text_secondary: "snow0",
+            text_bright: "snow2",
+            agent: "fable_violet",
+            agent_attention: "violet_bright",
+            link: "ice_steel",
+            selection: "selection",
+            cursor: "green_bright",
+            search: "first_light",
+            structural: "ice_deep",
         }
     }
 
     /// Lookup table of every role → palette-key pair, in stable order.
     /// Used by renderers to iterate.
     #[must_use]
-    pub fn pairs(&self) -> [(&'static str, &'static str); 17] {
+    pub fn pairs(&self) -> [(&'static str, &'static str); 26] {
         [
             ("background", self.background),
             ("surface", self.surface),
@@ -154,6 +232,15 @@ impl SemanticRoles {
             ("shadow", self.shadow),
             ("ink", self.ink),
             ("paper", self.paper),
+            ("text-secondary", self.text_secondary),
+            ("text-bright", self.text_bright),
+            ("agent", self.agent),
+            ("agent-attention", self.agent_attention),
+            ("link", self.link),
+            ("selection", self.selection),
+            ("cursor", self.cursor),
+            ("search", self.search),
+            ("structural", self.structural),
         ]
     }
 }

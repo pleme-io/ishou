@@ -18,6 +18,7 @@
 //! | `TokenSet`     | SVG (brand mark + swerve)              | `svg`        |
 //! | `TokenSet`     | stylix base16 YAML                     | `stylix`     |
 
+pub mod borealis;
 pub mod css;
 pub mod fleet_fonts;
 pub mod ghostty;
@@ -56,6 +57,14 @@ pub enum Target {
     /// package via `home.packages`. Sibling of `StylixFonts` — same
     /// typed Typography source, different consumer-side shape.
     FleetFonts,
+    /// Borealis base16 stylix scheme YAML (the prescribed fleet theme).
+    /// Sourced from the BORN `BorealisPalette`, not the Nord `TokenSet`.
+    StylixBorealis,
+    /// Borealis base24 stylix scheme YAML — base16 + the real two-tier
+    /// brights (base10–17).
+    StylixBorealisBase24,
+    /// Borealis palette preview SVG — one labelled chip per BORN token.
+    SvgBorealisPalette,
 }
 
 impl Target {
@@ -74,6 +83,9 @@ impl Target {
             "stylix-fonts" | "fonts-nix" => Self::StylixFonts,
             "nix" | "nord-palette-nix" => Self::Nix,
             "fleet-fonts" | "fleet_fonts" => Self::FleetFonts,
+            "stylix-borealis" | "stylix-base16-borealis-night" => Self::StylixBorealis,
+            "stylix-borealis-base24" | "stylix-base24-borealis-night" => Self::StylixBorealisBase24,
+            "svg-borealis-palette" | "borealis-palette" => Self::SvgBorealisPalette,
             _ => return None,
         })
     }
@@ -93,10 +105,15 @@ impl Target {
             Self::Nix => nix::render(tokens),
             Self::StylixFonts => stylix_fonts::render(tokens),
             Self::FleetFonts => fleet_fonts::render(tokens),
+            // Borealis targets are their own BORN source — the Nord
+            // `TokenSet` argument is unused.
+            Self::StylixBorealis => borealis::render_base16(),
+            Self::StylixBorealisBase24 => borealis::render_base24(),
+            Self::SvgBorealisPalette => borealis::render_svg_palette(),
         }
     }
 
-    pub fn all() -> [Target; 13] {
+    pub fn all() -> [Target; 16] {
         [
             Self::Css,
             Self::Tailwind,
@@ -111,6 +128,9 @@ impl Target {
             Self::Nix,
             Self::StylixFonts,
             Self::FleetFonts,
+            Self::StylixBorealis,
+            Self::StylixBorealisBase24,
+            Self::SvgBorealisPalette,
         ]
     }
 }

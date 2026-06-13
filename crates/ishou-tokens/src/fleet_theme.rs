@@ -40,6 +40,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::borealis::BorealisPalette;
 use crate::color::{ColorPalette, SemanticRoles};
 use crate::typography::Typography;
 
@@ -51,12 +52,17 @@ pub enum FleetTheme {
     /// Zero-opinion: black background, white foreground, no fonts
     /// preference, no brand. The bare-tier floor.
     Bare,
-    /// The official pleme-io look: Nord Polar Night dark palette
-    /// + ishou typography + brand integration. **The prescribed
-    /// default** every fleet app lands on without operator
-    /// intervention.
-    #[default]
+    /// The legacy pleme-io look: Nord Polar Night dark palette
+    /// + ishou typography + brand integration. Retained for
+    /// continuity; superseded as the prescribed default by
+    /// `BorealisNight`.
     PlemeDark,
+    /// **Borealis** — the fleet theme, dark variant `borealis-night`.
+    /// Frozen arctic substrate (the Nord-frost heritage, the ❄) +
+    /// computation as the aurora above it. **The prescribed default**
+    /// every fleet app lands on without operator intervention.
+    #[default]
+    BorealisNight,
 }
 
 impl FleetTheme {
@@ -67,10 +73,10 @@ impl FleetTheme {
         Self::Bare
     }
 
-    /// Tier 2 prescribed default — `FleetTheme::PlemeDark`.
+    /// Tier 2 prescribed default — `FleetTheme::BorealisNight`.
     #[must_use]
     pub const fn prescribed_default() -> Self {
-        Self::PlemeDark
+        Self::BorealisNight
     }
 
     /// Resolve to concrete color hex + font names. Consumers read
@@ -81,6 +87,7 @@ impl FleetTheme {
         match self {
             Self::Bare => ResolvedTheme::bare(),
             Self::PlemeDark => ResolvedTheme::pleme_dark(),
+            Self::BorealisNight => ResolvedTheme::borealis_night(),
         }
     }
 }
@@ -201,6 +208,36 @@ impl ResolvedTheme {
             name: "pleme_dark".into(),
         }
     }
+
+    /// Borealis dark variant — `borealis-night`. The prescribed fleet
+    /// theme. ANSI 16, surfaces, and the cursor come from
+    /// `BorealisPalette` (spec §4 + §5) so this resolved theme can
+    /// never drift from the BORN tokens. The cursor is `green_bright`
+    /// (an inverse pair ≥7.0) — it lives in NO base16 slot and ships
+    /// here as a first-class field + ANSI 10.
+    #[must_use]
+    pub fn borealis_night() -> Self {
+        let p = BorealisPalette::night();
+        let surfaces = p.surfaces();
+        let typography = Typography::pleme();
+
+        // §4 — the ONE canonical ANSI-16 mapping fleet-wide.
+        let ansi_src = p.ansi_16();
+        let ansi_16: [String; 16] = core::array::from_fn(|i| ansi_src[i].hex());
+
+        Self {
+            background: surfaces.background.hex(),
+            foreground: surfaces.foreground.hex(),
+            // green_bright — first-class cursor field (not a slot).
+            cursor: surfaces.cursor.hex(),
+            // The violet glass — byte-exact blend product.
+            selection_background: surfaces.selection_background.hex(),
+            ansi_16,
+            font_family: typography.mono_fonts.primary.into(),
+            font_italic: typography.mono_fonts.italic.into(),
+            name: "borealis-night".into(),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -208,9 +245,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn fleet_theme_default_is_pleme_dark() {
-        assert_eq!(FleetTheme::default(), FleetTheme::PlemeDark);
-        assert_eq!(FleetTheme::prescribed_default(), FleetTheme::PlemeDark);
+    fn fleet_theme_default_is_borealis_night() {
+        assert_eq!(FleetTheme::default(), FleetTheme::BorealisNight);
+        assert_eq!(FleetTheme::prescribed_default(), FleetTheme::BorealisNight);
     }
 
     #[test]
@@ -243,7 +280,7 @@ mod tests {
 
     #[test]
     fn fleet_theme_round_trips_through_serde() {
-        for &t in &[FleetTheme::Bare, FleetTheme::PlemeDark] {
+        for &t in &[FleetTheme::Bare, FleetTheme::PlemeDark, FleetTheme::BorealisNight] {
             let s = serde_yaml::to_string(&t).unwrap();
             let back: FleetTheme = serde_yaml::from_str(&s).unwrap();
             assert_eq!(t, back);
@@ -252,12 +289,34 @@ mod tests {
 
     #[test]
     fn ansi_16_palette_has_no_empty_strings() {
-        // Both tiers must populate all 16 ANSI slots — terminal
+        // Every tier must populate all 16 ANSI slots — terminal
         // apps using indexed color must not see "" as a color.
-        for r in [ResolvedTheme::bare(), ResolvedTheme::pleme_dark()] {
+        for r in [
+            ResolvedTheme::bare(),
+            ResolvedTheme::pleme_dark(),
+            ResolvedTheme::borealis_night(),
+        ] {
             for (i, c) in r.ansi_16.iter().enumerate() {
                 assert!(c.starts_with('#'), "ANSI slot {i} in {} is not hex: {c:?}", r.name);
             }
         }
+    }
+
+    #[test]
+    fn borealis_night_resolves_from_born_tokens() {
+        let r = ResolvedTheme::borealis_night();
+        assert_eq!(r.name, "borealis-night");
+        // §5 — background night0, foreground snow1, cursor green_bright,
+        // selection the byte-exact violet glass.
+        assert_eq!(r.background, "#1F222F");
+        assert_eq!(r.foreground, "#D4D9E3");
+        assert_eq!(r.cursor, "#74E29F");
+        assert_eq!(r.selection_background, "#3F3955");
+        // §4 — ANSI 15 is snow3 (= base07), never #FFFFFF.
+        assert_eq!(r.ansi_16[15], "#F5F7FA");
+        // §4 — ANSI 2 is the signature green.
+        assert_eq!(r.ansi_16[2], "#67D191");
+        // ANSI 0 is night2 (surface), NEVER base00.
+        assert_eq!(r.ansi_16[0], "#383B4C");
     }
 }
