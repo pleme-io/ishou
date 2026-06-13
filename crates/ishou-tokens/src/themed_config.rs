@@ -611,7 +611,7 @@ mod tests {
     fn from_fleet_pulls_canonical_pleme_values() {
         let fd = FleetDefaults::prescribed();
         let cfg = TestAppConfig::from_fleet(&fd);
-        assert_eq!(cfg.theme, FleetTheme::PlemeDark);
+        assert_eq!(cfg.theme, FleetTheme::BorealisNight);
         assert_eq!(cfg.font_family, "JetBrainsMono Nerd Font Mono");
         assert_eq!(cfg.font_size, 14.0);
         assert_eq!(cfg.padding, 0);

@@ -152,8 +152,11 @@ impl FleetDefaults {
     #[must_use]
     pub fn prescribed() -> Self {
         Self {
-            // Typography — pleme-io fleet canonical.
-            theme: FleetTheme::PlemeDark,
+            // Typography — pleme-io fleet canonical. The theme is the
+            // FleetTheme prescribed default (Borealis-night) by reference,
+            // so a future prescribed-theme change propagates here on the
+            // next compile rather than being re-asserted.
+            theme: FleetTheme::prescribed_default(),
             font_family: "JetBrainsMono Nerd Font Mono".into(),
             font_italic: "Iosevka".into(),
             font_size: 14.0,
@@ -214,7 +217,9 @@ mod tests {
     #[test]
     fn prescribed_carries_pleme_canonical_choices() {
         let p = FleetDefaults::prescribed();
-        assert_eq!(p.theme, FleetTheme::PlemeDark);
+        // Borealis-night is the prescribed fleet theme.
+        assert_eq!(p.theme, FleetTheme::BorealisNight);
+        assert_eq!(p.theme, FleetTheme::prescribed_default());
         assert_eq!(p.font_family, "JetBrainsMono Nerd Font Mono");
         assert_eq!(p.font_italic, "Iosevka");
         assert_eq!(p.font_size, 14.0);
