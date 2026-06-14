@@ -28,21 +28,23 @@
 //! * `FleetTheme::Bare` — monochrome black/white, system mono font,
 //!   no brand. The deliberate floor per shikumi `TieredConfig::bare`.
 //!
-//! * `FleetTheme::PlemeDark` — the canonical pleme-io look: Nord
+//! * `FleetTheme::PlemeDark` — the legacy pleme-io look: Nord
 //!   Polar Night background, Snow Storm foreground, Frost accent,
-//!   ishou pleme typography (JetBrainsMono Nerd Font Mono +
-//!   Iosevka italic). Prescribed default per
+//!   ishou pleme typography. Retained for continuity.
+//!
+//! * `FleetTheme::Vellum` — the warm aged-paper Nord-matte fleet
+//!   theme. The prescribed default per
 //!   `TieredConfig::prescribed_default`.
 //!
-//! Future: `PlemeLight`, `PlemeHighContrast`, operator-supplied
+//! Future: `VellumLight`, `VellumHighContrast`, operator-supplied
 //! `Custom(ResolvedTheme)` for inline overrides without forking
 //! the enum.
 
 use serde::{Deserialize, Serialize};
 
-use crate::borealis::BorealisPalette;
 use crate::color::{ColorPalette, SemanticRoles};
 use crate::typography::Typography;
+use crate::vellum::VellumPalette;
 
 /// Operator-facing theme selector. Apps embed this as a typed
 /// config field; the renderer reads `resolve()` at init time.
@@ -55,14 +57,14 @@ pub enum FleetTheme {
     /// The legacy pleme-io look: Nord Polar Night dark palette
     /// + ishou typography + brand integration. Retained for
     /// continuity; superseded as the prescribed default by
-    /// `BorealisNight`.
+    /// `Vellum`.
     PlemeDark,
-    /// **Borealis** — the fleet theme, dark variant `borealis-night`.
-    /// Frozen arctic substrate (the Nord-frost heritage, the ❄) +
-    /// computation as the aurora above it. **The prescribed default**
-    /// every fleet app lands on without operator intervention.
+    /// **Vellum** — the fleet theme, warm aged-paper Nord-matte.
+    /// An aged-parchment ground + muted matte ink above it. **The
+    /// prescribed default** every fleet app lands on without operator
+    /// intervention.
     #[default]
-    BorealisNight,
+    Vellum,
 }
 
 impl FleetTheme {
@@ -73,10 +75,10 @@ impl FleetTheme {
         Self::Bare
     }
 
-    /// Tier 2 prescribed default — `FleetTheme::BorealisNight`.
+    /// Tier 2 prescribed default — `FleetTheme::Vellum`.
     #[must_use]
     pub const fn prescribed_default() -> Self {
-        Self::BorealisNight
+        Self::Vellum
     }
 
     /// Resolve to concrete color hex + font names. Consumers read
@@ -87,7 +89,7 @@ impl FleetTheme {
         match self {
             Self::Bare => ResolvedTheme::bare(),
             Self::PlemeDark => ResolvedTheme::pleme_dark(),
-            Self::BorealisNight => ResolvedTheme::borealis_night(),
+            Self::Vellum => ResolvedTheme::vellum(),
         }
     }
 }
@@ -209,19 +211,19 @@ impl ResolvedTheme {
         }
     }
 
-    /// Borealis dark variant — `borealis-night`. The prescribed fleet
-    /// theme. ANSI 16, surfaces, and the cursor come from
-    /// `BorealisPalette` (spec §4 + §5) so this resolved theme can
-    /// never drift from the BORN tokens. The cursor is `green_bright`
-    /// (an inverse pair ≥7.0) — it lives in NO base16 slot and ships
-    /// here as a first-class field + ANSI 10.
+    /// Vellum — the warm aged-paper Nord-matte fleet theme. The
+    /// prescribed default. ANSI 16, surfaces, and the cursor come from
+    /// `VellumPalette` so this resolved theme can never drift from the
+    /// BORN tokens. The cursor is `green_bright` (an inverse pair ≥7.0)
+    /// — it lives in NO base16 slot and ships here as a first-class
+    /// field + ANSI 10.
     #[must_use]
-    pub fn borealis_night() -> Self {
-        let p = BorealisPalette::night();
+    pub fn vellum() -> Self {
+        let p = VellumPalette::vellum();
         let surfaces = p.surfaces();
         let typography = Typography::pleme();
 
-        // §4 — the ONE canonical ANSI-16 mapping fleet-wide.
+        // The ONE canonical ANSI-16 mapping fleet-wide.
         let ansi_src = p.ansi_16();
         let ansi_16: [String; 16] = core::array::from_fn(|i| ansi_src[i].hex());
 
@@ -235,7 +237,7 @@ impl ResolvedTheme {
             ansi_16,
             font_family: typography.mono_fonts.primary.into(),
             font_italic: typography.mono_fonts.italic.into(),
-            name: "borealis-night".into(),
+            name: "vellum".into(),
         }
     }
 }
@@ -245,9 +247,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn fleet_theme_default_is_borealis_night() {
-        assert_eq!(FleetTheme::default(), FleetTheme::BorealisNight);
-        assert_eq!(FleetTheme::prescribed_default(), FleetTheme::BorealisNight);
+    fn fleet_theme_default_is_vellum() {
+        assert_eq!(FleetTheme::default(), FleetTheme::Vellum);
+        assert_eq!(FleetTheme::prescribed_default(), FleetTheme::Vellum);
     }
 
     #[test]
@@ -280,7 +282,7 @@ mod tests {
 
     #[test]
     fn fleet_theme_round_trips_through_serde() {
-        for &t in &[FleetTheme::Bare, FleetTheme::PlemeDark, FleetTheme::BorealisNight] {
+        for &t in &[FleetTheme::Bare, FleetTheme::PlemeDark, FleetTheme::Vellum] {
             let s = serde_yaml::to_string(&t).unwrap();
             let back: FleetTheme = serde_yaml::from_str(&s).unwrap();
             assert_eq!(t, back);
@@ -294,7 +296,7 @@ mod tests {
         for r in [
             ResolvedTheme::bare(),
             ResolvedTheme::pleme_dark(),
-            ResolvedTheme::borealis_night(),
+            ResolvedTheme::vellum(),
         ] {
             for (i, c) in r.ansi_16.iter().enumerate() {
                 assert!(c.starts_with('#'), "ANSI slot {i} in {} is not hex: {c:?}", r.name);
@@ -303,20 +305,20 @@ mod tests {
     }
 
     #[test]
-    fn borealis_night_resolves_from_born_tokens() {
-        let r = ResolvedTheme::borealis_night();
-        assert_eq!(r.name, "borealis-night");
-        // §5 — background night0, foreground snow1, cursor green_bright,
+    fn vellum_resolves_from_born_tokens() {
+        let r = ResolvedTheme::vellum();
+        assert_eq!(r.name, "vellum");
+        // Background night0, foreground snow1, cursor green_bright,
         // selection the byte-exact violet glass.
-        assert_eq!(r.background, "#1F222F");
-        assert_eq!(r.foreground, "#D4D9E3");
-        assert_eq!(r.cursor, "#74E29F");
-        assert_eq!(r.selection_background, "#3F3955");
-        // §4 — ANSI 15 is snow3 (= base07), never #FFFFFF.
-        assert_eq!(r.ansi_16[15], "#F5F7FA");
-        // §4 — ANSI 2 is the signature green.
-        assert_eq!(r.ansi_16[2], "#67D191");
+        assert_eq!(r.background, "#16140E");
+        assert_eq!(r.foreground, "#E2DBC8");
+        assert_eq!(r.cursor, "#ADD7A3");
+        assert_eq!(r.selection_background, "#3A343E");
+        // ANSI 15 is snow3 (= base07), never #FFFFFF.
+        assert_eq!(r.ansi_16[15], "#F4EFE2");
+        // ANSI 2 is the signature green.
+        assert_eq!(r.ansi_16[2], "#A9BB8C");
         // ANSI 0 is night2 (surface), NEVER base00.
-        assert_eq!(r.ansi_16[0], "#383B4C");
+        assert_eq!(r.ansi_16[0], "#2B2820");
     }
 }

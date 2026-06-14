@@ -18,7 +18,6 @@
 //! | `TokenSet`     | SVG (brand mark + swerve)              | `svg`        |
 //! | `TokenSet`     | stylix base16 YAML                     | `stylix`     |
 
-pub mod borealis;
 pub mod css;
 pub mod fleet_fonts;
 pub mod ghostty;
@@ -33,6 +32,7 @@ pub mod stylix_fonts;
 pub mod svg;
 pub mod tailwind;
 pub mod tui;
+pub mod vellum;
 
 /// Every renderable target ishou-cli understands. The string here matches the
 /// CLI flag users type (`ishou render --target css`).
@@ -57,14 +57,14 @@ pub enum Target {
     /// package via `home.packages`. Sibling of `StylixFonts` — same
     /// typed Typography source, different consumer-side shape.
     FleetFonts,
-    /// Borealis base16 stylix scheme YAML (the prescribed fleet theme).
-    /// Sourced from the BORN `BorealisPalette`, not the Nord `TokenSet`.
-    StylixBorealis,
-    /// Borealis base24 stylix scheme YAML — base16 + the real two-tier
+    /// Vellum base16 stylix scheme YAML (the prescribed fleet theme).
+    /// Sourced from the BORN `VellumPalette`, not the Nord `TokenSet`.
+    StylixVellum,
+    /// Vellum base24 stylix scheme YAML — base16 + the real two-tier
     /// brights (base10–17).
-    StylixBorealisBase24,
-    /// Borealis palette preview SVG — one labelled chip per BORN token.
-    SvgBorealisPalette,
+    StylixVellumBase24,
+    /// Vellum palette preview SVG — one labelled chip per BORN token.
+    SvgVellumPalette,
 }
 
 impl Target {
@@ -83,9 +83,9 @@ impl Target {
             "stylix-fonts" | "fonts-nix" => Self::StylixFonts,
             "nix" | "nord-palette-nix" => Self::Nix,
             "fleet-fonts" | "fleet_fonts" => Self::FleetFonts,
-            "stylix-borealis" | "stylix-base16-borealis-night" => Self::StylixBorealis,
-            "stylix-borealis-base24" | "stylix-base24-borealis-night" => Self::StylixBorealisBase24,
-            "svg-borealis-palette" | "borealis-palette" => Self::SvgBorealisPalette,
+            "stylix-vellum" | "stylix-base16-vellum" => Self::StylixVellum,
+            "stylix-vellum-base24" | "stylix-base24-vellum" => Self::StylixVellumBase24,
+            "svg-vellum-palette" | "vellum-palette" => Self::SvgVellumPalette,
             _ => return None,
         })
     }
@@ -105,11 +105,11 @@ impl Target {
             Self::Nix => nix::render(tokens),
             Self::StylixFonts => stylix_fonts::render(tokens),
             Self::FleetFonts => fleet_fonts::render(tokens),
-            // Borealis targets are their own BORN source — the Nord
+            // Vellum targets are their own BORN source — the Nord
             // `TokenSet` argument is unused.
-            Self::StylixBorealis => borealis::render_base16(),
-            Self::StylixBorealisBase24 => borealis::render_base24(),
-            Self::SvgBorealisPalette => borealis::render_svg_palette(),
+            Self::StylixVellum => vellum::render_base16(),
+            Self::StylixVellumBase24 => vellum::render_base24(),
+            Self::SvgVellumPalette => vellum::render_svg_palette(),
         }
     }
 
@@ -128,9 +128,9 @@ impl Target {
             Self::Nix,
             Self::StylixFonts,
             Self::FleetFonts,
-            Self::StylixBorealis,
-            Self::StylixBorealisBase24,
-            Self::SvgBorealisPalette,
+            Self::StylixVellum,
+            Self::StylixVellumBase24,
+            Self::SvgVellumPalette,
         ]
     }
 }

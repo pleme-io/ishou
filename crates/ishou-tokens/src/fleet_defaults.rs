@@ -153,7 +153,7 @@ impl FleetDefaults {
     pub fn prescribed() -> Self {
         Self {
             // Typography — pleme-io fleet canonical. The theme is the
-            // FleetTheme prescribed default (Borealis-night) by reference,
+            // FleetTheme prescribed default (Vellum) by reference,
             // so a future prescribed-theme change propagates here on the
             // next compile rather than being re-asserted.
             theme: FleetTheme::prescribed_default(),
@@ -239,8 +239,8 @@ mod tests {
     #[test]
     fn prescribed_carries_pleme_canonical_choices() {
         let p = FleetDefaults::prescribed();
-        // Borealis-night is the prescribed fleet theme.
-        assert_eq!(p.theme, FleetTheme::BorealisNight);
+        // Vellum is the prescribed fleet theme.
+        assert_eq!(p.theme, FleetTheme::Vellum);
         assert_eq!(p.theme, FleetTheme::prescribed_default());
         // Font alignment to ghostty's known-good look: NON-Mono Nerd
         // family (icons keep designed width), italics on the SAME

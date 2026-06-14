@@ -19,7 +19,6 @@
 //!
 //! The entire token set is reachable from `TokenSet::default()`.
 
-pub mod borealis;
 pub mod brand;
 pub mod color;
 pub mod fleet_defaults;
@@ -34,10 +33,11 @@ pub mod space;
 pub mod spacing;
 pub mod themed_config;
 pub mod typography;
+pub mod vellum;
 
 use serde::Serialize;
 
-pub use borealis::{blend_linear, AlphaPaint, BorealisPalette, TerminalSurfaces};
+pub use vellum::{blend_linear, AlphaPaint, TerminalSurfaces, VellumPalette};
 pub use brand::Brand;
 pub use color::{ColorPalette, Rgb, SemanticRoles};
 pub use fleet_defaults::FleetDefaults;

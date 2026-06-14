@@ -1,36 +1,35 @@
-//! Borealis — the fleet theme, dark variant `borealis-night`.
+//! Vellum — the fleet theme, warm aged-paper Nord-matte.
 //!
-//! Frozen arctic substrate (the Nord-frost heritage, the ❄) + computation
-//! as the aurora above it. Every hex here is gamut-fitted from authored
-//! OKLCH targets or is an exact linear-space blend product. Colors are
-//! BORN here; every downstream value is a token reference, never a
-//! hand-authored hex.
+//! Aged-paper substrate (a warm, low-chroma parchment ground) + computation
+//! as muted matte ink above it. Every hex here is gamut-fitted from authored
+//! targets or is an exact linear-space blend product. Colors are BORN here;
+//! every downstream value is a token reference, never a hand-authored hex.
 //!
-//! Canonical spec: BOREALIS fleet theme spec v2 (judge-approved).
-//! Verified mechanically by `tests/borealis_matrix.rs` — the WCAG 2.1
-//! contrast matrix over every default pairing, the OKLab ladder/tier
-//! invariants, and the byte-exact blend-product assertions. A token
+//! The fleet theme is "Vellum". Verified mechanically by
+//! `tests/vellum_matrix.rs` — the WCAG 2.1 contrast matrix over every
+//! default pairing plus the byte-exact blend-product assertions. A token
 //! edit that breaks legibility fails the build.
 //!
 //! # Bands
 //!
-//! * **Night** — the arctic sky (backgrounds, ΔL=0.050 ladder).
-//! * **Shadow + Snow** — moonlit snow text axis (ΔL=0.045 lattice).
-//! * **Ice** — stratified frost accents (Frost lineage).
-//! * **Aurora dual-duty** — accents legacy TUIs also use as backgrounds
-//!   (one luminance row; text ≥4.5 on night0 AND snow3-over-slot ≥3.0).
+//! The band FIELD names are functional labels carried over from the
+//! engine; only the authored values change to the warm aged-paper palette.
+//!
+//! * **Night** — the parchment ground (backgrounds, darkest-to-lightest).
+//! * **Shadow + Snow** — the text axis (warm ink → warm cream).
+//! * **Ice** — the cool/steel matte accents.
+//! * **Aurora dual-duty** — accents legacy TUIs also use as backgrounds.
 //! * **Aurora glow** — the emissions (incl. `aurora_green`, THE signature,
 //!   and `fable_violet`, the AGENT-RESERVED accent).
-//! * **Bright** — the glow bloom (ANSI 9–14 + base24 12–17).
+//! * **Bright** — the brighter accent tier (ANSI 9–14 + base24 12–17).
 //! * **Derived** — exact linear-space blend products (selection, search,
-//!   the equal-luminance GLASS band). The token IS the blend output,
-//!   byte-exact, zero tolerance.
+//!   the GLASS band). The token IS the blend output, byte-exact.
 
 use serde::Serialize;
 
 use crate::color::Rgb;
 
-// ─── Linear-space blend (f64 — matches the spec's compute pipeline) ────────
+// ─── Linear-space blend (f64 — matches the compute pipeline) ────────────────
 
 fn channel_to_linear(c: u8) -> f64 {
     let c = f64::from(c) / 255.0;
@@ -57,9 +56,9 @@ fn linear_to_channel(c: f64) -> u8 {
 /// Linear-space alpha blend: `(1-alpha)·bg + alpha·accent`, computed in
 /// linear RGB (IEC 61966-2-1), quantised back to 8-bit sRGB.
 ///
-/// This is THE derivation for every Borealis derived token (selection,
+/// This is THE derivation for every Vellum derived token (selection,
 /// `search_others`, the glass band). The token equals this function's
-/// output byte-exactly — `tests/borealis_matrix.rs` enforces zero
+/// output byte-exactly — `tests/vellum_matrix.rs` enforces zero
 /// tolerance. sRGB-space compositors (CSS) consume the RESOLVED hex,
 /// never an alpha recipe.
 #[must_use]
@@ -86,31 +85,31 @@ pub struct AlphaPaint {
 
 // ─── The palette ────────────────────────────────────────────────────────────
 
-/// Every named Borealis token. Authored constants for the four bands +
+/// Every named Vellum token. Authored constants for the four bands +
 /// bright tier; derived tokens computed via [`blend_linear`] at
 /// construction so they can never drift from their recipes.
 #[derive(Debug, Clone, Serialize)]
-pub struct BorealisPalette {
-    // Night band — the arctic sky (ΔL=0.050 ladder, violet undertone).
+pub struct VellumPalette {
+    // Night band — the parchment ground (darkest-to-lightest).
     pub night_abyss: Rgb,
     pub night_deep: Rgb,
     pub night0: Rgb,
     pub night1: Rgb,
     pub night2: Rgb,
     pub night3: Rgb,
-    // Shadow + Snow band — moonlit snow text axis (ΔL=0.045 lattice).
+    // Shadow + Snow band — the warm text axis.
     pub shadow0: Rgb,
     pub shadow1: Rgb,
     pub snow0: Rgb,
     pub snow1: Rgb,
     pub snow2: Rgb,
     pub snow3: Rgb,
-    // Ice band — stratified frost.
+    // Ice band — cool/steel matte accents.
     pub ice_teal: Rgb,
     pub ice_cyan: Rgb,
     pub ice_steel: Rgb,
     pub ice_deep: Rgb,
-    // Aurora band, dual-duty tier (one luminance row, L 0.644–0.661).
+    // Aurora band, dual-duty tier.
     pub aurora_red: Rgb,
     pub solar_magenta: Rgb,
     pub dusk_bronze: Rgb,
@@ -122,7 +121,7 @@ pub struct BorealisPalette {
     /// NOT in base16/ANSI — downstream references the SEMANTIC
     /// (`agent` role), never the hex.
     pub fable_violet: Rgb,
-    // Bright tier — the glow bloom (ANSI 9–14 + base24 base12–17).
+    // Bright tier — the brighter accent tier (ANSI 9–14 + base24 base12–17).
     pub red_bright: Rgb,
     pub green_bright: Rgb,
     pub amber_bright: Rgb,
@@ -141,42 +140,42 @@ pub struct BorealisPalette {
     pub violet_glass: Rgb,
 }
 
-impl BorealisPalette {
-    /// The dark variant — `borealis-night`. Derived tokens are computed
-    /// from their blend recipes here, never authored.
+impl VellumPalette {
+    /// The fleet theme — `vellum`. Derived tokens are computed from their
+    /// blend recipes here, never authored.
     #[must_use]
-    pub fn night() -> Self {
-        // Authored band constants (gamut-fitted from OKLCH targets).
-        let night_abyss = Rgb::new(0x0A, 0x0C, 0x14);
-        let night_deep = Rgb::new(0x14, 0x16, 0x21);
-        let night0 = Rgb::new(0x1F, 0x22, 0x2F);
-        let night1 = Rgb::new(0x2B, 0x2E, 0x3D);
-        let night2 = Rgb::new(0x38, 0x3B, 0x4C);
-        let night3 = Rgb::new(0x45, 0x48, 0x59);
-        let shadow0 = Rgb::new(0x73, 0x76, 0x89);
-        let shadow1 = Rgb::new(0x8C, 0x92, 0xA4);
-        let snow0 = Rgb::new(0xB5, 0xBC, 0xC9);
-        let snow1 = Rgb::new(0xD4, 0xD9, 0xE3);
-        let snow2 = Rgb::new(0xE4, 0xE8, 0xEF);
-        let snow3 = Rgb::new(0xF5, 0xF7, 0xFA);
-        let ice_teal = Rgb::new(0x6E, 0xB4, 0xA4);
-        let ice_cyan = Rgb::new(0x73, 0xC6, 0xD9);
-        let ice_steel = Rgb::new(0x6A, 0x90, 0xC0);
-        let ice_deep = Rgb::new(0x57, 0x7C, 0xAF);
-        let aurora_red = Rgb::new(0xD8, 0x6E, 0x67);
-        let solar_magenta = Rgb::new(0xC6, 0x73, 0xA3);
-        let dusk_bronze = Rgb::new(0xB3, 0x83, 0x63);
-        let aurora_green = Rgb::new(0x67, 0xD1, 0x91);
-        let first_light = Rgb::new(0xED, 0xC9, 0x80);
-        let ember = Rgb::new(0xE8, 0x97, 0x72);
-        let fable_violet = Rgb::new(0xB6, 0x9A, 0xE9);
-        let red_bright = Rgb::new(0xFF, 0x84, 0x82);
-        let green_bright = Rgb::new(0x74, 0xE2, 0x9F);
-        let amber_bright = Rgb::new(0xFA, 0xD6, 0x8D);
-        let steel_bright = Rgb::new(0x89, 0xB1, 0xE3);
-        let magenta_bright = Rgb::new(0xF8, 0xA1, 0xD3);
-        let cyan_bright = Rgb::new(0x7E, 0xD7, 0xEC);
-        let violet_bright = Rgb::new(0xC6, 0xA9, 0xFC);
+    pub fn vellum() -> Self {
+        // Authored band constants (warm aged-paper Nord-matte).
+        let night_abyss = Rgb::new(0x0D, 0x0C, 0x08);
+        let night_deep = Rgb::new(0x10, 0x0E, 0x0A);
+        let night0 = Rgb::new(0x16, 0x14, 0x0E);
+        let night1 = Rgb::new(0x1F, 0x1C, 0x15);
+        let night2 = Rgb::new(0x2B, 0x28, 0x20);
+        let night3 = Rgb::new(0x38, 0x34, 0x2A);
+        let shadow0 = Rgb::new(0x6E, 0x68, 0x57);
+        let shadow1 = Rgb::new(0x90, 0x89, 0x7B);
+        let snow0 = Rgb::new(0xAD, 0xA5, 0x93);
+        let snow1 = Rgb::new(0xE2, 0xDB, 0xC8);
+        let snow2 = Rgb::new(0xED, 0xE6, 0xD6);
+        let snow3 = Rgb::new(0xF4, 0xEF, 0xE2);
+        let ice_teal = Rgb::new(0x8F, 0xB9, 0xAB);
+        let ice_cyan = Rgb::new(0x94, 0xBB, 0xB8);
+        let ice_steel = Rgb::new(0x99, 0xAA, 0xBE);
+        let ice_deep = Rgb::new(0x7E, 0x92, 0xAC);
+        let aurora_red = Rgb::new(0xC9, 0x83, 0x7B);
+        let solar_magenta = Rgb::new(0xB8, 0xA1, 0xB9);
+        let dusk_bronze = Rgb::new(0xB3, 0x88, 0x6C);
+        let aurora_green = Rgb::new(0xA9, 0xBB, 0x8C);
+        let first_light = Rgb::new(0xD7, 0xC4, 0x89);
+        let ember = Rgb::new(0xCB, 0x90, 0x70);
+        let fable_violet = Rgb::new(0xB2, 0x9E, 0xC4);
+        let red_bright = Rgb::new(0xD4, 0x90, 0x88);
+        let green_bright = Rgb::new(0xAD, 0xD7, 0xA3);
+        let amber_bright = Rgb::new(0xE0, 0xCF, 0x96);
+        let steel_bright = Rgb::new(0xA8, 0xB7, 0xCB);
+        let magenta_bright = Rgb::new(0xC6, 0xB0, 0xC7);
+        let cyan_bright = Rgb::new(0xA6, 0xCB, 0xC8);
+        let violet_bright = Rgb::new(0xC2, 0xB0, 0xD2);
 
         Self {
             night_abyss,
@@ -221,7 +220,7 @@ impl BorealisPalette {
         }
     }
 
-    /// Look up a Borealis token by snake_case name. Brand monochromes
+    /// Look up a Vellum token by snake_case name. Brand monochromes
     /// (`ink` / `paper` / `shadow_tone`) resolve through the shared
     /// pleme palette so the role map can reference them unchanged.
     #[must_use]
@@ -269,7 +268,7 @@ impl BorealisPalette {
         })
     }
 
-    /// Every Borealis token as (name, Rgb) pairs, in band order.
+    /// Every Vellum token as (name, Rgb) pairs, in band order.
     #[must_use]
     pub fn entries(&self) -> [(&'static str, Rgb); 38] {
         [
@@ -314,10 +313,8 @@ impl BorealisPalette {
         ]
     }
 
-    /// ONE canonical ANSI-16 mapping fleet-wide (spec §4). Slots 1/4/5
-    /// are the dual-duty tier (text ≥4.5 on night0 AND snow3-over-slot
-    /// ≥3.0); slot 15 is `snow3` (= base07) BECAUSE the dual-duty
-    /// window is empty against snow2 — proven, not chosen.
+    /// ONE canonical ANSI-16 mapping fleet-wide. Slots 1/4/5 are the
+    /// dual-duty tier; slot 15 is `snow3` (= base07).
     #[must_use]
     pub fn ansi_16(&self) -> [Rgb; 16] {
         [
@@ -340,9 +337,8 @@ impl BorealisPalette {
         ]
     }
 
-    /// base16 slots (spec §3 — canonical slot semantics, all 7 port
-    /// mistakes avoided). base02 is the violet-carrying selection
-    /// blend BY DESIGN.
+    /// base16 slots — canonical slot semantics. base02 is the violet-
+    /// carrying selection blend BY DESIGN.
     #[must_use]
     pub fn base16(&self) -> [(&'static str, Rgb); 16] {
         [
@@ -401,8 +397,8 @@ impl BorealisPalette {
         ]
     }
 
-    /// The terminal surface map (spec §5) — mado QUEUED spec + the
-    /// ghostty render target both consume this.
+    /// The terminal surface map — mado QUEUED spec + the ghostty render
+    /// target both consume this.
     #[must_use]
     pub fn surfaces(&self) -> TerminalSurfaces {
         TerminalSurfaces {
@@ -416,7 +412,7 @@ impl BorealisPalette {
             search_current_background: self.first_light,
             search_current_foreground: self.night0,
             search_status_text: self.ice_cyan,
-            bell_flash: AlphaPaint { color: self.snow3, alpha: 0.10 },
+            bell_flash: AlphaPaint { color: self.snow3, alpha: 0.06 },
             url_underline: AlphaPaint { color: self.ice_cyan, alpha: 0.60 },
             scrollbar_thumb: AlphaPaint { color: self.ice_cyan, alpha: 0.35 },
             osc133_separator: AlphaPaint { color: self.ice_deep, alpha: 0.30 },
@@ -432,14 +428,14 @@ impl BorealisPalette {
     }
 }
 
-/// The §5 terminal surface map as one typed value. `minimum_contrast`
-/// and `bold_is_bright` are Guard-pinned fleet decisions (M1 layer c +
-/// M6 declared decision: bold renders as weight, brights via SGR 90–97).
+/// The terminal surface map as one typed value. `minimum_contrast`
+/// and `bold_is_bright` are Guard-pinned fleet decisions (bold renders
+/// as weight, brights via SGR 90–97).
 #[derive(Debug, Clone, Serialize)]
 pub struct TerminalSurfaces {
     pub background: Rgb,
     pub foreground: Rgb,
-    /// Block cursor — `green_bright` (inverse pair ≥7.0, computed 9.88).
+    /// Block cursor — `green_bright` (inverse pair ≥7.0).
     pub cursor: Rgb,
     pub cursor_text: Rgb,
     /// Opaque consumers use this token; the GPU path composites
@@ -459,9 +455,9 @@ pub struct TerminalSurfaces {
     pub unfocused_split_fill: Rgb,
     pub titlebar_band: Rgb,
     pub agent_attention_surface: Rgb,
-    /// Grid-cell safety net for raw-ANSI legacy pairs (M1 layer c).
+    /// Grid-cell safety net for raw-ANSI legacy pairs.
     pub minimum_contrast: f32,
-    /// Declared decision (M6): false fleet-wide; bold = weight.
+    /// Declared decision: false fleet-wide; bold = weight.
     pub bold_is_bright: bool,
     pub workspace_tint_pleme: Rgb,
     pub workspace_tint_akeyless: Rgb,
@@ -473,38 +469,38 @@ mod tests {
 
     #[test]
     fn authored_tokens_match_spec_hexes() {
-        let p = BorealisPalette::night();
+        let p = VellumPalette::vellum();
         let expect = [
-            ("night_abyss", "#0A0C14"),
-            ("night_deep", "#141621"),
-            ("night0", "#1F222F"),
-            ("night1", "#2B2E3D"),
-            ("night2", "#383B4C"),
-            ("night3", "#454859"),
-            ("shadow0", "#737689"),
-            ("shadow1", "#8C92A4"),
-            ("snow0", "#B5BCC9"),
-            ("snow1", "#D4D9E3"),
-            ("snow2", "#E4E8EF"),
-            ("snow3", "#F5F7FA"),
-            ("ice_teal", "#6EB4A4"),
-            ("ice_cyan", "#73C6D9"),
-            ("ice_steel", "#6A90C0"),
-            ("ice_deep", "#577CAF"),
-            ("aurora_red", "#D86E67"),
-            ("solar_magenta", "#C673A3"),
-            ("dusk_bronze", "#B38363"),
-            ("aurora_green", "#67D191"),
-            ("first_light", "#EDC980"),
-            ("ember", "#E89772"),
-            ("fable_violet", "#B69AE9"),
-            ("red_bright", "#FF8482"),
-            ("green_bright", "#74E29F"),
-            ("amber_bright", "#FAD68D"),
-            ("steel_bright", "#89B1E3"),
-            ("magenta_bright", "#F8A1D3"),
-            ("cyan_bright", "#7ED7EC"),
-            ("violet_bright", "#C6A9FC"),
+            ("night_abyss", "#0D0C08"),
+            ("night_deep", "#100E0A"),
+            ("night0", "#16140E"),
+            ("night1", "#1F1C15"),
+            ("night2", "#2B2820"),
+            ("night3", "#38342A"),
+            ("shadow0", "#6E6857"),
+            ("shadow1", "#90897B"),
+            ("snow0", "#ADA593"),
+            ("snow1", "#E2DBC8"),
+            ("snow2", "#EDE6D6"),
+            ("snow3", "#F4EFE2"),
+            ("ice_teal", "#8FB9AB"),
+            ("ice_cyan", "#94BBB8"),
+            ("ice_steel", "#99AABE"),
+            ("ice_deep", "#7E92AC"),
+            ("aurora_red", "#C9837B"),
+            ("solar_magenta", "#B8A1B9"),
+            ("dusk_bronze", "#B3886C"),
+            ("aurora_green", "#A9BB8C"),
+            ("first_light", "#D7C489"),
+            ("ember", "#CB9070"),
+            ("fable_violet", "#B29EC4"),
+            ("red_bright", "#D49088"),
+            ("green_bright", "#ADD7A3"),
+            ("amber_bright", "#E0CF96"),
+            ("steel_bright", "#A8B7CB"),
+            ("magenta_bright", "#C6B0C7"),
+            ("cyan_bright", "#A6CBC8"),
+            ("violet_bright", "#C2B0D2"),
         ];
         let mut failures = Vec::new();
         for (name, hex) in expect {
@@ -518,19 +514,19 @@ mod tests {
 
     #[test]
     fn derived_tokens_are_byte_exact_blend_products() {
-        // M5+M7: the token IS the blend output, byte-exact, zero
-        // tolerance. These also pin the spec's published hexes so the
-        // recipe and the published value can never diverge.
-        let p = BorealisPalette::night();
+        // The token IS the blend output, byte-exact, zero tolerance.
+        // These also pin the published hexes so the recipe and the
+        // published value can never diverge.
+        let p = VellumPalette::vellum();
         let rows: [(&str, Rgb, &str); 8] = [
-            ("selection", blend_linear(p.night0, p.fable_violet, 0.08), "#3F3955"),
-            ("search_others", blend_linear(p.night0, p.first_light, 0.075), "#4E443A"),
-            ("red_glass", blend_linear(p.night0, p.aurora_red, 0.327), "#854647"),
-            ("green_glass", blend_linear(p.night0, p.aurora_green, 0.168), "#34614B"),
-            ("amber_glass", blend_linear(p.night0, p.first_light, 0.137), "#645642"),
-            ("steel_glass", blend_linear(p.night0, p.ice_steel, 0.325), "#435A79"),
-            ("cyan_glass", blend_linear(p.night0, p.ice_cyan, 0.173), "#395E6A"),
-            ("violet_glass", blend_linear(p.night0, p.fable_violet, 0.220), "#5F527C"),
+            ("selection", blend_linear(p.night0, p.fable_violet, 0.08), "#3A343E"),
+            ("search_others", blend_linear(p.night0, p.first_light, 0.075), "#443E2A"),
+            ("red_glass", blend_linear(p.night0, p.aurora_red, 0.327), "#7B4F4A"),
+            ("green_glass", blend_linear(p.night0, p.aurora_green, 0.168), "#4D543E"),
+            ("amber_glass", blend_linear(p.night0, p.first_light, 0.137), "#595137"),
+            ("steel_glass", blend_linear(p.night0, p.ice_steel, 0.325), "#5D6773"),
+            ("cyan_glass", blend_linear(p.night0, p.ice_cyan, 0.173), "#445553"),
+            ("violet_glass", blend_linear(p.night0, p.fable_violet, 0.220), "#5B5063"),
         ];
         let mut failures = Vec::new();
         for (name, blended, spec_hex) in rows {
@@ -547,47 +543,47 @@ mod tests {
 
     #[test]
     fn ansi_16_mapping_matches_spec_table() {
-        let p = BorealisPalette::night();
+        let p = VellumPalette::vellum();
         let ansi = p.ansi_16();
-        assert_eq!(ansi[0].hex(), "#383B4C"); // night2, NEVER base00
-        assert_eq!(ansi[1].hex(), "#D86E67");
-        assert_eq!(ansi[2].hex(), "#67D191");
-        assert_eq!(ansi[3].hex(), "#EDC980");
-        assert_eq!(ansi[4].hex(), "#6A90C0");
-        assert_eq!(ansi[5].hex(), "#C673A3");
-        assert_eq!(ansi[6].hex(), "#73C6D9");
-        assert_eq!(ansi[7].hex(), "#B5BCC9");
-        assert_eq!(ansi[8].hex(), "#737689");
-        assert_eq!(ansi[9].hex(), "#FF8482");
-        assert_eq!(ansi[10].hex(), "#74E29F");
-        assert_eq!(ansi[11].hex(), "#FAD68D");
-        assert_eq!(ansi[12].hex(), "#89B1E3");
-        assert_eq!(ansi[13].hex(), "#F8A1D3");
-        assert_eq!(ansi[14].hex(), "#7ED7EC");
-        assert_eq!(ansi[15].hex(), "#F5F7FA"); // snow3 = base07
+        assert_eq!(ansi[0].hex(), "#2B2820"); // night2, NEVER base00
+        assert_eq!(ansi[1].hex(), "#C9837B");
+        assert_eq!(ansi[2].hex(), "#A9BB8C");
+        assert_eq!(ansi[3].hex(), "#D7C489");
+        assert_eq!(ansi[4].hex(), "#99AABE");
+        assert_eq!(ansi[5].hex(), "#B8A1B9");
+        assert_eq!(ansi[6].hex(), "#94BBB8");
+        assert_eq!(ansi[7].hex(), "#ADA593");
+        assert_eq!(ansi[8].hex(), "#6E6857");
+        assert_eq!(ansi[9].hex(), "#D49088");
+        assert_eq!(ansi[10].hex(), "#ADD7A3");
+        assert_eq!(ansi[11].hex(), "#E0CF96");
+        assert_eq!(ansi[12].hex(), "#A8B7CB");
+        assert_eq!(ansi[13].hex(), "#C6B0C7");
+        assert_eq!(ansi[14].hex(), "#A6CBC8");
+        assert_eq!(ansi[15].hex(), "#F4EFE2"); // snow3 = base07
     }
 
     #[test]
     fn surfaces_pin_fleet_decisions() {
-        let s = BorealisPalette::night().surfaces();
+        let s = VellumPalette::vellum().surfaces();
         assert!((s.minimum_contrast - 3.0).abs() < f32::EPSILON);
         assert!(!s.bold_is_bright);
-        assert_eq!(s.cursor.hex(), "#74E29F"); // green_bright
-        assert_eq!(s.cursor_text.hex(), "#1F222F");
-        assert_eq!(s.selection_background.hex(), "#3F3955");
-        assert_eq!(s.search_current_background.hex(), "#EDC980");
-        assert_eq!(s.titlebar_band.hex(), "#2B2E3D");
+        assert_eq!(s.cursor.hex(), "#ADD7A3"); // green_bright
+        assert_eq!(s.cursor_text.hex(), "#16140E");
+        assert_eq!(s.selection_background.hex(), "#3A343E");
+        assert_eq!(s.search_current_background.hex(), "#D7C489");
+        assert_eq!(s.titlebar_band.hex(), "#1F1C15");
     }
 
     #[test]
     fn fg_promotion_map_is_total_over_the_six_sub_floor_tokens() {
-        let names: Vec<&str> = BorealisPalette::fg_promotions().iter().map(|(f, _)| *f).collect();
+        let names: Vec<&str> = VellumPalette::fg_promotions().iter().map(|(f, _)| *f).collect();
         for required in ["shadow0", "shadow1", "aurora_red", "ice_steel", "solar_magenta", "dusk_bronze"] {
             assert!(names.contains(&required), "missing promotion for {required}");
         }
         // Every target resolves.
-        let p = BorealisPalette::night();
-        for (from, to) in BorealisPalette::fg_promotions() {
+        let p = VellumPalette::vellum();
+        for (from, to) in VellumPalette::fg_promotions() {
             assert!(p.get(from).is_some() && p.get(to).is_some(), "{from}→{to} unresolvable");
         }
     }

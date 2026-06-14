@@ -10,8 +10,8 @@ description = "ishou — target-specific renderers for the pleme-io design token
 ishou-tokens = { version = "0.1.0", path = "../ishou-tokens" }
 serde.workspace = true
 serde_json.workspace = true
-# Typed emission of the Borealis stylix base16/base24 YAML — the scheme
-# is an `IndexMap` (slot order = spec slot order) and serde_yaml owns
+# Typed emission of the Vellum stylix base16/base24 YAML — the scheme
+# is an `IndexMap` (slot order = authored slot order) and serde_yaml owns
 # the escaping. No string-concatenated YAML for the new target.
 serde_yaml = "0.9"
 indexmap = { version = "2", features = ["serde"] }

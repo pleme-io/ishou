@@ -88,11 +88,11 @@ impl ColorPalette {
 /// palette value moves.
 ///
 /// Role-keys resolve through `ColorPalette::get` (Nord) for the
-/// `pleme_dark` binding and through `BorealisPalette::get` for the
-/// `borealis_night` binding. The Borealis binding adds nine new roles
-/// (`text_secondary` … `structural`) — spec §7 — that the Nord binding
-/// fills with the nearest legacy palette key so every consumer
-/// iterating `pairs()` sees a populated value on both themes.
+/// `pleme_dark` binding and through `VellumPalette::get` for the
+/// `vellum` binding. The Vellum binding adds nine new roles
+/// (`text_secondary` … `structural`) that the Nord binding fills with
+/// the nearest legacy palette key so every consumer iterating `pairs()`
+/// sees a populated value on both themes.
 #[derive(Debug, Clone, Serialize)]
 pub struct SemanticRoles {
     pub background: &'static str,
@@ -112,31 +112,31 @@ pub struct SemanticRoles {
     pub shadow: &'static str,
     pub ink: &'static str,
     pub paper: &'static str,
-    // ── Borealis additions (spec §7 — the complete struct diff) ──────
-    /// Secondary body text (Borealis `snow0`).
+    // ── Vellum additions (the complete struct diff) ──────────────────
+    /// Secondary body text (Vellum `snow0`).
     pub text_secondary: &'static str,
-    /// Brightest body text (Borealis `snow2`).
+    /// Brightest body text (Vellum `snow2`).
     pub text_bright: &'static str,
-    /// AGENT-RESERVED accent — vigy / MCP / AI surfaces (Borealis
+    /// AGENT-RESERVED accent — vigy / MCP / AI surfaces (Vellum
     /// `fable_violet`). Downstream references THIS role, never the hex.
     pub agent: &'static str,
-    /// Agent attention state (Borealis `violet_bright`).
+    /// Agent attention state (Vellum `violet_bright`).
     pub agent_attention: &'static str,
-    /// Links / function names (Borealis `ice_steel`).
+    /// Links / function names (Vellum `ice_steel`).
     pub link: &'static str,
-    /// Selection background (Borealis `selection` — the violet glass).
+    /// Selection background (Vellum `selection` — the violet glass).
     pub selection: &'static str,
-    /// Block cursor (Borealis `green_bright`).
+    /// Block cursor (Vellum `green_bright`).
     pub cursor: &'static str,
-    /// Search-current background (Borealis `first_light`).
+    /// Search-current background (Vellum `first_light`).
     pub search: &'static str,
-    /// Structural-only accent — never body text (Borealis `ice_deep`).
+    /// Structural-only accent — never body text (Vellum `ice_deep`).
     pub structural: &'static str,
 }
 
 impl SemanticRoles {
     /// Dark-first binding used across every pleme-io product.
-    /// The nine Borealis-only roles map to the nearest Nord palette key
+    /// The nine Vellum-only roles map to the nearest Nord palette key
     /// so a `pleme_dark` consumer iterating `pairs()` never sees an
     /// unresolvable role.
     #[must_use]
@@ -159,7 +159,7 @@ impl SemanticRoles {
             shadow: "shadow_tone",
             ink: "ink",
             paper: "paper",
-            // Borealis additions — nearest Nord key for legacy theme.
+            // Vellum additions — nearest Nord key for legacy theme.
             text_secondary: "snow_storm_0",
             text_bright: "snow_storm_2",
             agent: "aurora_purple",
@@ -172,13 +172,12 @@ impl SemanticRoles {
         }
     }
 
-    /// Borealis dark binding — `borealis-night` (spec §7). Every role
-    /// resolves through `BorealisPalette::get`. M3 resolution: `info`
-    /// is `ice_teal` (one token, one duty). The agent accent
-    /// (`fable_violet`) is named via the `agent` role so downstream
-    /// references the SEMANTIC, never the hex.
+    /// Vellum binding — `vellum`. Every role resolves through
+    /// `VellumPalette::get`. `info` is `ice_teal` (one token, one duty).
+    /// The agent accent (`fable_violet`) is named via the `agent` role
+    /// so downstream references the SEMANTIC, never the hex.
     #[must_use]
-    pub const fn borealis_night() -> Self {
+    pub const fn vellum() -> Self {
         Self {
             background: "night0",
             surface: "night1",
@@ -197,7 +196,7 @@ impl SemanticRoles {
             shadow: "shadow_tone",
             ink: "ink",
             paper: "paper",
-            // Borealis-native roles.
+            // Vellum-native roles.
             text_secondary: "snow0",
             text_bright: "snow2",
             agent: "fable_violet",
