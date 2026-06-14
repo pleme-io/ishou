@@ -432,6 +432,49 @@ impl Palette {
         ]
     }
 
+    /// The VIVID content ANSI-16 — the palette apps PAINT CONTENT with.
+    ///
+    /// DECOUPLED from [`Palette::ansi_16`] (the matte chrome accents) on
+    /// purpose — washed-out-colors fix, 2026-06-14. `ansi_16()` maps the
+    /// content slots to the deliberately *muted* parchment accents
+    /// (`aurora_green` #A9BB8C sage, `aurora_red` #C9837B dusty rose,
+    /// `snow0` #ADA593 tan). That tone is right for Vellum's CHROME
+    /// (surfaces, glass, search band), but it is the table apps remap
+    /// their CONTENT through — a `vim` syntax run, a shell `ls`, an
+    /// autocomplete menu — so on the dark parchment ground it reads as the
+    /// "dull grey-green, washed-out, low-contrast" the operator reported,
+    /// diverging from ghostty's vivid ANSI.
+    ///
+    /// The content layer keeps the parchment NEUTRALS (slots 0/7/8/15 from
+    /// the BORN ground — `night2` / `snow1` / `shadow0` / `snow3`, so the
+    /// blacks + whites stay coherent with the aged-paper feel) and paints
+    /// the CHROMATIC accents (1–6, 9–14) in standard vivid Nord
+    /// aurora/frost — readable ink at ghostty-equivalent contrast. Vivid
+    /// ink on a matte parchment ground: cozy *and* legible. This is the
+    /// ONE fleet content table — mado's renderer ANSI, the nvim syntax
+    /// colorscheme, and picker match-highlights all derive from it.
+    #[must_use]
+    pub fn content_ansi_16(&self) -> [Rgb; 16] {
+        [
+            self.night2,                // 0  black      — parchment surface (NEVER base00)
+            Rgb::new(0xBF, 0x61, 0x6A), // 1  red        — vivid Nord aurora red
+            Rgb::new(0xA3, 0xBE, 0x8C), // 2  green      — vivid Nord aurora green
+            Rgb::new(0xEB, 0xCB, 0x8B), // 3  yellow     — vivid Nord aurora yellow
+            Rgb::new(0x5E, 0x81, 0xAC), // 4  blue       — vivid Nord frost_3
+            Rgb::new(0xB4, 0x8E, 0xAD), // 5  magenta    — vivid Nord aurora purple
+            Rgb::new(0x88, 0xC0, 0xD0), // 6  cyan       — vivid Nord frost_1
+            self.snow1,                 // 7  white      — parchment cream fg
+            self.shadow0,               // 8  br-black   — parchment dim (typed floor)
+            Rgb::new(0xD0, 0x87, 0x70), // 9  br-red     — vivid Nord orange (distinct from 1)
+            Rgb::new(0xA3, 0xBE, 0x8C), // 10 br-green   — vivid Nord aurora green
+            Rgb::new(0xEB, 0xCB, 0x8B), // 11 br-yellow  — vivid Nord aurora yellow
+            Rgb::new(0x81, 0xA1, 0xC1), // 12 br-blue    — vivid Nord frost_2
+            Rgb::new(0xB4, 0x8E, 0xAD), // 13 br-magenta — vivid Nord aurora purple
+            Rgb::new(0x8F, 0xBC, 0xBB), // 14 br-cyan    — vivid Nord frost_0
+            self.snow3,                 // 15 br-white   — parchment bright cream
+        ]
+    }
+
     /// base16 slots — canonical slot semantics. base02 is the violet-
     /// carrying selection blend BY DESIGN.
     #[must_use]
@@ -714,6 +757,38 @@ mod tests {
         assert_eq!(ansi[13].hex(), "#C6B0C7");
         assert_eq!(ansi[14].hex(), "#A6CBC8");
         assert_eq!(ansi[15].hex(), "#F4EFE2"); // snow3 = base07
+    }
+
+    #[test]
+    fn content_ansi_is_vivid_and_decoupled_from_matte_chrome() {
+        // The CONTENT layer (what apps paint syntax/output with) is vivid
+        // Nord ink; the CHROME `ansi_16()` stays matte parchment. They MUST
+        // differ on the chromatic slots (washed-out-colors fix).
+        let p = VellumPalette::vellum();
+        let content = p.content_ansi_16();
+        let chrome = p.ansi_16();
+        // Chromatic accents are vivid Nord, NOT the matte parchment tones.
+        assert_eq!(content[1].hex(), "#BF616A"); // red  (chrome was #C9837B)
+        assert_eq!(content[2].hex(), "#A3BE8C"); // green(chrome was #A9BB8C)
+        assert_eq!(content[3].hex(), "#EBCB8B"); // yellow
+        assert_eq!(content[4].hex(), "#5E81AC"); // blue
+        assert_eq!(content[5].hex(), "#B48EAD"); // magenta
+        assert_eq!(content[6].hex(), "#88C0D0"); // cyan
+        assert_eq!(content[9].hex(), "#D08770"); // br-red orange
+        assert_eq!(content[14].hex(), "#8FBCBB"); // br-cyan
+        for slot in [1usize, 2, 3, 4, 5, 6] {
+            assert_ne!(
+                content[slot].hex(),
+                chrome[slot].hex(),
+                "content slot {slot} must be vivid, not the matte chrome accent",
+            );
+        }
+        // Neutrals (blacks + whites) stay parchment, coherent with the
+        // aged-paper ground — these MATCH the chrome table by design.
+        assert_eq!(content[0].hex(), p.night2.hex()); // surface black
+        assert_eq!(content[7].hex(), p.snow1.hex()); // cream fg-white
+        assert_eq!(content[8].hex(), p.shadow0.hex()); // dim br-black
+        assert_eq!(content[15].hex(), p.snow3.hex()); // bright cream
     }
 
     #[test]
