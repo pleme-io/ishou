@@ -65,6 +65,14 @@ pub enum Target {
     StylixVellumBase24,
     /// Vellum palette preview SVG — one labelled chip per BORN token.
     SvgVellumPalette,
+    /// Vellum skim/fzf `--color=k:v,…` string — the fleet picker theme.
+    /// Generated from the BORN `VellumPalette`, byte-equivalent to the
+    /// hand-authored `skim-tab::NORD_COLORS`.
+    SkimVellum,
+    /// Vellum escriba theme `*.lisp` — `(deftheme)` + `(defpalette)` +
+    /// `(defhighlight …)` over escriba's `CANONICAL_GROUPS`, sourced from
+    /// the BORN `VellumPalette`. Mirrors `escriba/configs/vellum.lisp`.
+    EscribaVellum,
 }
 
 impl Target {
@@ -86,6 +94,8 @@ impl Target {
             "stylix-vellum" | "stylix-base16-vellum" => Self::StylixVellum,
             "stylix-vellum-base24" | "stylix-base24-vellum" => Self::StylixVellumBase24,
             "svg-vellum-palette" | "vellum-palette" => Self::SvgVellumPalette,
+            "skim-vellum" | "skim" => Self::SkimVellum,
+            "escriba-vellum" | "escriba" => Self::EscribaVellum,
             _ => return None,
         })
     }
@@ -110,10 +120,12 @@ impl Target {
             Self::StylixVellum => vellum::render_base16(),
             Self::StylixVellumBase24 => vellum::render_base24(),
             Self::SvgVellumPalette => vellum::render_svg_palette(),
+            Self::SkimVellum => vellum::render_skim(),
+            Self::EscribaVellum => vellum::render_escriba_lisp(),
         }
     }
 
-    pub fn all() -> [Target; 16] {
+    pub fn all() -> [Target; 18] {
         [
             Self::Css,
             Self::Tailwind,
@@ -131,6 +143,8 @@ impl Target {
             Self::StylixVellum,
             Self::StylixVellumBase24,
             Self::SvgVellumPalette,
+            Self::SkimVellum,
+            Self::EscribaVellum,
         ]
     }
 }

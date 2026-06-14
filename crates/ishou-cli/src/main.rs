@@ -113,6 +113,8 @@ fn filename(t: Target) -> &'static str {
         Target::StylixVellum => "vellum.yaml",
         Target::StylixVellumBase24 => "vellum-base24.yaml",
         Target::SvgVellumPalette => "vellum-palette.svg",
+        Target::SkimVellum => "vellum.skim",
+        Target::EscribaVellum => "vellum.lisp",
     }
 }
 
@@ -134,5 +136,7 @@ fn target_name(t: Target) -> &'static str {
         Target::StylixVellum => "stylix-vellum",
         Target::StylixVellumBase24 => "stylix-vellum-base24",
         Target::SvgVellumPalette => "svg-vellum-palette",
+        Target::SkimVellum => "skim-vellum",
+        Target::EscribaVellum => "escriba-vellum",
     }
 }

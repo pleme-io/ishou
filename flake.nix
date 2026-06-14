@@ -62,6 +62,10 @@
       stylix-vellum = mk "stylix-vellum";
       stylix-vellum-base24 = mk "stylix-vellum-base24";
       svg-vellum-palette = mk "svg-vellum-palette";
+      # Vellum skim/fzf --color string + escriba theme lisp, both
+      # generated from the BORN VellumPalette (never hand-authored).
+      skim-vellum = mk "skim-vellum";
+      escriba-vellum = mk "escriba-vellum";
       render-all = {
         type = "app";
         program = "${pkgs.writeShellScriptBin "ishou-render-all" ''
@@ -176,6 +180,33 @@
     } ''
       ${ishouBin}/bin/ishou render --target fleet-fonts > $out
     '';
+
+    # Vellum skim/fzf `--color=k:v,…` string — generated from the BORN
+    # VellumPalette, byte-equivalent to the hand-authored
+    # `skim-tab::NORD_COLORS`. A file containing the single --color
+    # string (no trailing newline); skim-tab / the nix skim-theme can
+    # source it so every fleet picker follows one Vellum.
+    mkSkimVellum = system: let
+      pkgs = import nixpkgs { inherit system; };
+      ishouBin = toolOutputs.packages.${system}.default;
+    in pkgs.runCommand "ishou-skim-vellum" {
+      meta.description = "ishou-rendered Vellum skim/fzf --color string";
+    } ''
+      ${ishouBin}/bin/ishou render --target skim-vellum > $out
+    '';
+
+    # Vellum escriba theme `*.lisp` — `(deftheme)` + `(defpalette)` +
+    # `(defhighlight …)` over escriba's CANONICAL_GROUPS, generated
+    # from the BORN VellumPalette. escriba can `include` this path so
+    # the editor theme follows the fleet by construction.
+    mkEscribaVellumLisp = system: let
+      pkgs = import nixpkgs { inherit system; };
+      ishouBin = toolOutputs.packages.${system}.default;
+    in pkgs.runCommand "ishou-escriba-vellum-lisp" {
+      meta.description = "ishou-rendered Vellum escriba theme lisp (deftheme + defpalette + defhighlight)";
+    } ''
+      ${ishouBin}/bin/ishou render --target escriba-vellum > $out
+    '';
   in
     toolOutputs
     // {
@@ -208,6 +239,11 @@
           # this to name the canonical font AND install the
           # underlying nixpkgs package via home.packages.
           fleet-fonts = mkFleetFonts system;
+          # Vellum skim/fzf --color string (skim-tab / nix skim-theme
+          # source this) + the escriba theme lisp (escriba `include`s
+          # this), both generated from the BORN VellumPalette.
+          skim-vellum = mkSkimVellum system;
+          escriba-vellum-lisp = mkEscribaVellumLisp system;
         }
       );
     };

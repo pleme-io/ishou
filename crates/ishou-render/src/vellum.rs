@@ -135,6 +135,264 @@ pub fn render_svg_palette() -> String {
     )
 }
 
+// ─── skim / fzf `--color` string ────────────────────────────────────────────
+
+/// Resolve a Vellum token to its **uppercase** `#RRGGBB` hex — the skim
+/// `--color` wire format mirrors the hand-authored `skim-tab::NORD_COLORS`,
+/// which uses uppercase hex.
+fn tok(p: &VellumPalette, name: &str) -> String {
+    p.get(name)
+        .unwrap_or_else(|| panic!("vellum token `{name}` missing"))
+        .hex()
+}
+
+/// Render the skim/fzf `--color=k:v,…` string from the BORN `VellumPalette`.
+///
+/// Byte-equivalent to the hand-authored `pleme-io/skim-tab::NORD_COLORS`:
+/// every colour resolves from a typed token, the `:bold`/`:underlined`
+/// attribute suffixes are the picker's fixed UX contract. The role→token
+/// map is the single source of truth — change a Vellum token and every
+/// picker on the fleet follows.
+///
+/// Role → token:
+/// - `fg`      → `snow1`        (base05, the text fg)
+/// - `bg`      → `night0`       (base00, the parchment ground)
+/// - `hl`      → `ice_cyan`     (base0C, match highlight) `:bold:underlined`
+/// - `fg+`     → `snow3`        (base07, selected-line fg) `:bold`
+/// - `bg+`     → `night2`       (the selected-line surface)
+/// - `hl+`     → `cyan_bright`  (ANSI-14, selected-match) `:bold:underlined`
+/// - `info`    → `shadow0`      (the dim ANSI-8 tier)
+/// - `prompt`  → `aurora_green` (base0B, the prompt)
+/// - `pointer` → `green_bright` (the cursor/green signature)
+/// - `marker`  → `solar_magenta`(base0E, multi-select)
+/// - `spinner` → `ice_steel`    (base0D)
+/// - `header`  → `ice_steel`    (base0D)
+/// - `border`  → `shadow0`      (the dim tier)
+/// - `query`   → `snow3`        (base07) `:bold`
+#[must_use]
+pub fn render_skim() -> String {
+    let p = VellumPalette::vellum();
+    // (key, token, attr-suffix) — order is the skim-tab authored order.
+    let rows: [(&str, &str, &str); 14] = [
+        ("fg", "snow1", ""),
+        ("bg", "night0", ""),
+        ("hl", "ice_cyan", ":bold:underlined"),
+        ("fg+", "snow3", ":bold"),
+        ("bg+", "night2", ""),
+        ("hl+", "cyan_bright", ":bold:underlined"),
+        ("info", "shadow0", ""),
+        ("prompt", "aurora_green", ""),
+        ("pointer", "green_bright", ""),
+        ("marker", "solar_magenta", ""),
+        ("spinner", "ice_steel", ""),
+        ("header", "ice_steel", ""),
+        ("border", "shadow0", ""),
+        ("query", "snow3", ":bold"),
+    ];
+    rows.iter()
+        .map(|(key, token, attr)| format!("{key}:{}{attr}", tok(&p, token)))
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
+// ─── escriba theme lisp ──────────────────────────────────────────────────────
+
+/// A `(defhighlight …)` row — a group plus the typed token roles it paints.
+/// `link` is mutually exclusive with the colour/attr fields (escriba's
+/// `HighlightSpec` honours `link` first).
+struct HiRow {
+    group: &'static str,
+    /// fg token name (resolved through `VellumPalette::get`), or `""`.
+    fg: &'static str,
+    /// bg token name, or `""`.
+    bg: &'static str,
+    bold: bool,
+    italic: bool,
+    /// `:link "<group>"` — when set, colour fields are skipped.
+    link: &'static str,
+}
+
+impl HiRow {
+    const fn fg(group: &'static str, fg: &'static str) -> Self {
+        Self { group, fg, bg: "", bold: false, italic: false, link: "" }
+    }
+    const fn bg(group: &'static str, bg: &'static str) -> Self {
+        Self { group, fg: "", bg, bold: false, italic: false, link: "" }
+    }
+    const fn fg_bg(group: &'static str, fg: &'static str, bg: &'static str) -> Self {
+        Self { group, fg, bg, bold: false, italic: false, link: "" }
+    }
+    const fn link(group: &'static str, link: &'static str) -> Self {
+        Self { group, fg: "", bg: "", bold: false, italic: false, link }
+    }
+    const fn b(mut self) -> Self { self.bold = true; self }
+    const fn i(mut self) -> Self { self.italic = true; self }
+}
+
+/// Lowercase, `#`-prefixed six-char hex — escriba's `defpalette` /
+/// `defhighlight` wire format (the hand-authored `vellum.lisp` uses
+/// lowercase hex).
+fn lc_hex(p: &VellumPalette, name: &str) -> String {
+    let h = tok(p, name); // "#RRGGBB" uppercase
+    format!("#{}", h[1..].to_ascii_lowercase())
+}
+
+/// A typed `(defX :k v …)` line writer — one keyword/value pair per
+/// emitted slot, joined with single spaces, wrapped in parens. Keeps the
+/// emission off ad-hoc concatenation (TYPED EMISSION).
+fn lisp_form(head: &str, kvs: &[(&str, String)]) -> String {
+    use std::fmt::Write as _;
+    let mut s = String::new();
+    write!(s, "({head}").expect("write to String");
+    for (k, v) in kvs {
+        write!(s, " {k} {v}").expect("write to String");
+    }
+    s.push(')');
+    s
+}
+
+/// Render the escriba Vellum theme `*.lisp` — a `(deftheme …)` +
+/// `(defpalette …)` + the `(defhighlight …)` forms over escriba's
+/// `CANONICAL_GROUPS`, all sourced from the BORN `VellumPalette`.
+///
+/// Mirrors `pleme-io/escriba/escriba/configs/vellum.lisp` so escriba can
+/// later `include` the generated file. Every colour resolves through a
+/// typed token; the diff backgrounds use the byte-exact GLASS blend
+/// tokens (`*_glass`), so they can never drift from the blend recipes.
+#[must_use]
+pub fn render_escriba_lisp() -> String {
+    use std::fmt::Write as _;
+    let p = VellumPalette::vellum();
+
+    let mut out = String::new();
+    out.push_str(
+        "; escriba — Vellum theme (the fleet default)\n\
+         ; Generated by ishou-render::vellum::render_escriba_lisp — DO NOT EDIT\n\
+         ; Source of truth: pleme-io/ishou/crates/ishou-tokens/src/vellum.rs\n\
+         ; Vellum — warm aged-paper Nord-matte; every hex is a BORN ishou token.\n\n",
+    );
+
+    // ─ Theme select ─
+    writeln!(out, "{}", lisp_form("deftheme", &[(":preset", "\"vellum\"".to_string())]))
+        .expect("write");
+    out.push('\n');
+
+    // ─ Palette — base16 slots, lowercase hex. base02 carries night2
+    //   (the escriba lisp's selected-line surface), NOT the violet
+    //   selection blend — matching the hand-authored file. ─
+    let palette_kvs: Vec<(&str, String)> = vec![
+        (":name", "\"vellum\"".to_string()),
+        (":base00", format!("\"{}\"", lc_hex(&p, "night0"))),
+        (":base01", format!("\"{}\"", lc_hex(&p, "night1"))),
+        (":base02", format!("\"{}\"", lc_hex(&p, "night2"))),
+        (":base03", format!("\"{}\"", lc_hex(&p, "shadow1"))),
+        (":base04", format!("\"{}\"", lc_hex(&p, "snow0"))),
+        (":base05", format!("\"{}\"", lc_hex(&p, "snow1"))),
+        (":base06", format!("\"{}\"", lc_hex(&p, "snow2"))),
+        (":base07", format!("\"{}\"", lc_hex(&p, "snow3"))),
+        (":base08", format!("\"{}\"", lc_hex(&p, "aurora_red"))),
+        (":base09", format!("\"{}\"", lc_hex(&p, "ember"))),
+        (":base0a", format!("\"{}\"", lc_hex(&p, "first_light"))),
+        (":base0b", format!("\"{}\"", lc_hex(&p, "aurora_green"))),
+        (":base0c", format!("\"{}\"", lc_hex(&p, "ice_cyan"))),
+        (":base0d", format!("\"{}\"", lc_hex(&p, "ice_steel"))),
+        (":base0e", format!("\"{}\"", lc_hex(&p, "solar_magenta"))),
+        (":base0f", format!("\"{}\"", lc_hex(&p, "dusk_bronze"))),
+    ];
+    writeln!(out, "{}", lisp_form("defpalette", &palette_kvs)).expect("write");
+    out.push('\n');
+
+    // ─ Highlights — group → token-role map. Mirrors the hand-authored
+    //   vellum.lisp group set (escriba's CANONICAL_GROUPS + the
+    //   tree-sitter overrides). ─
+    let rows: &[HiRow] = &[
+        // Syntax
+        HiRow::fg_bg("Normal", "snow1", "night0"),
+        HiRow::fg("Comment", "shadow1").i(),
+        HiRow::fg("String", "aurora_green"),
+        HiRow::fg("Number", "solar_magenta"),
+        HiRow::fg("Boolean", "solar_magenta"),
+        HiRow::fg("Function", "ice_steel").b(),
+        HiRow::fg("Keyword", "solar_magenta").i(),
+        HiRow::fg("Statement", "solar_magenta"),
+        HiRow::fg("Conditional", "solar_magenta"),
+        HiRow::fg("Repeat", "solar_magenta"),
+        HiRow::fg("Operator", "solar_magenta"),
+        HiRow::fg("Type", "first_light"),
+        HiRow::fg("Structure", "first_light"),
+        HiRow::fg("Identifier", "snow1"),
+        HiRow::fg("Constant", "ember"),
+        HiRow::fg("PreProc", "ember"),
+        HiRow::fg("Macro", "ember"),
+        HiRow::fg("Special", "first_light"),
+        // UI
+        HiRow::bg("CursorLine", "night1"),
+        HiRow::bg("CursorColumn", "night1"),
+        HiRow::fg("LineNr", "shadow1"),
+        HiRow::bg("SignColumn", "night0"),
+        HiRow::bg("Visual", "night2"),
+        HiRow::bg("VisualNOS", "night2"),
+        HiRow::fg_bg("Search", "night0", "first_light"),
+        HiRow::fg_bg("IncSearch", "night0", "ember").b(),
+        HiRow::fg("MatchParen", "ember").b(),
+        HiRow::fg_bg("StatusLine", "snow1", "night1"),
+        HiRow::fg_bg("StatusLineNC", "shadow1", "night0"),
+        HiRow::fg_bg("TabLine", "shadow1", "night0"),
+        HiRow::bg("TabLineFill", "night0"),
+        HiRow::fg_bg("TabLineSel", "night0", "ice_cyan").b(),
+        HiRow::fg("VertSplit", "night3"),
+        HiRow::fg_bg("Pmenu", "snow1", "night1"),
+        HiRow::fg_bg("PmenuSel", "night0", "ice_cyan").b(),
+        HiRow::bg("PmenuSbar", "night1"),
+        HiRow::bg("PmenuThumb", "shadow1"),
+        HiRow::fg_bg("NormalFloat", "snow1", "night1"),
+        HiRow::fg_bg("FloatBorder", "ice_steel", "night1"),
+        // Diagnostics
+        HiRow::fg("DiagnosticError", "aurora_red").b(),
+        HiRow::fg("DiagnosticWarn", "first_light"),
+        HiRow::fg("DiagnosticInfo", "ice_cyan"),
+        HiRow::fg("DiagnosticHint", "aurora_green"),
+        // Git (gitsigns parity) + diff backgrounds (the GLASS blends)
+        HiRow::fg("GitSignsAdd", "aurora_green"),
+        HiRow::fg("GitSignsChange", "first_light"),
+        HiRow::fg("GitSignsDelete", "aurora_red"),
+        HiRow::bg("DiffAdd", "green_glass"),
+        HiRow::bg("DiffChange", "amber_glass"),
+        HiRow::bg("DiffDelete", "red_glass"),
+        HiRow::bg("DiffText", "steel_glass"),
+        // Tree-sitter semantic overrides
+        HiRow::link("@function.call", "Function"),
+        HiRow::link("@variable", "Identifier"),
+        HiRow::fg("@parameter", "snow1").i(),
+        HiRow::fg("@comment.todo", "first_light").b(),
+        HiRow::fg("@comment.note", "ice_cyan").b(),
+        HiRow::fg("@comment.warning", "ember").b(),
+    ];
+
+    for r in rows {
+        let mut kvs: Vec<(&str, String)> = vec![(":group", format!("\"{}\"", r.group))];
+        if r.link.is_empty() {
+            if !r.fg.is_empty() {
+                kvs.push((":fg", format!("\"{}\"", lc_hex(&p, r.fg))));
+            }
+            if !r.bg.is_empty() {
+                kvs.push((":bg", format!("\"{}\"", lc_hex(&p, r.bg))));
+            }
+            if r.bold {
+                kvs.push((":bold", "#t".to_string()));
+            }
+            if r.italic {
+                kvs.push((":italic", "#t".to_string()));
+            }
+        } else {
+            kvs.push((":link", format!("\"{}\"", r.link)));
+        }
+        writeln!(out, "{}", lisp_form("defhighlight", &kvs)).expect("write");
+    }
+
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -142,6 +400,71 @@ mod tests {
     #[test]
     fn base16_is_deterministic() {
         assert_eq!(render_base16(), render_base16());
+    }
+
+    #[test]
+    fn skim_string_is_deterministic() {
+        assert_eq!(render_skim(), render_skim());
+    }
+
+    #[test]
+    fn skim_string_matches_the_authored_vellum_string() {
+        // The exact byte sequence `pleme-io/skim-tab::NORD_COLORS` ships
+        // (joined with `,` — no trailing newline). Generated from the
+        // typed Vellum tokens.
+        let expected = "\
+fg:#E2DBC8,\
+bg:#16140E,\
+hl:#94BBB8:bold:underlined,\
+fg+:#F4EFE2:bold,\
+bg+:#2B2820,\
+hl+:#A6CBC8:bold:underlined,\
+info:#6E6857,\
+prompt:#A9BB8C,\
+pointer:#ADD7A3,\
+marker:#B8A1B9,\
+spinner:#99AABE,\
+header:#99AABE,\
+border:#6E6857,\
+query:#F4EFE2:bold";
+        assert_eq!(render_skim(), expected, "skim --color string drifted");
+    }
+
+    #[test]
+    fn escriba_lisp_is_deterministic() {
+        assert_eq!(render_escriba_lisp(), render_escriba_lisp());
+    }
+
+    #[test]
+    fn escriba_lisp_has_palette_and_key_highlights() {
+        let out = render_escriba_lisp();
+        // defpalette base00 = night0, lowercase.
+        assert!(
+            out.contains("(defpalette :name \"vellum\" :base00 \"#16140e\""),
+            "defpalette base00 missing/drifted:\n{out}"
+        );
+        // A handful of canonical groups, exact emitted lines.
+        for line in [
+            "(defhighlight :group \"Normal\" :fg \"#e2dbc8\" :bg \"#16140e\")",
+            "(defhighlight :group \"Comment\" :fg \"#90897b\" :italic #t)",
+            "(defhighlight :group \"String\" :fg \"#a9bb8c\")",
+            "(defhighlight :group \"Function\" :fg \"#99aabe\" :bold #t)",
+            "(defhighlight :group \"DiffAdd\" :bg \"#4d543e\")",
+            "(defhighlight :group \"@function.call\" :link \"Function\")",
+        ] {
+            assert!(out.contains(line), "missing line `{line}`\n{out}");
+        }
+        // Every CANONICAL group label appears as an emitted group.
+        for g in [
+            "Normal", "Comment", "String", "Number", "Boolean", "Function",
+            "Keyword", "Statement", "Type", "Constant", "Special",
+            "Visual", "Search", "DiagnosticError", "GitSignsAdd",
+        ] {
+            assert!(
+                out.contains(&format!(":group \"{g}\"")),
+                "missing group {g}\n{out}"
+            );
+        }
     }
 
     #[test]
