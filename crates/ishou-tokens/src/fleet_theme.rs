@@ -81,6 +81,29 @@ impl FleetTheme {
         Self::Vellum
     }
 
+    /// The theme LIBRARY — every variant the fleet ships, in tier order.
+    /// This is the registry surface: tooling (`<app> config-show`, theme
+    /// pickers, the verification matrix) iterates it mechanically. Adding
+    /// a variant to the enum without listing it here trips the
+    /// `library_is_complete` forcing-function test.
+    #[must_use]
+    pub const fn all() -> &'static [FleetTheme] {
+        &[Self::Bare, Self::PlemeDark, Self::Vellum]
+    }
+
+    /// Stable, serde-matching name for a theme without resolving it.
+    /// The match is EXHAUSTIVE on purpose: a new `FleetTheme` variant
+    /// fails to compile until it is named here — the compiler is the
+    /// forcing function that keeps the registry total.
+    #[must_use]
+    pub const fn name(&self) -> &'static str {
+        match self {
+            Self::Bare => "bare",
+            Self::PlemeDark => "pleme_dark",
+            Self::Vellum => "vellum",
+        }
+    }
+
     /// Resolve to concrete color hex + font names. Consumers read
     /// this struct at render-init time and never re-resolve unless
     /// the operator changes `theme` (shikumi hot-reload triggers).
