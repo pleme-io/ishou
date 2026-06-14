@@ -36,6 +36,16 @@
 //!   theme. The prescribed default per
 //!   `TieredConfig::prescribed_default`.
 //!
+//! * `FleetTheme::PolarVeil` — the cool/neutral deep-polar-night
+//!   sibling of Vellum. Same band structure, authored with a cooler,
+//!   lower-warmth palette; the matte-cool alternative for operators who
+//!   prefer a cold ground.
+//!
+//! The shipping LIBRARY is two themes today (plus the `Bare` floor and
+//! the legacy `PlemeDark`): **Vellum** (warm, the default) and **Polar
+//! Veil** (cool). Both flow from the SAME `Palette` engine in `vellum.rs`,
+//! so a band-recipe change propagates to both by construction.
+//!
 //! Future: `VellumLight`, `VellumHighContrast`, operator-supplied
 //! `Custom(ResolvedTheme)` for inline overrides without forking
 //! the enum.
@@ -44,7 +54,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::color::{ColorPalette, SemanticRoles};
 use crate::typography::Typography;
-use crate::vellum::VellumPalette;
+use crate::vellum::Palette;
 
 /// Operator-facing theme selector. Apps embed this as a typed
 /// config field; the renderer reads `resolve()` at init time.
@@ -65,6 +75,10 @@ pub enum FleetTheme {
     /// intervention.
     #[default]
     Vellum,
+    /// **Polar Veil** — the cool/neutral deep-polar-night sibling of
+    /// Vellum. The same band structure authored with a colder, lower-warmth
+    /// palette; for operators who prefer a cold matte ground.
+    PolarVeil,
 }
 
 impl FleetTheme {
@@ -88,7 +102,7 @@ impl FleetTheme {
     /// `library_is_complete` forcing-function test.
     #[must_use]
     pub const fn all() -> &'static [FleetTheme] {
-        &[Self::Bare, Self::PlemeDark, Self::Vellum]
+        &[Self::Bare, Self::PlemeDark, Self::Vellum, Self::PolarVeil]
     }
 
     /// Stable, serde-matching name for a theme without resolving it.
@@ -101,6 +115,7 @@ impl FleetTheme {
             Self::Bare => "bare",
             Self::PlemeDark => "pleme_dark",
             Self::Vellum => "vellum",
+            Self::PolarVeil => "polar_veil",
         }
     }
 
@@ -113,6 +128,7 @@ impl FleetTheme {
             Self::Bare => ResolvedTheme::bare(),
             Self::PlemeDark => ResolvedTheme::pleme_dark(),
             Self::Vellum => ResolvedTheme::vellum(),
+            Self::PolarVeil => ResolvedTheme::polar_veil(),
         }
     }
 }
@@ -242,7 +258,23 @@ impl ResolvedTheme {
     /// field + ANSI 10.
     #[must_use]
     pub fn vellum() -> Self {
-        let p = VellumPalette::vellum();
+        Self::from_palette(Palette::vellum(), "vellum")
+    }
+
+    /// Polar Veil — the cool/neutral deep-polar-night sibling theme.
+    /// Sourced from `Palette::polar_veil()` through the SAME engine path
+    /// as `vellum()`, so the resolved theme can never drift from the BORN
+    /// tokens. Body text (`snow1` over `night0`) clears WCAG AAA.
+    #[must_use]
+    pub fn polar_veil() -> Self {
+        Self::from_palette(Palette::polar_veil(), "polar_veil")
+    }
+
+    /// Resolve any band-structured [`Palette`] into a render-ready theme.
+    /// The ONE engine path both `vellum()` and `polar_veil()` flow through
+    /// — surfaces, the canonical ANSI-16 mapping, and the cursor all come
+    /// from the palette so resolved themes can never drift from BORN tokens.
+    fn from_palette(p: Palette, name: &str) -> Self {
         let surfaces = p.surfaces();
         let typography = Typography::pleme();
 
@@ -260,7 +292,7 @@ impl ResolvedTheme {
             ansi_16,
             font_family: typography.mono_fonts.primary.into(),
             font_italic: typography.mono_fonts.italic.into(),
-            name: "vellum".into(),
+            name: name.into(),
         }
     }
 }
@@ -305,7 +337,7 @@ mod tests {
 
     #[test]
     fn fleet_theme_round_trips_through_serde() {
-        for &t in &[FleetTheme::Bare, FleetTheme::PlemeDark, FleetTheme::Vellum] {
+        for &t in FleetTheme::all() {
             let s = serde_yaml::to_string(&t).unwrap();
             let back: FleetTheme = serde_yaml::from_str(&s).unwrap();
             assert_eq!(t, back);
@@ -316,11 +348,8 @@ mod tests {
     fn ansi_16_palette_has_no_empty_strings() {
         // Every tier must populate all 16 ANSI slots — terminal
         // apps using indexed color must not see "" as a color.
-        for r in [
-            ResolvedTheme::bare(),
-            ResolvedTheme::pleme_dark(),
-            ResolvedTheme::vellum(),
-        ] {
+        for t in FleetTheme::all() {
+            let r = t.resolve();
             for (i, c) in r.ansi_16.iter().enumerate() {
                 assert!(c.starts_with('#'), "ANSI slot {i} in {} is not hex: {c:?}", r.name);
             }
@@ -343,5 +372,26 @@ mod tests {
         assert_eq!(r.ansi_16[2], "#A9BB8C");
         // ANSI 0 is night2 (surface), NEVER base00.
         assert_eq!(r.ansi_16[0], "#2B2820");
+    }
+
+    #[test]
+    fn polar_veil_resolves_from_born_tokens() {
+        let r = ResolvedTheme::polar_veil();
+        assert_eq!(r.name, "polar_veil");
+        // Background night0 (cool deep-polar), foreground snow1.
+        assert_eq!(r.background, "#171A22");
+        assert_eq!(r.foreground, "#D3D9E3");
+        // Cursor is green_bright (= ANSI 10 in the shared engine).
+        assert_eq!(r.cursor, "#AEC79A");
+        // Selection is the byte-exact cool violet glass.
+        assert_eq!(r.selection_background, "#3A3549");
+        // ANSI 0 is night2 (surface), ANSI 15 is snow3 (= base07).
+        assert_eq!(r.ansi_16[0], "#2C3140");
+        assert_eq!(r.ansi_16[15], "#F0F3F8");
+        // ANSI 8 is the dim grey shadow0.
+        assert_eq!(r.ansi_16[8], "#969EB1");
+        // Cool ground: background is bluer than it is warm (B > R).
+        let to_u8 = |s: &str, i: usize| u8::from_str_radix(&s[i..i + 2], 16).unwrap();
+        assert!(to_u8(&r.background, 5) > to_u8(&r.background, 1), "polar_veil bg should be cool (B > R)");
     }
 }

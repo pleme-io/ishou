@@ -85,11 +85,15 @@ pub struct AlphaPaint {
 
 // ─── The palette ────────────────────────────────────────────────────────────
 
-/// Every named Vellum token. Authored constants for the four bands +
-/// bright tier; derived tokens computed via [`blend_linear`] at
-/// construction so they can never drift from their recipes.
+/// A band-structured authored palette. Theme-agnostic engine: the band
+/// FIELD names are functional labels; each constructor authors a concrete
+/// theme's values onto them. Derived tokens computed via [`blend_linear`]
+/// at construction so they can never drift from their recipes.
+///
+/// Two themes ship today: [`Palette::vellum`] (warm aged-paper, the fleet
+/// default) and [`Palette::polar_veil`] (cool neutral deep-polar-night).
 #[derive(Debug, Clone, Serialize)]
-pub struct VellumPalette {
+pub struct Palette {
     // Night band — the parchment ground (darkest-to-lightest).
     pub night_abyss: Rgb,
     pub night_deep: Rgb,
@@ -140,9 +144,14 @@ pub struct VellumPalette {
     pub violet_glass: Rgb,
 }
 
-impl VellumPalette {
-    /// The fleet theme — `vellum`. Derived tokens are computed from their
-    /// blend recipes here, never authored.
+/// Back-compat alias. Consumers wrote `VellumPalette` before the engine was
+/// generalized to hold more than one theme; the name still resolves to the
+/// theme-agnostic [`Palette`] so `VellumPalette::vellum()` keeps compiling.
+pub type VellumPalette = Palette;
+
+impl Palette {
+    /// The fleet theme — `vellum` (warm aged-paper Nord-matte). Derived
+    /// tokens are computed from their blend recipes here, never authored.
     #[must_use]
     pub fn vellum() -> Self {
         // Authored band constants (warm aged-paper Nord-matte).
@@ -209,6 +218,92 @@ impl VellumPalette {
             cyan_bright,
             violet_bright,
             // Derived — the token IS the blend output, byte-exact.
+            selection: blend_linear(night0, fable_violet, 0.08),
+            search_others: blend_linear(night0, first_light, 0.075),
+            red_glass: blend_linear(night0, aurora_red, 0.327),
+            green_glass: blend_linear(night0, aurora_green, 0.168),
+            amber_glass: blend_linear(night0, first_light, 0.137),
+            steel_glass: blend_linear(night0, ice_steel, 0.325),
+            cyan_glass: blend_linear(night0, ice_cyan, 0.173),
+            violet_glass: blend_linear(night0, fable_violet, 0.220),
+        }
+    }
+
+    /// **Polar Veil** — the cool/neutral deep-polar-night sibling theme.
+    /// The SAME band structure as [`Palette::vellum`], authored with a
+    /// cooler, lower-warmth palette. Derived tokens use the identical
+    /// [`blend_linear`] recipes, so the glass band comes out cool
+    /// automatically. base16-faithful (the cool deep-polar matte ground).
+    #[must_use]
+    pub fn polar_veil() -> Self {
+        // Authored band constants (cool/neutral deep-polar-night).
+        let night_abyss = Rgb::new(0x0E, 0x10, 0x16);
+        let night_deep = Rgb::new(0x12, 0x14, 0x1B);
+        let night0 = Rgb::new(0x17, 0x1A, 0x22); // base00
+        let night1 = Rgb::new(0x21, 0x24, 0x2F); // base01
+        let night2 = Rgb::new(0x2C, 0x31, 0x40); // base02 — ANSI slot 0
+        let night3 = Rgb::new(0x3A, 0x41, 0x50); // dividers, a step above night2
+        let shadow0 = Rgb::new(0x96, 0x9E, 0xB1); // ANSI-8 grey
+        let shadow1 = Rgb::new(0x8A, 0x93, 0xA8); // base03 comment
+        let snow0 = Rgb::new(0xA7, 0xAE, 0xBC); // base04
+        let snow1 = Rgb::new(0xD3, 0xD9, 0xE3); // base05
+        let snow2 = Rgb::new(0xE2, 0xE6, 0xEE); // base06
+        let snow3 = Rgb::new(0xF0, 0xF3, 0xF8); // base07 — ANSI 15
+        let ice_teal = Rgb::new(0x8F, 0xBE, 0xB6);
+        let ice_cyan = Rgb::new(0x8C, 0xC0, 0xC6); // base0C
+        let ice_steel = Rgb::new(0x88, 0xA8, 0xCC); // base0D
+        let ice_deep = Rgb::new(0x6E, 0x86, 0xAA);
+        let aurora_red = Rgb::new(0xCC, 0x70, 0x7A); // base08
+        let solar_magenta = Rgb::new(0xB6, 0x9C, 0xC2); // base0E
+        let dusk_bronze = Rgb::new(0xAE, 0x82, 0x70); // base0F
+        let aurora_green = Rgb::new(0xA1, 0xBC, 0x8B); // base0B
+        let first_light = Rgb::new(0xDC, 0xC2, 0x87); // base0A
+        let ember = Rgb::new(0xD0, 0x8C, 0x6E); // base09
+        let fable_violet = Rgb::new(0xB0, 0x9C, 0xD2); // AGENT-RESERVED
+        let red_bright = Rgb::new(0xD8, 0x7F, 0x88);
+        // ANSI-10 br-green. This field is dual-duty cursor + ANSI-10 in the
+        // shared engine (as in vellum); the spec's `ansi_16()` array fixes
+        // it to #AEC79A, so that is the authoritative value.
+        let green_bright = Rgb::new(0xAE, 0xC7, 0x9A);
+        let amber_bright = Rgb::new(0xE6, 0xCE, 0x96);
+        let steel_bright = Rgb::new(0x9A, 0xB6, 0xD6);
+        let magenta_bright = Rgb::new(0xC4, 0xAC, 0xCE);
+        let cyan_bright = Rgb::new(0x9C, 0xCC, 0xD2);
+        let violet_bright = Rgb::new(0xC7, 0xB6, 0xDE);
+
+        Self {
+            night_abyss,
+            night_deep,
+            night0,
+            night1,
+            night2,
+            night3,
+            shadow0,
+            shadow1,
+            snow0,
+            snow1,
+            snow2,
+            snow3,
+            ice_teal,
+            ice_cyan,
+            ice_steel,
+            ice_deep,
+            aurora_red,
+            solar_magenta,
+            dusk_bronze,
+            aurora_green,
+            first_light,
+            ember,
+            fable_violet,
+            red_bright,
+            green_bright,
+            amber_bright,
+            steel_bright,
+            magenta_bright,
+            cyan_bright,
+            violet_bright,
+            // Derived — the token IS the blend output, byte-exact. The SAME
+            // recipes as vellum; cool inputs yield cool outputs.
             selection: blend_linear(night0, fable_violet, 0.08),
             search_others: blend_linear(night0, first_light, 0.075),
             red_glass: blend_linear(night0, aurora_red, 0.327),
@@ -510,6 +605,64 @@ mod tests {
             }
         }
         assert!(failures.is_empty(), "token drift:\n  - {}", failures.join("\n  - "));
+    }
+
+    #[test]
+    fn polar_veil_authored_tokens_match_spec_hexes() {
+        let p = Palette::polar_veil();
+        let expect = [
+            ("night_abyss", "#0E1016"),
+            ("night_deep", "#12141B"),
+            ("night0", "#171A22"),
+            ("night1", "#21242F"),
+            ("night2", "#2C3140"),
+            ("night3", "#3A4150"),
+            ("shadow0", "#969EB1"),
+            ("shadow1", "#8A93A8"),
+            ("snow0", "#A7AEBC"),
+            ("snow1", "#D3D9E3"),
+            ("snow2", "#E2E6EE"),
+            ("snow3", "#F0F3F8"),
+            ("ice_teal", "#8FBEB6"),
+            ("ice_cyan", "#8CC0C6"),
+            ("ice_steel", "#88A8CC"),
+            ("ice_deep", "#6E86AA"),
+            ("aurora_red", "#CC707A"),
+            ("solar_magenta", "#B69CC2"),
+            ("dusk_bronze", "#AE8270"),
+            ("aurora_green", "#A1BC8B"),
+            ("first_light", "#DCC287"),
+            ("ember", "#D08C6E"),
+            ("fable_violet", "#B09CD2"),
+            ("red_bright", "#D87F88"),
+            ("green_bright", "#AEC79A"),
+            ("amber_bright", "#E6CE96"),
+            ("steel_bright", "#9AB6D6"),
+            ("magenta_bright", "#C4ACCE"),
+            ("cyan_bright", "#9CCCD2"),
+            ("violet_bright", "#C7B6DE"),
+        ];
+        let mut failures = Vec::new();
+        for (name, hex) in expect {
+            let got = p.get(name).unwrap().hex();
+            if got != hex {
+                failures.push(format!("{name}: got {got}, spec {hex}"));
+            }
+        }
+        assert!(failures.is_empty(), "polar_veil token drift:\n  - {}", failures.join("\n  - "));
+    }
+
+    #[test]
+    fn polar_veil_ansi_16_matches_spec_table() {
+        // The base16 ANSI-16 surface, cool deep-polar-night.
+        let p = Palette::polar_veil();
+        let ansi: Vec<String> = p.ansi_16().iter().map(super::Rgb::hex).collect();
+        let expect = [
+            "#2C3140", "#CC707A", "#A1BC8B", "#DCC287", "#88A8CC", "#B69CC2",
+            "#8CC0C6", "#A7AEBC", "#969EB1", "#D87F88", "#AEC79A", "#E6CE96",
+            "#9AB6D6", "#C4ACCE", "#9CCCD2", "#F0F3F8",
+        ];
+        assert_eq!(ansi, expect, "polar_veil ANSI-16 drift");
     }
 
     #[test]
