@@ -23,6 +23,7 @@ pub mod brand;
 pub mod color;
 pub mod fleet_defaults;
 pub mod fleet_keybinds;
+pub mod app_signals;
 pub mod fleet_session_names;
 pub mod fleet_signals;
 pub mod fleet_theme;
@@ -46,6 +47,9 @@ pub use fleet_defaults::FleetDefaults;
 pub use fleet_keybinds::{FleetKeybinds, FleetKeybindsConsumer};
 pub use fleet_session_names::{FleetSessionNames, SessionIdentity, SessionName, SessionNameStyle};
 pub use fleet_signals::{FleetSignals, FleetSignalsConsumer, Signal, SignalMode};
+pub use app_signals::{
+    EscribaSignals, FrostmourneSignals, MadoSignals, NamimadoSignals, SekiSignals, TearSignals,
+};
 pub use fleet_theme::{FleetTheme, ResolvedTheme};
 pub use refined::{Bounds, Refined};
 pub use themed_config::{convergence, FleetThemedConfig};
