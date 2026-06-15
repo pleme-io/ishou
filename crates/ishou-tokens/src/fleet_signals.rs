@@ -255,15 +255,22 @@ impl FleetSignals {
             session_detached: Signal::new("💤", "z", "detached"),
             pane_zoomed: Signal::new("🔍", "⤢", "zoom"),
             prefix_armed: Signal::new("⌨️", "⌗", "prefix"),
-            // git — glyph column matches seki's existing prompt vocabulary
+            // git — GLYPH column IS the canonical starship/seki prompt
+            // vocabulary (seki is a starship fork and THE fleet prompt
+            // renderer, so its symbols are canonical for prompt-safe
+            // adoption: ⇡ahead ⇣behind ⇕diverged !modified +staged
+            // $stashed =conflict ✓clean). Matching seki exactly is what
+            // makes adoption DRIFT-FREE — seki's git module sources these
+            // verbatim (first consumer, 2026-06-15). The emoji column
+            // stays expressive for status-line / notification surfaces.
             git_clean: Signal::new("✨", "✓", "clean"),
-            git_dirty: Signal::new("📝", "✚", "dirty"),
+            git_dirty: Signal::new("📝", "!", "dirty"),
             git_ahead: Signal::new("⬆️", "⇡", "ahead"),
             git_behind: Signal::new("⬇️", "⇣", "behind"),
             git_diverged: Signal::new("🔀", "⇕", "diverged"),
-            git_staged: Signal::new("📦", "●", "staged"),
-            git_conflict: Signal::new("💥", "✘", "conflict"),
-            git_stashed: Signal::new("🗄️", "⚑", "stash"),
+            git_staged: Signal::new("📦", "+", "staged"),
+            git_conflict: Signal::new("💥", "=", "conflict"),
+            git_stashed: Signal::new("🗄️", "$", "stash"),
             // notification
             bell: Signal::new("🔔", "‼", "bell"),
             notify: Signal::new("📢", "✸", "notify"),
@@ -386,6 +393,24 @@ mod tests {
     #[test]
     fn frost_is_the_fleet_mark() {
         assert_eq!(FleetSignals::prescribed().fleet_mark.glyph, "❄");
+    }
+
+    #[test]
+    fn git_glyph_column_is_the_canonical_starship_seki_vocabulary() {
+        // The GLYPH column exists for prompt-safe adoption; seki (a
+        // starship fork + THE fleet prompt) is canonical. Pinning these
+        // keeps adoption drift-free — if the atlas diverges from
+        // starship/seki, this test fails BEFORE a prompt silently
+        // changes under operators.
+        let p = FleetSignals::prescribed();
+        assert_eq!(p.git_ahead.glyph, "⇡");
+        assert_eq!(p.git_behind.glyph, "⇣");
+        assert_eq!(p.git_diverged.glyph, "⇕");
+        assert_eq!(p.git_dirty.glyph, "!");
+        assert_eq!(p.git_staged.glyph, "+");
+        assert_eq!(p.git_stashed.glyph, "$");
+        assert_eq!(p.git_conflict.glyph, "=");
+        assert_eq!(p.git_clean.glyph, "✓");
     }
 
     #[test]
