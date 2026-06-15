@@ -28,6 +28,7 @@ pub mod fleet_session_names;
 pub mod fleet_signals;
 pub mod fleet_state;
 pub mod fleet_theme;
+pub mod shell_signals;
 pub mod motion;
 pub mod radius;
 pub mod refined;
@@ -49,6 +50,7 @@ pub use fleet_keybinds::{FleetKeybinds, FleetKeybindsConsumer};
 pub use fleet_session_names::{FleetSessionNames, SessionIdentity, SessionName, SessionNameStyle};
 pub use fleet_signals::{FleetSignals, FleetSignalsConsumer, Signal, SignalMode};
 pub use fleet_state::{FleetState, FleetStateVar};
+pub use shell_signals::{ShellSignal, ShellSignals};
 pub use app_signals::{
     EscribaSignals, FrostmourneSignals, MadoSignals, NamimadoSignals, SekiSignals, TearSignals,
 };
