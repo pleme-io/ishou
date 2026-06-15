@@ -3,6 +3,7 @@ members = [
     "crates/ishou-tokens",
     "crates/ishou-render",
     "crates/ishou-cli",
+    "crates/ishou-emoji",
 ]
 resolver = "2"
 

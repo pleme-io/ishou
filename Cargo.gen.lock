@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "cargo_lock_sha256": "626c26861451bc569bf0cbdebb821f89e9808b00b27c26ce75f54c52214aedf9",
+  "cargo_lock_sha256": "afea5d1db6cbbf01a3084a526806cdd2cd70c13b181feac27ee53133987014a5",
   "target_resolves": {
     "base": {
       "aho-corasick-1.1.4": {
@@ -669,6 +669,11 @@
             "tree": "target"
           }
         ],
+        "build_dependencies": [],
+        "features": []
+      },
+      "ishou-emoji-0.1.3": {
+        "runtime_dependencies": [],
         "build_dependencies": [],
         "features": []
       },
@@ -1968,6 +1973,14 @@
           "path": "src/main.rs"
         }
       ]
+    },
+    "ishou-emoji-0.1.3": {
+      "edition": "2024",
+      "build_script": "build.rs",
+      "lib_target": {
+        "name": "ishou_emoji",
+        "path": "src/lib.rs"
+      }
     },
     "ishou-render-0.1.3": {
       "edition": "2024",

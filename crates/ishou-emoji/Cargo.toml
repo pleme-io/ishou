@@ -1,0 +1,16 @@
+[package]
+name = "ishou-emoji"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "ishou — comprehensive typed catalog of every Unicode emoji (generated from the official emoji-test.txt), searchable by name / shortcode / keyword. The foundation layer beneath ishou_tokens::FleetSignals."
+build = "build.rs"
+
+[dependencies]
+
+[dev-dependencies]
+
+[lints]
+workspace = true

@@ -316,6 +316,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "ishou-emoji"
+version = "0.1.3"
+
+[[package]]
 name = "ishou-render"
 version = "0.1.3"
 dependencies = [
