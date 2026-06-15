@@ -1,16 +1,33 @@
 //! Build-time code generation for the comprehensive Unicode emoji catalog.
 //!
 //! This is **generation over composition** (Pillar 12): we never hand-type the
-//! ~3,790 emoji. The canonical, machine-readable Unicode `emoji-test.txt`
-//! (vendored under `data/`) is parsed here at build time into a typed
-//! `&'static [Emoji]` catalog, emitted into `OUT_DIR` and `include!`d by the
-//! crate root. The data is OWNED (no runtime dependency) and regenerable on
-//! every Unicode release by re-fetching `data/emoji-test.txt`.
+//! ~3,950 emoji nor the GitHub/Slack shortcodes. Two canonical, machine-readable
+//! datasets are vendored under `data/` and **joined** here at build time:
+//!
+//! - `emoji-test.txt` — the official Unicode RGI emoji set (the *universe* of
+//!   displayable emoji + their canonical names, subgroups, versions). Owns the
+//!   full catalog.
+//! - `gemoji.json` — GitHub's official emoji→shortcode dataset (MIT). Owns the
+//!   shortcodes people actually type (`:white_check_mark:`, `:tada:`, `:+1:`,
+//!   `:joy:`) + keyword `tags`. Covers ~1,870 of the ~3,950 catalog entries.
+//!
+//! The join key is the emoji character itself: each Unicode entry is matched to
+//! its gemoji entry by `ch`. Where gemoji has the entry, its `aliases` become
+//! the **primary** shortcodes and its `tags` enrich the keywords; the
+//! Unicode-name-derived slug is retained as an **additional fallback** shortcode
+//! (so both `:check_mark_button:` and `:white_check_mark:` resolve). Entries
+//! with no gemoji match keep their Unicode-name slugs (~2,080 of them).
+//!
+//! Both files are parsed into a typed `&'static [Emoji]` catalog, emitted into
+//! `OUT_DIR` and `include!`d by the crate root. The data is OWNED (no runtime
+//! dependency) and regenerable on every dataset release by re-fetching the two
+//! `data/*` files.
 //!
 //! Emission discipline (TYPED EMISSION): the generated Rust is produced by a
 //! small typed writer (`CatalogWriter`) backed by `std::fmt::Write` — every
 //! string literal is escaped through `escape_rust_str`, never spliced raw.
 
+use std::collections::HashMap;
 use std::env;
 use std::fmt::Write as _;
 use std::fs;
@@ -102,6 +119,51 @@ fn escape_rust_str(s: &str) -> String {
     out
 }
 
+/// The gemoji facts joined onto a Unicode entry: GitHub/Slack shortcodes
+/// (`aliases`) + keyword `tags`. Aliases are kept **verbatim** — gemoji already
+/// emits the exact tokens people type, including the `+1` / `-1` special cases
+/// (which are not slugs and must not be slugified).
+struct GemojiEntry {
+    aliases: Vec<String>,
+    tags: Vec<String>,
+}
+
+/// Parse the vendored `gemoji.json` into a `char-string -> GemojiEntry` map,
+/// keyed by the emoji character (the join key against `emoji-test.txt`).
+///
+/// We parse through `serde_json::Value` rather than a `#[derive(Deserialize)]`
+/// struct to keep the build-dependency surface to `serde_json` alone (no
+/// `serde` derive in build-deps) and to be tolerant of extra fields gemoji may
+/// add over time.
+fn parse_gemoji(text: &str) -> HashMap<String, GemojiEntry> {
+    let root: serde_json::Value =
+        serde_json::from_str(text).expect("data/gemoji.json is not valid JSON");
+    let arr = root
+        .as_array()
+        .expect("data/gemoji.json root must be a JSON array");
+
+    let str_vec = |v: Option<&serde_json::Value>| -> Vec<String> {
+        v.and_then(serde_json::Value::as_array)
+            .map(|a| {
+                a.iter()
+                    .filter_map(|x| x.as_str().map(str::to_owned))
+                    .collect()
+            })
+            .unwrap_or_default()
+    };
+
+    let mut map = HashMap::with_capacity(arr.len());
+    for entry in arr {
+        let Some(ch) = entry.get("emoji").and_then(serde_json::Value::as_str) else {
+            continue;
+        };
+        let aliases = str_vec(entry.get("aliases"));
+        let tags = str_vec(entry.get("tags"));
+        map.insert(ch.to_owned(), GemojiEntry { aliases, tags });
+    }
+    map
+}
+
 /// Parse the vendored `emoji-test.txt` into typed rows.
 ///
 /// We keep `fully-qualified` and `component` statuses — together these are the
@@ -109,7 +171,7 @@ fn escape_rust_str(s: &str) -> String {
 /// ZWJ-sequence variant). `minimally-qualified` / `unqualified` are dropped:
 /// they are duplicate presentation-selector-stripped forms of an entry already
 /// captured by its fully-qualified row.
-fn parse(text: &str) -> Vec<ParsedEmoji> {
+fn parse(text: &str, gemoji: &HashMap<String, GemojiEntry>) -> Vec<ParsedEmoji> {
     let mut out = Vec::new();
     let mut cur_group: Option<&'static str> = None;
     let mut cur_subgroup = String::new();
@@ -167,24 +229,53 @@ fn parse(text: &str) -> Vec<ParsedEmoji> {
         // portion before the first `:` when the tail mentions a skin tone.
         let has_skin_tone = name.contains("skin tone");
         let base_name = if has_skin_tone {
-            name.split_once(':').map_or_else(|| name.clone(), |(b, _)| b.trim().to_string())
+            name.split_once(':')
+                .map_or_else(|| name.clone(), |(b, _)| b.trim().to_string())
         } else {
             name.clone()
         };
 
-        // Shortcodes: full-name slug + base-name slug (deduped). The base-name
-        // slug lets `by_shortcode("waving_hand")` resolve the tone-less variant.
-        let mut shortcodes: Vec<String> = Vec::new();
-        let full_slug = slugify(&name);
-        if !full_slug.is_empty() {
-            shortcodes.push(full_slug);
-        }
-        let base_slug = slugify(&base_name);
-        if !base_slug.is_empty() && !shortcodes.contains(&base_slug) {
-            shortcodes.push(base_slug);
-        }
+        // Look up the gemoji join row (keyed by the emoji char). Present for the
+        // ~1,870 emoji GitHub/Slack assign shortcodes to; absent for the rest.
+        let gem = gemoji.get(ch);
 
-        let keywords = keywords_from_name(&name);
+        // Shortcodes, in resolution-priority order:
+        //   1. gemoji `aliases` (PRIMARY — the GitHub/Slack codes people type:
+        //      `white_check_mark`, `tada`, `+1`). Kept verbatim, incl. `+1`/`-1`.
+        //   2. full-name slug (ADDITIONAL fallback — `check_mark_button`).
+        //   3. base-name slug (so `by_shortcode("waving_hand")` resolves the
+        //      tone-less variant of a skin-tone entry).
+        // Deduped, preserving first-seen order.
+        let mut shortcodes: Vec<String> = Vec::new();
+        let push_code = |code: String, codes: &mut Vec<String>| {
+            if !code.is_empty() && !codes.contains(&code) {
+                codes.push(code);
+            }
+        };
+        if let Some(g) = gem {
+            for alias in &g.aliases {
+                push_code(alias.clone(), &mut shortcodes);
+            }
+        }
+        push_code(slugify(&name), &mut shortcodes);
+        push_code(slugify(&base_name), &mut shortcodes);
+
+        // Keywords: gemoji `tags` first (the human-curated search terms), then
+        // the name-derived tokens. Deduped, preserving first-seen order.
+        let mut keywords: Vec<String> = Vec::new();
+        if let Some(g) = gem {
+            for tag in &g.tags {
+                let t = tag.to_ascii_lowercase();
+                if !t.is_empty() && !keywords.contains(&t) {
+                    keywords.push(t);
+                }
+            }
+        }
+        for kw in keywords_from_name(&name) {
+            if !keywords.contains(&kw) {
+                keywords.push(kw);
+            }
+        }
 
         out.push(ParsedEmoji {
             ch: ch.to_string(),
@@ -208,7 +299,9 @@ struct CatalogWriter {
 
 impl CatalogWriter {
     fn new() -> Self {
-        Self { buf: String::with_capacity(1 << 20) }
+        Self {
+            buf: String::with_capacity(1 << 20),
+        }
     }
 
     fn header(&mut self, count: usize) {
@@ -250,7 +343,8 @@ impl CatalogWriter {
         self.buf.push_str(", unicode_version: \"");
         self.buf.push_str(&escape_rust_str(&e.unicode_version));
         self.buf.push_str("\", has_skin_tone: ");
-        self.buf.push_str(if e.has_skin_tone { "true" } else { "false" });
+        self.buf
+            .push_str(if e.has_skin_tone { "true" } else { "false" });
         self.buf.push_str(", base_name: \"");
         self.buf.push_str(&escape_rust_str(&e.base_name));
         self.buf.push_str("\" },\n");
@@ -262,25 +356,51 @@ impl CatalogWriter {
 }
 
 fn main() {
-    let data_path = Path::new("data/emoji-test.txt");
+    let emoji_test_path = Path::new("data/emoji-test.txt");
+    let gemoji_path = Path::new("data/gemoji.json");
     println!("cargo:rerun-if-changed=data/emoji-test.txt");
+    println!("cargo:rerun-if-changed=data/gemoji.json");
     println!("cargo:rerun-if-changed=build.rs");
 
-    let text = fs::read_to_string(data_path)
-        .unwrap_or_else(|e| panic!("failed to read {}: {e}", data_path.display()));
-    let parsed = parse(&text);
+    let text = fs::read_to_string(emoji_test_path)
+        .unwrap_or_else(|e| panic!("failed to read {}: {e}", emoji_test_path.display()));
+    let gemoji_text = fs::read_to_string(gemoji_path)
+        .unwrap_or_else(|e| panic!("failed to read {}: {e}", gemoji_path.display()));
+    let gemoji = parse_gemoji(&gemoji_text);
+    assert!(
+        gemoji.len() > 1000,
+        "parsed only {} gemoji entries — gemoji.json may be malformed",
+        gemoji.len()
+    );
+
+    let parsed = parse(&text, &gemoji);
     assert!(
         parsed.len() > 3000,
         "parsed only {} emoji — emoji-test.txt may be malformed",
         parsed.len()
     );
 
+    // Coverage split: how many catalog entries received GitHub/gemoji shortcodes
+    // vs. how many remain Unicode-name-only. Baked into the catalog as
+    // constants so the crate can assert + report the split without re-parsing.
+    let gemoji_covered = parsed.iter().filter(|e| gemoji.contains_key(&e.ch)).count();
+    let unicode_only = parsed.len() - gemoji_covered;
+
     let mut w = CatalogWriter::new();
     w.header(parsed.len());
     let _ = writeln!(
         w.buf,
-        "/// The full Unicode emoji catalog ({} entries), generated from\n\
-         /// the official `emoji-test.txt`.\n\
+        "/// Number of catalog entries that received GitHub/gemoji shortcodes\n\
+         /// (their `shortcodes[0..]` lead with the GitHub/Slack aliases).\n\
+         pub const GEMOJI_COVERED: usize = {gemoji_covered};\n\
+         /// Number of catalog entries with no gemoji match — these keep only the\n\
+         /// Unicode-name-derived slug shortcodes.\n\
+         pub const UNICODE_ONLY: usize = {unicode_only};\n"
+    );
+    let _ = writeln!(
+        w.buf,
+        "/// The full Unicode emoji catalog ({} entries), generated by joining\n\
+         /// the official `emoji-test.txt` with GitHub's `gemoji.json`.\n\
          pub static CATALOG: &[Emoji] = &[",
         parsed.len()
     );

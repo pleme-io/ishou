@@ -1,9 +1,23 @@
 //! # ishou-emoji
 //!
 //! The comprehensive, typed, named, searchable catalog of **every** Unicode
-//! emoji — generated at build time from the official Unicode
-//! [`emoji-test.txt`](https://www.unicode.org/Public/emoji/latest/emoji-test.txt)
-//! (vendored under `data/`), parsed into a `&'static [Emoji]` by `build.rs`.
+//! emoji — generated at build time by joining two vendored datasets in
+//! `build.rs`:
+//!
+//! - the official Unicode
+//!   [`emoji-test.txt`](https://www.unicode.org/Public/emoji/latest/emoji-test.txt)
+//!   (the full RGI set + canonical names), and
+//! - GitHub's official
+//!   [`gemoji`](https://github.com/github/gemoji) `emoji.json` (the
+//!   GitHub/Slack shortcodes + keyword tags, MIT).
+//!
+//! Both parse into a `&'static [Emoji]`. **Shortcodes are GitHub/gemoji-primary
+//! with a Unicode-name-derived fallback:** where gemoji assigns codes (~1,870 of
+//! the ~3,950 entries), its `aliases` lead (`:white_check_mark:`, `:tada:`,
+//! `:+1:`, `:joy:`) and its `tags` enrich the keywords, while the Unicode-name
+//! slug (`:check_mark_button:`) is retained as an additional fallback so both
+//! styles resolve. The remaining ~2,080 entries keep only their Unicode-name
+//! slugs.
 //!
 //! This is the **foundation layer** beneath the curated
 //! [`ishou_tokens::FleetSignals`] vocabulary: `FleetSignals` (and per-app sets)
@@ -19,9 +33,10 @@
 //!
 //! ## Generation, not composition
 //!
-//! No emoji is hand-typed. `build.rs` owns the data (vendored emoji-test.txt →
-//! `OUT_DIR` codegen → `include!`), so a Unicode update is a one-line re-fetch
-//! of `data/emoji-test.txt` followed by a rebuild — no source edits.
+//! No emoji or shortcode is hand-typed. `build.rs` owns the data (the vendored
+//! `emoji-test.txt` + `gemoji.json`, joined → `OUT_DIR` codegen → `include!`),
+//! so an update is a one-line re-fetch of either `data/` file followed by a
+//! rebuild — no source edits.
 //!
 //! ## Examples
 //!
@@ -30,6 +45,12 @@
 //!
 //! assert_eq!(by_shortcode("rocket").unwrap().ch, "🚀");
 //! assert_eq!(by_shortcode(":rocket:").unwrap().ch, "🚀"); // colons are stripped
+//! // GitHub/Slack shortcodes (from gemoji) resolve:
+//! assert_eq!(by_shortcode("white_check_mark").unwrap().ch, "✅");
+//! assert_eq!(by_shortcode("tada").unwrap().ch, "🎉");
+//! assert_eq!(by_shortcode("+1").unwrap().ch, "👍");
+//! // …and the Unicode-name slug still works as a fallback:
+//! assert_eq!(by_shortcode("check_mark_button").unwrap().ch, "✅");
 //!
 //! let heart = by_name("red heart").unwrap();
 //! assert_eq!(heart.ch, "❤️");
@@ -60,11 +81,16 @@ pub struct Emoji {
     pub group: Group,
     /// The Unicode subgroup label, e.g. `"face-smiling"`.
     pub subgroup: &'static str,
-    /// Shortcode aliases (no surrounding colons). Always includes a slug of the
-    /// full name; for skin-tone / qualified variants it also includes a slug of
-    /// the tone-less base name so `by_shortcode("waving_hand")` resolves.
+    /// Shortcode aliases (no surrounding colons), in resolution-priority order:
+    /// the GitHub/gemoji `aliases` first (the codes people type, e.g.
+    /// `"white_check_mark"`, `"tada"`, `"+1"`), then a slug of the full Unicode
+    /// name (`"check_mark_button"`), then — for skin-tone / qualified variants —
+    /// a slug of the tone-less base name so `by_shortcode("waving_hand")`
+    /// resolves. Entries with no gemoji match carry only the name slugs.
     pub shortcodes: &'static [&'static str],
-    /// Lowercase keyword tokens derived from the name (stopwords removed).
+    /// Lowercase keyword tokens for search: the GitHub/gemoji `tags` first (the
+    /// human-curated terms, e.g. `"hooray"`, `"party"` for 🎉), then the
+    /// name-derived tokens (stopwords removed).
     pub keywords: &'static [&'static str],
     /// The Unicode/emoji version this entry was introduced in, e.g. `"1.0"`,
     /// `"15.1"`. Empty string if the source omitted it.
@@ -159,9 +185,22 @@ pub fn by_group(group: Group) -> impl Iterator<Item = &'static Emoji> {
     CATALOG.iter().filter(move |e| e.group == group)
 }
 
-/// Normalize a shortcode query: strip surrounding `:` and lowercase, mapping
-/// spaces and `-` to `_` so `"red heart"` / `"red-heart"` both match.
-fn normalize_shortcode(q: &str) -> String {
+/// Strip surrounding `:` and lowercase a shortcode query, *without* rewriting
+/// separators. This preserves the gemoji literal codes that are not slugs —
+/// notably `+1` / `-1` (👍 / 👎), where mapping `-` → `_` would otherwise
+/// destroy the token.
+fn normalize_shortcode_literal(q: &str) -> String {
+    let trimmed = q.trim().trim_matches(':');
+    let mut out = String::with_capacity(trimmed.len());
+    for c in trimmed.chars() {
+        out.extend(c.to_lowercase());
+    }
+    out
+}
+
+/// As [`normalize_shortcode_literal`] but also maps spaces and `-` to `_`, so
+/// `"red heart"` / `"red-heart"` both resolve to the `red_heart` slug.
+fn normalize_shortcode_slug(q: &str) -> String {
     let trimmed = q.trim().trim_matches(':');
     let mut out = String::with_capacity(trimmed.len());
     for c in trimmed.chars() {
@@ -175,16 +214,32 @@ fn normalize_shortcode(q: &str) -> String {
 }
 
 /// Look up an emoji by shortcode. Accepts the bare form (`"rocket"`) or the
-/// colon-wrapped form (`":rocket:"`); spaces and `-` are treated as `_`.
+/// colon-wrapped form (`":rocket:"`); spaces and `-` are treated as `_` so the
+/// Unicode-name slugs resolve, while the gemoji literal codes `+1` / `-1`
+/// (which are not slugs) are matched verbatim.
 ///
-/// Returns the first catalog entry that lists the (normalized) shortcode.
+/// Shortcodes lead with the GitHub/gemoji aliases (`white_check_mark`, `tada`,
+/// `+1`), then fall back to the Unicode-name slug (`check_mark_button`), so both
+/// styles resolve. Returns the first catalog entry that lists the shortcode.
 #[must_use]
 pub fn by_shortcode(shortcode: &str) -> Option<&'static Emoji> {
-    let needle = normalize_shortcode(shortcode);
-    if needle.is_empty() {
+    // Try the literal form first so `+1` / `-1` match the gemoji aliases
+    // verbatim; then the separator-normalized slug form for `red-heart` etc.
+    let literal = normalize_shortcode_literal(shortcode);
+    if !literal.is_empty()
+        && let Some(e) = CATALOG
+            .iter()
+            .find(|e| e.shortcodes.iter().any(|s| *s == literal))
+    {
+        return Some(e);
+    }
+    let slug = normalize_shortcode_slug(shortcode);
+    if slug.is_empty() || slug == literal {
         return None;
     }
-    CATALOG.iter().find(|e| e.shortcodes.iter().any(|s| *s == needle))
+    CATALOG
+        .iter()
+        .find(|e| e.shortcodes.iter().any(|s| *s == slug))
 }
 
 /// Look up an emoji by its exact canonical Unicode name (case-insensitive),
@@ -370,27 +425,103 @@ mod tests {
     }
 
     #[test]
-    fn shortcode_no_collision_on_distinct_chars() {
+    fn unicode_name_slugs_still_resolve() {
         // Policy: by_shortcode returns the FIRST (Unicode-order) entry for a
-        // shortcode. Verify the common curated codes resolve to the expected
-        // canonical character (i.e. the first-wins policy is sane).
-        // Shortcodes here are slugs of the canonical Unicode name (this crate's
-        // source carries no GitHub/CLDR shortcodes — see crate docs), so e.g.
-        // ✅ is "check_mark_button", not GitHub's "white_check_mark".
+        // shortcode. The Unicode-name slugs are retained as fallback shortcodes
+        // even where gemoji also assigns a GitHub code, so the original
+        // name-derived codes keep working (no regression).
         let cases = [
             ("fire", "🔥"),
             ("thumbs_up", "👍"),
             ("eyes", "👀"),
             ("warning", "⚠️"),
+            // ✅'s Unicode-name slug — resolves alongside GitHub's
+            // "white_check_mark" (asserted in `github_shortcodes_resolve`).
             ("check_mark_button", "✅"),
         ];
         for (code, ch) in cases {
             assert_eq!(
                 by_shortcode(code).map(|e| e.ch),
                 Some(ch),
-                "shortcode {code:?} should resolve to {ch}"
+                "name-slug shortcode {code:?} should resolve to {ch}"
             );
         }
+    }
+
+    #[test]
+    fn github_shortcodes_resolve() {
+        // The canonical GitHub/Slack shortcodes — sourced from gemoji, NOT
+        // derivable from Unicode names — must now resolve.
+        let cases = [
+            ("white_check_mark", "✅"),
+            ("tada", "🎉"),
+            ("joy", "😂"),
+            ("fire", "🔥"),
+            ("rocket", "🚀"),
+            ("eyes", "👀"),
+            ("100", "💯"),
+            ("pray", "🙏"),
+        ];
+        for (code, ch) in cases {
+            assert_eq!(
+                by_shortcode(code).map(|e| e.ch),
+                Some(ch),
+                "GitHub shortcode {code:?} should resolve to {ch}"
+            );
+            // Colon-wrapped form too.
+            assert_eq!(by_shortcode(&format!(":{code}:")).map(|e| e.ch), Some(ch));
+        }
+    }
+
+    #[test]
+    fn plus_one_minus_one_special_cases_resolve() {
+        // gemoji uses the literal `+1` / `-1` codes for 👍 / 👎. These are not
+        // slugs — the `-` must NOT be rewritten to `_`.
+        assert_eq!(by_shortcode("+1").map(|e| e.ch), Some("👍"));
+        assert_eq!(by_shortcode(":+1:").map(|e| e.ch), Some("👍"));
+        assert_eq!(by_shortcode("-1").map(|e| e.ch), Some("👎"));
+        assert_eq!(by_shortcode(":-1:").map(|e| e.ch), Some("👎"));
+    }
+
+    #[test]
+    fn gemoji_keywords_enrich_search() {
+        // "hooray" is a gemoji tag for 🎉 (tada) — not present in its Unicode
+        // name "party popper". Searching it must surface 🎉.
+        let results = search("hooray");
+        assert!(
+            results.iter().any(|e| e.ch == "🎉"),
+            "gemoji tag 'hooray' should surface 🎉 in search"
+        );
+        // "joy" is a gemoji tag on several smileys; the exact alias 😂 ranks.
+        let joy = search("joy");
+        assert!(joy.iter().any(|e| e.ch == "😂"));
+    }
+
+    #[test]
+    fn gemoji_coverage_split_is_reported() {
+        // ~1,870 of the ~3,950 catalog entries get GitHub/gemoji shortcodes;
+        // the rest keep Unicode-name slugs only. Assert the partition is whole
+        // and the gemoji-covered count is in the expected ballpark.
+        assert_eq!(
+            GEMOJI_COVERED + UNICODE_ONLY,
+            len(),
+            "coverage split must partition the catalog"
+        );
+        // The two bounds are over generated `const`s, so they evaluate at
+        // compile time — a regression in the join (e.g. zero matches) fails the
+        // build, not just the test run.
+        const {
+            assert!(
+                GEMOJI_COVERED > 1500,
+                "expected >1500 gemoji-covered entries"
+            );
+            assert!(
+                UNICODE_ONLY > 1000,
+                "expected a substantial Unicode-only remainder"
+            );
+        }
+        // Sanity: gemoji-covered entries are a large-but-minority slice.
+        assert!(GEMOJI_COVERED < len());
     }
 
     #[test]

@@ -10,6 +10,9 @@ build = "build.rs"
 
 [dependencies]
 
+[build-dependencies]
+serde_json.workspace = true
+
 [dev-dependencies]
 
 [lints]

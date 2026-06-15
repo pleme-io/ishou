@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "cargo_lock_sha256": "afea5d1db6cbbf01a3084a526806cdd2cd70c13b181feac27ee53133987014a5",
+  "cargo_lock_sha256": "2f367b600c561a6d9fb6ad5ddd26d65d0639e8cf45c2b2ce1a73b3a42ebcdc13",
   "target_resolves": {
     "base": {
       "aho-corasick-1.1.4": {
@@ -674,7 +674,18 @@
       },
       "ishou-emoji-0.1.3": {
         "runtime_dependencies": [],
-        "build_dependencies": [],
+        "build_dependencies": [
+          {
+            "name": "serde_json",
+            "package_key": "serde_json-1.0.149",
+            "kind": "build",
+            "features": [],
+            "uses_default_features": true,
+            "optional": false,
+            "target": null,
+            "tree": "host"
+          }
+        ],
         "features": []
       },
       "ishou-render-0.1.3": {
