@@ -47,7 +47,9 @@ pub use brand::Brand;
 pub use color::{ColorPalette, Rgb, SemanticRoles};
 pub use fleet_defaults::FleetDefaults;
 pub use fleet_keybinds::{FleetKeybinds, FleetKeybindsConsumer};
-pub use fleet_session_names::{FleetSessionNames, SessionIdentity, SessionName, SessionNameStyle};
+pub use fleet_session_names::{
+    FleetSessionNames, SessionIdentity, SessionName, SessionNameStyle, SessionTheme,
+};
 pub use fleet_signals::{FleetSignals, FleetSignalsConsumer, Signal, SignalMode};
 pub use fleet_state::{FleetState, FleetStateVar};
 pub use shell_signals::{ShellSignal, ShellSignals};
