@@ -132,4 +132,18 @@ mod tests {
     fn is_deterministic() {
         assert_eq!(render(&TokenSet::pleme()), render(&TokenSet::pleme()));
     }
+
+    #[test]
+    fn steel_theme_renders_the_metallic_surface() {
+        let out = render(&TokenSet::steel());
+        // primary ← frost_1 = the blued-steel #5E8CC4
+        assert!(
+            out.contains("--md-sys-color-primary: #5E8CC4"),
+            "steel primary should be blued-steel"
+        );
+        // background ← polar_night_0 = the machined near-black
+        assert!(out.contains("--md-sys-color-background: #0B0E12"));
+        // still fully resolved (no sentinel)
+        assert!(!out.contains("#000000"), "steel md3 should fully resolve");
+    }
 }

@@ -29,11 +29,18 @@ enum Cmd {
     Render {
         #[arg(long)]
         target: String,
+        /// Theme to render (`pleme` = the default Nord set, `steel` = the cool
+        /// brushed-metal set). Defaults to `pleme`.
+        #[arg(long, default_value = "pleme")]
+        theme: String,
         #[arg(long)]
         out: Option<PathBuf>,
     },
     /// Render every supported target to a directory, one file per target.
     RenderAll {
+        /// Theme to render (`pleme` | `steel`). Defaults to `pleme`.
+        #[arg(long, default_value = "pleme")]
+        theme: String,
         #[arg(long, default_value = "generated")]
         out_dir: PathBuf,
     },
@@ -45,16 +52,17 @@ enum Cmd {
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
-    let tokens = TokenSet::pleme();
 
     match cli.cmd {
-        Cmd::Render { target, out } => {
+        Cmd::Render { target, theme, out } => {
+            let tokens = token_set(&theme)?;
             let target = Target::from_str(&target)
                 .ok_or_else(|| anyhow!("unknown target: {target}"))?;
             let content = target.render(&tokens);
             emit(content, out)?;
         }
-        Cmd::RenderAll { out_dir } => {
+        Cmd::RenderAll { theme, out_dir } => {
+            let tokens = token_set(&theme)?;
             fs::create_dir_all(&out_dir).context("mkdir out_dir")?;
             for target in Target::all() {
                 let path = out_dir.join(filename(target));
@@ -64,6 +72,7 @@ fn main() -> Result<()> {
             }
         }
         Cmd::Hash => {
+            let tokens = TokenSet::pleme();
             let h = tokens.content_hash();
             for b in h {
                 print!("{b:02x}");
@@ -93,6 +102,16 @@ fn emit(content: String, out: Option<PathBuf>) -> Result<()> {
         }
     }
     Ok(())
+}
+
+/// Select the token set for a theme name. Unknown themes are a hard error
+/// (no silent fallback) so a typo never renders the wrong theme.
+fn token_set(theme: &str) -> Result<TokenSet> {
+    Ok(match theme {
+        "pleme" | "default" | "nord" => TokenSet::pleme(),
+        "steel" => TokenSet::steel(),
+        other => return Err(anyhow!("unknown theme: {other} (try: pleme, steel)")),
+    })
 }
 
 fn filename(t: Target) -> &'static str {

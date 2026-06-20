@@ -82,6 +82,42 @@ impl ColorPalette {
             shadow_tone: Rgb::new(0x14, 0x18, 0x22),
         }
     }
+
+    /// **Steel** — a cool industrial brushed-metal palette: machined near-black
+    /// grounds, a silver→chrome foreground ladder, blued-steel accents, and
+    /// oxidized-metal semantic accents. Fills the same slots as [`pleme`] (so
+    /// the `pleme_dark` role binding resolves unchanged) but with metallic
+    /// values. Body text (`snow_storm_2` on `polar_night_0`) clears WCAG AAA
+    /// (16.29:1). Synthesized from the gaveta-steel design pass.
+    #[must_use]
+    pub fn steel() -> Self {
+        Self {
+            // black → gunmetal background ladder
+            polar_night_0: Rgb::new(0x0B, 0x0E, 0x12),
+            polar_night_1: Rgb::new(0x14, 0x19, 0x22),
+            polar_night_2: Rgb::new(0x1F, 0x26, 0x32),
+            polar_night_3: Rgb::new(0x2C, 0x36, 0x45),
+            // silver → chrome foreground ladder
+            snow_storm_0: Rgb::new(0x9F, 0xA9, 0xB7),
+            snow_storm_1: Rgb::new(0xC6, 0xCD, 0xD7),
+            snow_storm_2: Rgb::new(0xE8, 0xEC, 0xF0),
+            // blued-steel accent family (primary = frost_1)
+            frost_0: Rgb::new(0x3E, 0x5C, 0x7E),
+            frost_1: Rgb::new(0x5E, 0x8C, 0xC4),
+            frost_2: Rgb::new(0x7F, 0xA6, 0xD4),
+            frost_3: Rgb::new(0xA7, 0xC2, 0xE0),
+            // oxidized-metal semantic accents (functional, but cooled into steel)
+            aurora_red: Rgb::new(0xD9, 0x8C, 0x8C),    // oxide red
+            aurora_orange: Rgb::new(0xD9, 0xB0, 0x8C), // tarnished copper
+            aurora_yellow: Rgb::new(0xD9, 0xCE, 0x9E), // pale brass
+            aurora_green: Rgb::new(0x9C, 0xC2, 0xA8),  // patina
+            aurora_purple: Rgb::new(0xB0, 0xA8, 0xC9), // gunmetal violet
+            // brand monochrome anchors
+            ink: Rgb::new(0x05, 0x06, 0x08),        // deepest forged black
+            paper: Rgb::new(0xF4, 0xF7, 0xFA),      // chrome white
+            shadow_tone: Rgb::new(0x06, 0x09, 0x0D), // blue-tinted shadow
+        }
+    }
 }
 
 /// Semantic color roles consumers bind to — keeps tokens stable when a

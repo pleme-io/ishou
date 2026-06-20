@@ -105,6 +105,18 @@ impl TokenSet {
         Self::default()
     }
 
+    /// The **Steel** theme — the canonical token set with the metallic
+    /// [`ColorPalette::steel`] swapped in. The `pleme_dark` role binding
+    /// resolves against the steel slots unchanged, so every render target
+    /// (`css` / `md3` / `tailwind` / …) emits the cool brushed-metal surface.
+    #[must_use]
+    pub fn steel() -> Self {
+        Self {
+            color: ColorPalette::steel(),
+            ..Self::default()
+        }
+    }
+
     /// Deterministic content hash used by arch-synthesizer attestation.
     /// Two token sets produce identical hashes iff every token is byte-equal.
     #[must_use]
