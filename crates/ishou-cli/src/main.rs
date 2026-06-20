@@ -98,6 +98,7 @@ fn emit(content: String, out: Option<PathBuf>) -> Result<()> {
 fn filename(t: Target) -> &'static str {
     match t {
         Target::Css => "ishou.css",
+        Target::Md3 => "md-sys-color.css",
         Target::Tailwind => "tailwind.config.js",
         Target::Scss => "_ishou.scss",
         Target::Rust => "ishou.rs",
@@ -121,6 +122,7 @@ fn filename(t: Target) -> &'static str {
 fn target_name(t: Target) -> &'static str {
     match t {
         Target::Css => "css",
+        Target::Md3 => "md3",
         Target::Tailwind => "tailwind",
         Target::Scss => "scss",
         Target::Rust => "rust",

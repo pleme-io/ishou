@@ -19,6 +19,7 @@
 //! | `TokenSet`     | stylix base16 YAML                     | `stylix`     |
 
 pub mod css;
+pub mod md3;
 pub mod fleet_fonts;
 pub mod ghostty;
 pub mod glsl;
@@ -39,6 +40,10 @@ pub mod vellum;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Target {
     Css,
+    /// Material Design 3 system colors (`--md-sys-color-*`) mapped from the
+    /// TokenSet — the target Material consumers (`pleme-mui`) bind to so they
+    /// can consume ishou instead of forking a hard-coded MD3 palette.
+    Md3,
     Tailwind,
     Scss,
     Rust,
@@ -79,6 +84,7 @@ impl Target {
     pub fn from_str(s: &str) -> Option<Self> {
         Some(match s {
             "css" => Self::Css,
+            "md3" | "material" | "md-sys-color" => Self::Md3,
             "tailwind" => Self::Tailwind,
             "scss" => Self::Scss,
             "rust" => Self::Rust,
@@ -103,6 +109,7 @@ impl Target {
     pub fn render(&self, tokens: &ishou_tokens::TokenSet) -> String {
         match self {
             Self::Css => css::render(tokens),
+            Self::Md3 => md3::render(tokens),
             Self::Tailwind => tailwind::render(tokens),
             Self::Scss => scss::render(tokens),
             Self::Rust => rust::render(tokens),
@@ -125,9 +132,10 @@ impl Target {
         }
     }
 
-    pub fn all() -> [Target; 18] {
+    pub fn all() -> [Target; 19] {
         [
             Self::Css,
+            Self::Md3,
             Self::Tailwind,
             Self::Scss,
             Self::Rust,

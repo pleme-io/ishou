@@ -46,6 +46,7 @@
       };
     in {
       css      = mk "css";
+      md3      = mk "md3";
       tailwind = mk "tailwind";
       scss     = mk "scss";
       rust     = mk "rust";
