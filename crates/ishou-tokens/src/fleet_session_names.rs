@@ -91,6 +91,65 @@ impl fmt::Display for SessionName {
     }
 }
 
+/// What a session is being named FROM — the single input to the fleet's
+/// one naming authority, [`FleetSessionNames::resolve`]. Every
+/// session-name decision (mado boot, picker create, MCP spawn, the daemon
+/// hook) maps a context through `resolve`, so a session has exactly ONE
+/// identity, rendered per surface (glyph → the text prompt, emoji → the
+/// GUI picker). No surface decides a name on its own.
+#[derive(Debug, Clone, Copy)]
+pub enum NameContext<'a> {
+    /// The operator pinned an explicit name (e.g. `tear.session_name`) —
+    /// used verbatim, no curated mark.
+    Override(&'a str),
+    /// Name derived from a PROJECT ROOT — the deterministic, path-stable
+    /// curated identity (same seed as [`FleetSessionNames::from_project_path`]).
+    Project(&'a std::path::Path),
+    /// No project + no override — the branded fleet
+    /// [`FleetSessionNames::DEFAULT`] (`🌑 rime`).
+    Default,
+}
+
+/// The output of the [`FleetSessionNames::resolve`] authority: either a
+/// curated [`SessionIdentity`] (renderable in BOTH styles — the basis for
+/// the split "emoji in the GUI / glyph in the prompt" projection) or a
+/// literal operator string (one mark-free form).
+///
+/// This resolved value is the single source of truth for a session's
+/// name, minted ONCE at creation. Every surface renders it (never derives
+/// an independent one), so the picker and the prompt can never disagree on
+/// the session's word.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ResolvedName {
+    /// A curated identity — render with [`Self::render`] in either style.
+    Identity(SessionIdentity),
+    /// A verbatim operator string — style-agnostic (no leading mark).
+    Literal(String),
+}
+
+impl ResolvedName {
+    /// Render this name in `style`. A [`Self::Literal`] ignores style
+    /// (operator strings carry no curated mark); an [`Self::Identity`]
+    /// renders its emoji/glyph mark + word via [`SessionName`]'s `Display`.
+    #[must_use]
+    pub fn render(&self, style: SessionNameStyle) -> String {
+        match self {
+            ResolvedName::Identity(id) => SessionName { identity: *id, style }.to_string(),
+            ResolvedName::Literal(s) => s.clone(),
+        }
+    }
+
+    /// The style-independent word the picker fuzzy-search ranks on
+    /// (`"rime"`, `"tide"`, or the literal string).
+    #[must_use]
+    pub fn word(&self) -> &str {
+        match self {
+            ResolvedName::Identity(id) => id.word,
+            ResolvedName::Literal(s) => s,
+        }
+    }
+}
+
 /// The curated atlas. Elemental / celestial / natural words in the Vellum
 /// register (warm, calm, a little wild) — each paired with an emoji and a
 /// clean single-width Nerd-Font/Unicode glyph alternative.
@@ -145,6 +204,44 @@ impl FleetSessionNames {
         SessionIdentity { emoji: "🥭", glyph: "\u{25d4}", word: "manga", theme: SessionTheme::Brazil, keywords: &["mango","fruit","tropical","sweet"] },
         SessionIdentity { emoji: "🎸", glyph: "\u{266a}", word: "bossa", theme: SessionTheme::Brazil, keywords: &["guitar","music","violao","strings"] },
     ];
+
+    /// The branded fleet-default identity — **`🌑 rime`**, our own
+    /// "void × frost" blend (blackmatter's dark register × the Frost
+    /// register; `rime` = hoarfrost). A session with no project to name it
+    /// from (mado's boot launch with no spawn cwd) gets THIS instead of an
+    /// opaque `mado-<ts>-<pid>` tag — compact, on-theme, and rendered per
+    /// surface like any identity. Deliberately NOT a [`Self::POOL`] member:
+    /// it is the special home identity, never a random project/seed draw.
+    /// The single-width glyph (`◉`) keeps the cursor-sensitive text prompt
+    /// grid-aligned; the wide emoji (`🌑`) is for the GUI picker.
+    pub const DEFAULT: SessionIdentity = SessionIdentity {
+        emoji: "🌑",
+        glyph: "\u{25c9}", // ◉ fisheye — dark centre + ring: void×frost, one column
+        word: "rime",
+        theme: SessionTheme::Frost,
+        keywords: &["frost", "ice", "dark", "void", "hoarfrost", "cold", "rime"],
+    };
+
+    /// THE single naming authority: map a [`NameContext`] to a
+    /// [`ResolvedName`]. Every session-name decision in the fleet flows
+    /// through here, so a session is named ONCE and rendered per surface —
+    /// the picker and the prompt project the SAME identity, never two
+    /// independently-derived names.
+    #[must_use]
+    pub fn resolve(ctx: NameContext<'_>) -> ResolvedName {
+        match ctx {
+            NameContext::Override(s) => ResolvedName::Literal(s.to_owned()),
+            NameContext::Project(p) => ResolvedName::Identity(Self::identity_for_path(p)),
+            NameContext::Default => ResolvedName::Identity(Self::DEFAULT),
+        }
+    }
+
+    /// The branded fleet-default [`SessionName`] in a style — `🌑 rime`
+    /// (Emoji) / `◉ rime` (Glyph). Convenience over `resolve(Default)`.
+    #[must_use]
+    pub fn default_name(style: SessionNameStyle) -> SessionName {
+        SessionName { identity: Self::DEFAULT, style }
+    }
 
     /// Deterministic identity for a seed (e.g. tear's session counter or a hash
     /// of the SessionId). Same seed → same identity, always.
@@ -243,6 +340,50 @@ pub fn stable_seed(bytes: &[u8]) -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn fleet_default_is_the_void_frost_blend() {
+        assert_eq!(FleetSessionNames::DEFAULT.word, "rime");
+        assert_eq!(FleetSessionNames::DEFAULT.theme, SessionTheme::Frost);
+        assert_eq!(
+            FleetSessionNames::default_name(SessionNameStyle::Emoji).to_string(),
+            "🌑 rime"
+        );
+        assert_eq!(
+            FleetSessionNames::default_name(SessionNameStyle::Glyph).to_string(),
+            "◉ rime"
+        );
+        // The special home identity — NOT a random-assignment POOL member,
+        // so a project/seed can never accidentally collide onto it.
+        assert!(
+            !FleetSessionNames::POOL.iter().any(|i| i.word == "rime"),
+            "DEFAULT must stay out of the POOL so it is never a random draw"
+        );
+    }
+
+    #[test]
+    fn resolve_is_the_single_authority_with_split_projection() {
+        // Default → the branded identity, renderable in BOTH styles from
+        // ONE resolved value (the basis for emoji-in-GUI / glyph-in-prompt).
+        let d = FleetSessionNames::resolve(NameContext::Default);
+        assert_eq!(d.render(SessionNameStyle::Emoji), "🌑 rime");
+        assert_eq!(d.render(SessionNameStyle::Glyph), "◉ rime");
+        assert_eq!(d.word(), "rime", "same word across both renders");
+
+        // Project → the path-stable identity, byte-identical to
+        // from_project_path (resolve is the one decider, not a new scheme).
+        let p = std::path::Path::new("/code/pleme-io/mado");
+        let r = FleetSessionNames::resolve(NameContext::Project(p));
+        let direct =
+            FleetSessionNames::from_project_path(p, SessionNameStyle::Emoji).to_string();
+        assert_eq!(r.render(SessionNameStyle::Emoji), direct);
+
+        // Override → verbatim, style-agnostic (no curated mark either way).
+        let o = FleetSessionNames::resolve(NameContext::Override("billing-stack"));
+        assert_eq!(o.render(SessionNameStyle::Emoji), "billing-stack");
+        assert_eq!(o.render(SessionNameStyle::Glyph), "billing-stack");
+        assert_eq!(o.word(), "billing-stack");
+    }
 
     #[test]
     fn identity_is_deterministic() {
