@@ -118,6 +118,39 @@ impl ColorPalette {
             shadow_tone: Rgb::new(0x06, 0x09, 0x0D), // blue-tinted shadow
         }
     }
+
+    /// **Shaar** — akeyless-vpn: Akeyless teal-on-dark. The fleet's Nord-frost
+    /// accent turned up to product aqua over a cool near-black ground — the one
+    /// hue that satisfies both the pleme-io family and the Akeyless product
+    /// line. `primary` (frost_1) is the brand teal `#16C7A8`; body text
+    /// (`snow_storm_2` on `polar_night_0`) stays high-contrast. The rendered
+    /// marks live at `akeyless-vpn/brand/shaar-*.svg` (see [`super::Brand::shaar`]).
+    /// Same slots as [`Self::pleme`] so the `pleme_dark` role binding resolves
+    /// unchanged.
+    #[must_use]
+    pub fn shaar() -> Self {
+        Self {
+            polar_night_0: Rgb::new(0x0A, 0x11, 0x19), // canonical product-dark bg
+            polar_night_1: Rgb::new(0x0E, 0x1A, 0x24),
+            polar_night_2: Rgb::new(0x16, 0x24, 0x2F),
+            polar_night_3: Rgb::new(0x21, 0x33, 0x41),
+            snow_storm_0: Rgb::new(0x7F, 0x94, 0xA1), // muted
+            snow_storm_1: Rgb::new(0xB8, 0xC9, 0xC9),
+            snow_storm_2: Rgb::new(0xEA, 0xF6, 0xF3), // paper
+            frost_0: Rgb::new(0x3F, 0xE0, 0xCC),      // aqua — the swerve
+            frost_1: Rgb::new(0x16, 0xC7, 0xA8),      // teal — PRIMARY brand
+            frost_2: Rgb::new(0x0E, 0x9E, 0x8C),      // teal deep — gate
+            frost_3: Rgb::new(0x0B, 0x8C, 0x78),      // teal deeper
+            aurora_red: Rgb::new(0xE5, 0x7A, 0x7A),
+            aurora_orange: Rgb::new(0xE2, 0xA9, 0x6B),
+            aurora_yellow: Rgb::new(0xE6, 0xCE, 0x8C),
+            aurora_green: Rgb::new(0x5F, 0xE0, 0xCC),
+            aurora_purple: Rgb::new(0xB0, 0xA0, 0xC9),
+            ink: Rgb::new(0x0A, 0x0A, 0x0A),
+            paper: Rgb::new(0xEA, 0xF6, 0xF3),
+            shadow_tone: Rgb::new(0x06, 0x09, 0x0F), // ground_2
+        }
+    }
 }
 
 /// Semantic color roles consumers bind to — keeps tokens stable when a

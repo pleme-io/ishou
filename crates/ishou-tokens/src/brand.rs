@@ -75,4 +75,34 @@ impl Brand {
             },
         }
     }
+
+    /// **Shaar** — the akeyless-vpn brand (codename שער, "gate").
+    ///
+    /// A pleme-io product-line sibling of mado: it REUSES the pleme swerve
+    /// geometry verbatim (the shared signature stroke) and points at the
+    /// gate-framed marks rendered in `akeyless-vpn/brand/`. The gate arch +
+    /// auth-spark are the Shaar-specific additions the SVG renderer gains next;
+    /// pairs with [`super::ColorPalette::shaar`].
+    #[must_use]
+    pub const fn shaar() -> Self {
+        Self {
+            name: "akeyless-vpn",
+            tagline: "Identity is the gate",
+            logo_paths: LogoAssets {
+                lockup: "brand/shaar-lockup.svg",
+                mark: "brand/shaar-mark.svg",
+                lockup_mono_black: "brand/shaar-mark-mono.svg",
+                lockup_mono_white: "brand/shaar-mark-mono.svg",
+                favicon: "brand/shaar-favicon.svg",
+            },
+            // The swerve is the shared pleme-io signature — same geometry as
+            // Brand::pleme().swerve, reused so the mark stays in-family.
+            swerve: Swerve {
+                viewbox: 64,
+                stroke_width: 10,
+                stroke_cap: StrokeCap::Round,
+                path_d: "M 8 10 C 14 46, 30 52, 32 32 C 34 12, 50 18, 56 54",
+            },
+        }
+    }
 }
