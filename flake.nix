@@ -56,6 +56,8 @@
       tui      = mk "tui";
       svg      = mk "svg";
       stylix   = mk "stylix";
+      # First per-app config-file render app — bat's base16 .tmTheme.
+      bat      = mk "bat";
       stylix-fonts = mk "stylix-fonts";
       fleet-fonts = mk "fleet-fonts";
       nix      = mk "nix";
@@ -88,6 +90,23 @@
       meta.description = "ishou-rendered base16 YAML for stylix consumers (Nord Dark)";
     } ''
       ${ishouBin}/bin/ishou render --target stylix > $out
+    '';
+
+    # bat base16 `.tmTheme` — the FIRST per-app *config-file* package
+    # output. This is the M0 proof that ishou can natively emit a per-app
+    # config file (not just a palette/scheme), toward ishou replacing
+    # stylix as the fleet theming engine: instead of stylix generating the
+    # `bat` theme from its base16 scheme, ishou renders the `.tmTheme`
+    # directly from the same typed TokenSet. A consumer wires it as
+    #   programs.bat.themes."Nord (pleme-io / ishou)".src =
+    #     inputs.ishou.packages.${system}.bat-theme;
+    mkBatTheme = system: let
+      pkgs = import nixpkgs { inherit system; };
+      ishouBin = toolOutputs.packages.${system}.default;
+    in pkgs.runCommand "ishou-bat-tmtheme-nord" {
+      meta.description = "ishou-rendered base16 .tmTheme for bat (Nord)";
+    } ''
+      ${ishouBin}/bin/ishou render --target bat > $out
     '';
 
     # Vellum base16 scheme — the prescribed fleet theme, built
@@ -217,6 +236,9 @@
       packages = nixpkgs.lib.genAttrs systems (system:
         (toolOutputs.packages.${system} or {}) // {
           stylix-base16 = mkStylixBase16 system;
+          # bat base16 `.tmTheme` — the first per-app config-file output.
+          # Consumers wire `programs.bat.themes.<name>.src = …bat-theme`.
+          bat-theme = mkBatTheme system;
           # Alias under the explicit theme name so consumers can
           # eventually switch schemes by changing the attribute name
           # (e.g. `stylix-base16-dracula`) without editing the

@@ -17,7 +17,9 @@
 //! | `TokenSet`     | TUI ratatui / crossterm Color table    | `tui`        |
 //! | `TokenSet`     | SVG (brand mark + swerve)              | `svg`        |
 //! | `TokenSet`     | stylix base16 YAML                     | `stylix`     |
+//! | `TokenSet`     | base16 bat `.tmTheme` (Sublime plist)  | `bat`        |
 
+pub mod bat;
 pub mod css;
 pub mod md3;
 pub mod fleet_fonts;
@@ -53,6 +55,12 @@ pub enum Target {
     Tui,
     Svg,
     Stylix,
+    /// base16 bat `.tmTheme` (Sublime-Text XML plist) — the FIRST per-app
+    /// *config-file* target. bat consumes it as a custom theme; this is the
+    /// M0 proof ishou can natively emit a per-app config file (toward ishou
+    /// replacing stylix as the fleet theming engine). Same base16 slot→Nord
+    /// mapping as `Stylix`.
+    Bat,
     Nix,
     StylixFonts,
     /// Fleet-fonts attrset — `{ primary, italic, bold, symbols, emoji,
@@ -94,6 +102,7 @@ impl Target {
             "tui" => Self::Tui,
             "svg" => Self::Svg,
             "stylix" | "stylix-base16" => Self::Stylix,
+            "bat" | "bat-tmtheme" => Self::Bat,
             "stylix-fonts" | "fonts-nix" => Self::StylixFonts,
             "nix" | "nord-palette-nix" => Self::Nix,
             "fleet-fonts" | "fleet_fonts" => Self::FleetFonts,
@@ -119,6 +128,7 @@ impl Target {
             Self::Tui => tui::render(tokens),
             Self::Svg => svg::render(tokens),
             Self::Stylix => stylix::render(tokens),
+            Self::Bat => bat::render(tokens),
             Self::Nix => nix::render(tokens),
             Self::StylixFonts => stylix_fonts::render(tokens),
             Self::FleetFonts => fleet_fonts::render(tokens),
@@ -132,7 +142,7 @@ impl Target {
         }
     }
 
-    pub fn all() -> [Target; 19] {
+    pub fn all() -> [Target; 20] {
         [
             Self::Css,
             Self::Md3,
@@ -145,6 +155,7 @@ impl Target {
             Self::Tui,
             Self::Svg,
             Self::Stylix,
+            Self::Bat,
             Self::Nix,
             Self::StylixFonts,
             Self::FleetFonts,
