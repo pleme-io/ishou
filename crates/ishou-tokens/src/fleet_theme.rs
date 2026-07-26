@@ -64,16 +64,27 @@ pub enum FleetTheme {
     /// Zero-opinion: black background, white foreground, no fonts
     /// preference, no brand. The bare-tier floor.
     Bare,
-    /// The legacy pleme-io look: Nord Polar Night dark palette
-    /// + ishou typography + brand integration. Retained for
-    /// continuity; superseded as the prescribed default by
-    /// `Vellum`.
-    PlemeDark,
-    /// **Vellum** — the fleet theme, warm aged-paper Nord-matte.
-    /// An aged-parchment ground + muted matte ink above it. **The
-    /// prescribed default** every fleet app lands on without operator
-    /// intervention.
+    /// **Nord Polar Night dark** + ishou typography + brand integration.
+    /// **The prescribed default** every fleet app lands on without operator
+    /// intervention — the look mado and frostmourne actually render, and
+    /// therefore the one an operator recognises as "pleme-io".
+    ///
+    /// Reinstated as prescribed 2026-07-25 (operator decision: *"its all
+    /// nord dark its all like mado or frostmourne"* / *"mado frostmourne
+    /// escriba defaults should be the absolute the same look"*). It had been
+    /// marked superseded-by-Vellum, but that was never true of the shipped
+    /// fleet: mado overrode it back to Nord in its own config and asserted
+    /// the divergence, escriba followed the declaration into Vellum, and
+    /// frostmourne rendered a third palette. Three apps, three looks, from
+    /// one "prescribed" default nobody prescribed.
     #[default]
+    PlemeDark,
+    /// **Vellum** — warm aged-paper Nord-matte: an aged-parchment ground +
+    /// muted matte ink above it. A first-class, fully-supported theme an
+    /// operator may select; **no longer the prescribed default** (see
+    /// [`FleetTheme::PlemeDark`]). Retired from that role, never removed —
+    /// its palette, its render targets and its `StylixVellum` /
+    /// `SkimVellum` emitters all stay exactly as they are.
     Vellum,
     /// **Polar Veil** — the cool/neutral deep-polar-night sibling of
     /// Vellum. The same band structure authored with a colder, lower-warmth
@@ -89,10 +100,39 @@ impl FleetTheme {
         Self::Bare
     }
 
-    /// Tier 2 prescribed default — `FleetTheme::Vellum`.
+    /// Tier 2 prescribed default — `FleetTheme::PlemeDark` (Nord dark).
+    ///
+    /// THE load-bearing fleet-look decision: every app that derives its
+    /// visual prescribed tier from [`crate::FleetDefaults`] lands here, so
+    /// this one line is what makes mado, escriba and every other themed app
+    /// agree by construction instead of by hand-matching.
     #[must_use]
     pub const fn prescribed_default() -> Self {
-        Self::Vellum
+        Self::PlemeDark
+    }
+
+    /// The PALETTE-PRESET name, as the shared theme vocabulary spells it
+    /// (`irodzuki` / `irodori` presets, escriba's `(deftheme :preset …)`,
+    /// mado's theme registry).
+    ///
+    /// Distinct from [`FleetTheme::name`] on purpose: `name()` is the SERDE
+    /// wire name (`"pleme_dark"`) and is frozen — changing it would break
+    /// every persisted config — whereas the preset vocabulary calls that
+    /// same palette `"nord"`. Without this, `"nord"` was underivable, so
+    /// mado carried it as a local `MADO_PRESCRIBED_THEME_NAME` constant and
+    /// escriba hardcoded `"vellum"`; both are exactly the hand-matching
+    /// this method removes.
+    ///
+    /// Exhaustive on purpose — a new variant fails to compile until it is
+    /// named here, the same forcing function [`FleetTheme::name`] uses.
+    #[must_use]
+    pub const fn preset_name(&self) -> &'static str {
+        match self {
+            Self::Bare => "bare",
+            Self::PlemeDark => "nord",
+            Self::Vellum => "vellum",
+            Self::PolarVeil => "polar_veil",
+        }
     }
 
     /// The theme LIBRARY — every variant the fleet ships, in tier order.
@@ -302,9 +342,46 @@ mod tests {
     use super::*;
 
     #[test]
-    fn fleet_theme_default_is_vellum() {
-        assert_eq!(FleetTheme::default(), FleetTheme::Vellum);
-        assert_eq!(FleetTheme::prescribed_default(), FleetTheme::Vellum);
+    fn fleet_theme_default_is_nord_dark() {
+        assert_eq!(FleetTheme::default(), FleetTheme::PlemeDark);
+        assert_eq!(FleetTheme::prescribed_default(), FleetTheme::PlemeDark);
+        // `Default` and `prescribed_default()` must never diverge — two
+        // entry points to the same decision.
+        assert_eq!(FleetTheme::default(), FleetTheme::prescribed_default());
+    }
+
+    /// The prescribed theme resolves to NORD POLAR NIGHT, pinned by hex.
+    /// This is the assertion that actually protects the operator-visible
+    /// look: a future re-point of `prescribed_default()` to a warm/light
+    /// palette fails here with the concrete colour, not just a variant name.
+    #[test]
+    fn prescribed_theme_resolves_to_nord_polar_night() {
+        let r = FleetTheme::prescribed_default().resolve();
+        assert_eq!(r.background, "#2E3440", "Nord Polar Night nord0 ground");
+    }
+
+    /// `preset_name()` is the palette vocabulary, `name()` is the serde
+    /// wire. They deliberately differ for PlemeDark — that difference is
+    /// the whole reason `"nord"` is derivable instead of a local constant
+    /// in every consumer.
+    #[test]
+    fn preset_name_is_the_palette_vocabulary_not_the_serde_wire() {
+        assert_eq!(FleetTheme::PlemeDark.name(), "pleme_dark", "serde wire, frozen");
+        assert_eq!(FleetTheme::PlemeDark.preset_name(), "nord", "palette vocabulary");
+        assert_eq!(FleetTheme::prescribed_default().preset_name(), "nord");
+        // Every other variant agrees on both spellings.
+        for t in [FleetTheme::Bare, FleetTheme::Vellum, FleetTheme::PolarVeil] {
+            assert_eq!(t.name(), t.preset_name(), "{t:?} needs no distinct preset name");
+        }
+    }
+
+    /// Vellum is RETIRED from the prescribed role, not removed — it must
+    /// stay fully selectable and fully resolvable (MODULARIZE, DON'T DELETE).
+    #[test]
+    fn vellum_remains_a_selectable_first_class_theme() {
+        assert!(FleetTheme::all().contains(&FleetTheme::Vellum));
+        let v = FleetTheme::Vellum.resolve();
+        assert_eq!(v.background, "#16140E", "Vellum's parchment ground is intact");
     }
 
     #[test]

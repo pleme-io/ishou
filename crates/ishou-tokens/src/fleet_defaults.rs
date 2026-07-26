@@ -239,8 +239,9 @@ mod tests {
     #[test]
     fn prescribed_carries_pleme_canonical_choices() {
         let p = FleetDefaults::prescribed();
-        // Vellum is the prescribed fleet theme.
-        assert_eq!(p.theme, FleetTheme::Vellum);
+        // Nord dark (PlemeDark) is the prescribed fleet theme — the look
+        // mado and frostmourne render, so every derived app matches them.
+        assert_eq!(p.theme, FleetTheme::PlemeDark);
         assert_eq!(p.theme, FleetTheme::prescribed_default());
         // Font alignment to ghostty's known-good look: NON-Mono Nerd
         // family (icons keep designed width), italics on the SAME

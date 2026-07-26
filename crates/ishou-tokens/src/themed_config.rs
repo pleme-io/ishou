@@ -645,7 +645,11 @@ mod tests {
     fn from_fleet_pulls_canonical_pleme_values() {
         let fd = FleetDefaults::prescribed();
         let cfg = TestAppConfig::from_fleet(&fd);
-        assert_eq!(cfg.theme, FleetTheme::Vellum);
+        // Derived, never hardcoded: an app that goes through `from_fleet`
+        // inherits whatever the fleet prescribes, so this asserts the
+        // DERIVATION rather than a specific theme name.
+        assert_eq!(cfg.theme, FleetTheme::prescribed_default());
+        assert_eq!(cfg.theme, FleetTheme::PlemeDark, "the fleet look is Nord dark");
         // Ghostty-aligned fleet font (see fleet_defaults.rs prescribed()).
         assert_eq!(cfg.font_family, "JetBrainsMono Nerd Font");
         assert_eq!(cfg.font_size, 13.0);

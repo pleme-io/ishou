@@ -58,8 +58,9 @@ fn library_is_complete() {
         FleetTheme::all().contains(&FleetTheme::prescribed_default()),
         "prescribed default missing from library"
     );
-    // Vellum is the shipping default.
-    assert_eq!(FleetTheme::prescribed_default(), FleetTheme::Vellum);
+    // Nord dark (PlemeDark) is the shipping default — the look mado and
+    // frostmourne render, so every derived app matches them.
+    assert_eq!(FleetTheme::prescribed_default(), FleetTheme::PlemeDark);
 }
 
 /// Every theme name is unique and matches its serde encoding.
@@ -123,12 +124,28 @@ fn every_theme_body_text_clears_aaa() {
 
 /// Pin the prescribed fleet default's identity so a stray re-point is caught.
 #[test]
-fn prescribed_default_is_vellum_warm_parchment() {
+fn prescribed_default_is_nord_polar_night() {
     let r = FleetTheme::prescribed_default().resolve();
-    assert_eq!(r.name, "vellum");
-    assert_eq!(r.background.to_uppercase(), "#16140E");
-    assert_eq!(r.foreground.to_uppercase(), "#E2DBC8");
-    // The warm-parchment promise: background is warmer than it is cool (R > B).
+    assert_eq!(r.name, "pleme_dark");
+    assert_eq!(FleetTheme::prescribed_default().preset_name(), "nord");
+    assert_eq!(r.background.to_uppercase(), "#2E3440", "Nord nord0 ground");
+    // The polar-night promise: the ground is COOL (B > R) — the inverse of
+    // Vellum's warm parchment. This is the assertion that would catch a
+    // re-point to any warm palette, whatever it were named.
     let (br, _, bb) = parse_hex(&r.background);
-    assert!(br >= bb, "vellum background should be warm (R >= B), got {}", r.background);
+    assert!(bb > br, "nord background should be cool (B > R), got {}", r.background);
+}
+
+/// Vellum is RETIRED from the prescribed role, never removed: its palette
+/// must stay exactly as authored so an operator selecting it — and the
+/// StylixVellum / SkimVellum render targets — get the same bytes as before.
+#[test]
+fn vellum_is_retired_not_removed_and_still_warm() {
+    assert!(FleetTheme::all().contains(&FleetTheme::Vellum));
+    let v = FleetTheme::Vellum.resolve();
+    assert_eq!(v.name, "vellum");
+    assert_eq!(v.background.to_uppercase(), "#16140E");
+    assert_eq!(v.foreground.to_uppercase(), "#E2DBC8");
+    let (br, _, bb) = parse_hex(&v.background);
+    assert!(br >= bb, "vellum background should stay warm (R >= B), got {}", v.background);
 }
