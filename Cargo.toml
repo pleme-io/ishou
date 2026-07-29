@@ -2,6 +2,7 @@
 members = [
     "crates/ishou-tokens",
     "crates/ishou-pente",
+    "crates/ishou-batente",
     "crates/ishou-render",
     "crates/ishou-cli",
     "crates/ishou-emoji",

@@ -1,0 +1,15 @@
+[package]
+name = "ishou-batente"
+description = "batente (the loom's beater) — the fleet's typed motion spine: a closed Beat/Cadence/Motion/Choreography algebra where an animation exceeding a face's capability has no apply path."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+ishou-tokens = { path = "../ishou-tokens" }
+serde = { workspace = true, features = ["derive"] }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true
