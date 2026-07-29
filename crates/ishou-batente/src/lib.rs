@@ -11,11 +11,14 @@
 //!
 //! ## The thesis
 //!
-//! The fleet does not lack a motion source: `mado/src/motion/` is a real,
-//! property-tested algebra with a WebKit `UnitBezier` solve, genuinely wired
-//! to bell-flash, cursor blink and decay. It does not lack a motion
-//! vocabulary either: `ishou_tokens::motion` ships 5 durations and 5 béziers,
-//! already emitted to CSS/Tailwind.
+//! The fleet does not lack a motion source. It has TWO shipped evaluators
+//! that do not know about each other: `mado/src/motion/` (a WebKit
+//! `UnitBezier` solve, wired to bell-flash/cursor-blink/decay) and
+//! `ayatsuri/src/logic/spring.rs` (a closed-form damped-harmonic-oscillator
+//! with `SpringParams { stiffness, damping_ratio }`, wired through
+//! `ecs/systems/animation.rs`). It does not lack a motion vocabulary either:
+//! `ishou_tokens::motion` ships 5 durations and 5 béziers, already emitted
+//! to CSS/Tailwind.
 //!
 //! What it lacks is an **authoring border**, a **closed vocabulary**, and a
 //! **forced consumption path** — the identical three things PENTE names for
@@ -54,11 +57,13 @@
 //!
 //! ## Tier-honest scope of THIS milestone (M0)
 //!
-//! - **batente does NOT evaluate.** mado owns the one evaluator and is
-//!   single-tenant by explicit decision, gated at its 3rd consumer. batente
-//!   is #2, so it holds the border and delegates. Re-implementing the bézier
-//!   solve here would create the second evaluator this doctrine exists to
-//!   prevent.
+//! - **batente does NOT evaluate.** Two evaluators already exist (above), so
+//!   batente is the THIRD site holding motion logic, not the second — an
+//!   earlier draft of this doc got that arithmetic wrong and the extraction
+//!   gate must be re-derived at M1, not inherited. Until then batente holds
+//!   the border and delegates: re-implementing a solve here would make three.
+//!   Any absorbed spring arm carries `damping_ratio` as well as `stiffness`,
+//!   or it regresses ayatsuri.
 //! - **No `#[derive(DeriveTataraDomain)]`, no loader.** Same flag-day as
 //!   pente: ishou pins no tatara-lisp and the two lineages are incompatible.
 //!   `specs/fleet.batente.tlisp` documents the destination form.
