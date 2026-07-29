@@ -1,0 +1,114 @@
+;;; fleet.pente.tlisp — the authored visual spine.
+;;;
+;;; STATUS: DESTINATION FORM, NOT WIRED. Nothing loads this file today.
+;;;
+;;; This documents the M1 authoring surface for `ishou-pente`'s typed algebra
+;;; (crates/ishou-pente). M0 shipped the Rust types + their tests; the
+;;; `#[derive(DeriveTataraDomain)]` border and the loader that would make this
+;;; file load-bearing are deliberately deferred, for a reason worth stating:
+;;;
+;;;   The ishou workspace pins NO tatara-lisp today, and the two lineages are
+;;;   mutually incompatible — `KeywordSexp` exists only on the standalone line
+;;;   (tatara-lisp/tatara-lisp-derive), `parse_kwargs_strict`/`ClosedSet` only
+;;;   on the monorepo line (tatara/tatara-lisp-derive), with zero cross-hits.
+;;;   ishou is depended on by escriba, garasu and madori, so adopting either
+;;;   line here is a flag-day, not an increment. It waits for the tatara-lisp
+;;;   consolidation (theory/TATARA-LISP-CONSOLIDATION.md).
+;;;
+;;; Until then this file is a design artifact. Treat any claim that pente is
+;;; "Lisp-authored" as false until a loader exists and this header is deleted.
+
+;;; ── Ramps ──────────────────────────────────────────────────────────────
+;;;
+;;; A ramp is a named, closed TokenName -> Origin map. `:born` is the ONLY
+;;; place a colour literal may appear anywhere in the algebra — that is what
+;;; makes a stray hex homeless rather than merely discouraged.
+;;;
+;;; M0 step 2 authors these BY TRANSCRIPTION: zero new colours. `nord`
+;;; transcribes irodori::NORD's 16 consts (which STAYS the Nord source of
+;;; truth); `vellum` transcribes VellumPalette::vellum()'s 38 entries. A
+;;; parity oracle asserts byte-equality against both, and any parity achieved
+;;; by encoding a known-wrong value carries a `pending-pente:` row.
+
+(deframp nord
+  :tokens ((polar-night-0 :born "#2E3440")
+           (polar-night-1 :born "#3B4252")
+           (polar-night-2 :born "#434C5E")
+           (polar-night-3 :born "#4C566A")
+           (snow-storm-0  :born "#D8DEE9")
+           (snow-storm-1  :born "#E5E9F0")
+           (snow-storm-2  :born "#ECEFF4")
+           (frost-0       :born "#8FBCBB")
+           (frost-1       :born "#88C0D0")
+           (frost-2       :born "#81A1C1")
+           (frost-3       :born "#5E81AC")
+           (aurora-red    :born "#BF616A")
+           (aurora-orange :born "#D08770")
+           (aurora-yellow :born "#EBCB8B")
+           (aurora-green  :born "#A3BE8C")
+           (aurora-purple :born "#B48EAD")
+
+           ;; Derived, never authored twice. `selection` is today
+           ;; simultaneously authored AND blended in three places; here the
+           ;; recipe is the single definition and the resolver produces the
+           ;; byte-exact value ishou/tests/vellum_matrix.rs already pins.
+           (selection     :blend (:over polar-night-0 :with frost-1 :alpha 0.30))
+           (search-others :blend (:over polar-night-0 :with aurora-yellow :alpha 0.22))))
+
+;;; ── Bindings ───────────────────────────────────────────────────────────
+;;;
+;;; A binding IS a theme: every CoreRole bound to a token in a named ramp.
+;;; All 16 core roles are mandatory — in Rust that is E0063 (a missing field
+;;; in a struct literal), which is a genuine compile error and is an
+;;; INHERITED property of SemanticRoles' shape, not something pente invented.
+;;;
+;;; Nord-vs-Vellum becomes ONE `:binding` line rather than a fleet-wide edit.
+
+(defbinding nord
+  :ramp nord
+  :background       polar-night-0
+  :surface          polar-night-1
+  :surface-elevated polar-night-2
+  :text             snow-storm-2
+  :text-muted       snow-storm-0
+  :text-dim         polar-night-3
+  :primary          frost-2
+  :accent           frost-1
+  :border           polar-night-3
+  :error            aurora-red
+  :warning          aurora-yellow
+  :success          aurora-green
+  :info             frost-0
+  :selection        selection
+  :cursor           frost-1
+  :agent            aurora-purple)
+
+;;; ── Faces ──────────────────────────────────────────────────────────────
+;;;
+;;; A face declares which OPEN face-roles it consumes. Core roles are NOT
+;;; redeclared per face — they come from the binding, so a face structurally
+;;; cannot disagree with the theme about what `accent` means.
+;;;
+;;; `:consumes` completeness is a CATALOG test (CI tier, honestly) — not a
+;;; compile error, because FaceRole is deliberately open.
+
+(defface terminal
+  :consumes (terminal.ansi-0 terminal.ansi-1 terminal.ansi-2 terminal.ansi-3
+             terminal.ansi-4 terminal.ansi-5 terminal.ansi-6 terminal.ansi-7)
+  :bind ((terminal.ansi-0 polar-night-1)
+         (terminal.ansi-1 aurora-red)
+         (terminal.ansi-2 aurora-green)
+         (terminal.ansi-3 aurora-yellow)
+         (terminal.ansi-4 frost-2)
+         (terminal.ansi-5 aurora-purple)
+         (terminal.ansi-6 frost-0)
+         (terminal.ansi-7 snow-storm-0)))
+
+;;; Hard-face stubs — authored but unconsumed at M0, per §III.
+(defface gpu
+  :consumes (gpu.aurora-low)
+  :bind ((gpu.aurora-low aurora-purple)))
+
+(defface web
+  :consumes (web.on-primary)
+  :bind ((web.on-primary snow-storm-2)))

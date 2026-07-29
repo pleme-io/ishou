@@ -1,0 +1,15 @@
+[package]
+name = "ishou-pente"
+description = "pente (the loom's reed) — the fleet's typed visual spine: a closed Origin/Ramp/Role/Binding algebra in which a hand-typed hex outside a ramp has no field to live in."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+ishou-tokens = { path = "../ishou-tokens" }
+serde = { workspace = true, features = ["derive"] }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

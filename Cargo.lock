@@ -323,6 +323,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ishou-pente"
+version = "0.1.4"
+dependencies = [
+ "ishou-tokens",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
 name = "ishou-render"
 version = "0.1.4"
 dependencies = [

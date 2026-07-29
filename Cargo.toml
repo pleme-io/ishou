@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "crates/ishou-tokens",
+    "crates/ishou-pente",
     "crates/ishou-render",
     "crates/ishou-cli",
     "crates/ishou-emoji",
