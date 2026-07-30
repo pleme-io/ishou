@@ -32,28 +32,28 @@
 
 (deframp nord
   :tokens ((polar-night-0 :born "#2E3440")
-           (polar-night-1 :born "#3B4252")
-           (polar-night-2 :born "#434C5E")
-           (polar-night-3 :born "#4C566A")
-           (snow-storm-0  :born "#D8DEE9")
-           (snow-storm-1  :born "#E5E9F0")
-           (snow-storm-2  :born "#ECEFF4")
-           (frost-0       :born "#8FBCBB")
-           (frost-1       :born "#88C0D0")
-           (frost-2       :born "#81A1C1")
-           (frost-3       :born "#5E81AC")
-           (aurora-red    :born "#BF616A")
-           (aurora-orange :born "#D08770")
-           (aurora-yellow :born "#EBCB8B")
-           (aurora-green  :born "#A3BE8C")
-           (aurora-purple :born "#B48EAD")
+    (polar-night-1 :born "#3B4252")
+    (polar-night-2 :born "#434C5E")
+    (polar-night-3 :born "#4C566A")
+    (snow-storm-0 :born "#D8DEE9")
+    (snow-storm-1 :born "#E5E9F0")
+    (snow-storm-2 :born "#ECEFF4")
+    (frost-0 :born "#8FBCBB")
+    (frost-1 :born "#88C0D0")
+    (frost-2 :born "#81A1C1")
+    (frost-3 :born "#5E81AC")
+    (aurora-red :born "#BF616A")
+    (aurora-orange :born "#D08770")
+    (aurora-yellow :born "#EBCB8B")
+    (aurora-green :born "#A3BE8C")
+    (aurora-purple :born "#B48EAD")
 
-           ;; Derived, never authored twice. `selection` is today
-           ;; simultaneously authored AND blended in three places; here the
-           ;; recipe is the single definition and the resolver produces the
-           ;; byte-exact value ishou/tests/vellum_matrix.rs already pins.
-           (selection     :blend (:over polar-night-0 :with frost-1 :alpha 0.30))
-           (search-others :blend (:over polar-night-0 :with aurora-yellow :alpha 0.22))))
+    ;; Derived, never authored twice. `selection` is today
+    ;; simultaneously authored AND blended in three places; here the
+    ;; recipe is the single definition and the resolver produces the
+    ;; byte-exact value ishou/tests/vellum_matrix.rs already pins.
+    (selection :blend (:over polar-night-0 :with frost-1 :alpha 0.3))
+    (search-others :blend (:over polar-night-0 :with aurora-yellow :alpha 0.22))))
 
 ;;; ── Bindings ───────────────────────────────────────────────────────────
 ;;;
@@ -66,22 +66,22 @@
 
 (defbinding nord
   :ramp nord
-  :background       polar-night-0
-  :surface          polar-night-1
+  :background polar-night-0
+  :surface polar-night-1
   :surface-elevated polar-night-2
-  :text             snow-storm-2
-  :text-muted       snow-storm-0
-  :text-dim         polar-night-3
-  :primary          frost-2
-  :accent           frost-1
-  :border           polar-night-3
-  :error            aurora-red
-  :warning          aurora-yellow
-  :success          aurora-green
-  :info             frost-0
-  :selection        selection
-  :cursor           frost-1
-  :agent            aurora-purple)
+  :text snow-storm-2
+  :text-muted snow-storm-0
+  :text-dim polar-night-3
+  :primary frost-2
+  :accent frost-1
+  :border polar-night-3
+  :error aurora-red
+  :warning aurora-yellow
+  :success aurora-green
+  :info frost-0
+  :selection selection
+  :cursor frost-1
+  :agent aurora-purple)
 
 ;;; ── Faces ──────────────────────────────────────────────────────────────
 ;;;
@@ -93,22 +93,24 @@
 ;;; compile error, because FaceRole is deliberately open.
 
 (defface terminal
-  :consumes (terminal.ansi-0 terminal.ansi-1 terminal.ansi-2 terminal.ansi-3
-             terminal.ansi-4 terminal.ansi-5 terminal.ansi-6 terminal.ansi-7)
+  :consumes (terminal.ansi-0
+    terminal.ansi-1
+    terminal.ansi-2
+    terminal.ansi-3
+    terminal.ansi-4
+    terminal.ansi-5
+    terminal.ansi-6
+    terminal.ansi-7)
   :bind ((terminal.ansi-0 polar-night-1)
-         (terminal.ansi-1 aurora-red)
-         (terminal.ansi-2 aurora-green)
-         (terminal.ansi-3 aurora-yellow)
-         (terminal.ansi-4 frost-2)
-         (terminal.ansi-5 aurora-purple)
-         (terminal.ansi-6 frost-0)
-         (terminal.ansi-7 snow-storm-0)))
+    (terminal.ansi-1 aurora-red)
+    (terminal.ansi-2 aurora-green)
+    (terminal.ansi-3 aurora-yellow)
+    (terminal.ansi-4 frost-2)
+    (terminal.ansi-5 aurora-purple)
+    (terminal.ansi-6 frost-0)
+    (terminal.ansi-7 snow-storm-0)))
 
 ;;; Hard-face stubs — authored but unconsumed at M0, per §III.
-(defface gpu
-  :consumes (gpu.aurora-low)
-  :bind ((gpu.aurora-low aurora-purple)))
+(defface gpu :consumes (gpu.aurora-low) :bind ((gpu.aurora-low aurora-purple)))
 
-(defface web
-  :consumes (web.on-primary)
-  :bind ((web.on-primary snow-storm-2)))
+(defface web :consumes (web.on-primary) :bind ((web.on-primary snow-storm-2)))
