@@ -1,7 +1,33 @@
 name: auto-release
 
-# Workspace auto-release: every push to main bumps the shared
-# workspace version, commits + tags v<X.Y.Z>, and uploads every
+# ┌─ DORMANT: Actions are DISABLED for this repository ────────────────────┐
+#
+# Nothing in this file runs today. `GET /repos/pleme-io/ishou/actions/
+# permissions` returns {"enabled": false} (measured 2026-07-30), and that is
+# DECLARED, not drift: pangea-architectures `workspaces/pleme-io-opensource/
+# org.yaml` carries `actions_enabled: false` on the `ishou` record. 14 of 860
+# records set it explicitly — a deliberate CI-cost/noise posture, not an
+# oversight. The last run of any kind here was 2026-07-18.
+#
+# CONSEQUENCE, stated plainly so the next reader doesn't hunt for a bug:
+# `ishou-batente@0.1.4` and `ishou-pente@0.1.4` are ABSENT from crates.io
+# (both 404) and no automated path can put them there while Actions are off.
+# That is an accepted state, not a stranded release. The description below
+# describes what this workflow WOULD do, not what is happening.
+#
+# THE REVERSAL IS ONE LINE: flip `actions_enabled` to `true` on the `ishou`
+# record in that org.yaml and let the reconciler apply it. Do NOT enable
+# Actions through the GitHub UI or API — open_source_repo.rb emits
+# `github_actions_repository_permissions enabled=false` from the declared
+# value, so an unmanaged re-enable is REVERTED on the next reconcile.
+#
+# The wiring below is kept, not deleted (MODULARIZE, DON'T DELETE): it is
+# correct, and it resumes on its own the moment the declaration flips.
+#
+# └────────────────────────────────────────────────────────────────────────┘
+
+# Workspace auto-release (dormant — see above): every push to main bumps the
+# shared workspace version, commits + tags v<X.Y.Z>, and uploads every
 # member crate to crates.io (multi-pass dependency order). Points
 # at the per-language reusable directly (the proven engenho/tend/
 # hashfix pattern) rather than the polymorphic dispatcher.
