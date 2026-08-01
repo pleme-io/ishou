@@ -135,32 +135,59 @@ impl<T: fmt::Display, B: Bounds<T>> fmt::Display for Refined<T, B> {
 
 impl<T: Copy + PartialOrd, B: Bounds<T>> Refined<T, B> {
     /// Construct from an arbitrary `T`. Always succeeds — out-of-range
-    /// values are clamped to `B::min()` or `B::max()`.
+    /// values are clamped to `B::min()` or `B::max()`, and values that are
+    /// not comparable to the bounds at all (see below) become
+    /// `B::default()`.
     ///
     /// Use [`Self::try_new`] when you want to detect clamping.
+    ///
+    /// ## Why this tests for IN-range rather than OUT-of-range
+    ///
+    /// `T: PartialOrd` is a **partial** order: two values may be
+    /// incomparable, in which case `<`, `>`, `<=` and `>=` are ALL false.
+    /// `f32::NAN` is the everyday instance.
+    ///
+    /// This used to read `if value < B::min() … else if value > B::max() …
+    /// else { value }`, which let every incomparable value fall through the
+    /// `else` **unrefined**. `Refined::<f32, _>::new(f32::NAN)` returned
+    /// `NaN`, and [`Self::get`]'s promise that the result "always satisfies
+    /// `B::min() <= v <= B::max()`" was false for it — a refinement type
+    /// that silently passed through the one value most likely to poison
+    /// arithmetic downstream.
+    ///
+    /// Requiring positive proof of in-range fixes the whole class rather
+    /// than special-casing floats: no `is_finite`, no `T: Float` bound. For
+    /// a total order (every integer type) the incomparable arm is simply
+    /// unreachable.
     #[must_use]
     pub fn new(value: T) -> Self {
-        let clamped = if value < B::min() {
+        let refined = if value >= B::min() && value <= B::max() {
+            value
+        } else if value < B::min() {
             B::min()
         } else if value > B::max() {
             B::max()
         } else {
-            value
+            // Incomparable to both bounds — NaN and friends. There is no
+            // meaningful clamp for a value that is not on the order at all,
+            // so take the declared default.
+            B::default()
         };
-        Self { value: clamped, _bounds: PhantomData }
+        Self { value: refined, _bounds: PhantomData }
     }
 
-    /// Construct from a `T`, returning `Err(value)` when the input
-    /// would have been clamped.
+    /// Construct from a `T`, returning `Err(value)` when the input is not
+    /// already within bounds.
     ///
     /// # Errors
-    /// Returns the original out-of-range value when
-    /// `value < B::min()` or `value > B::max()`.
+    /// Returns the original value when it is out of range **or not
+    /// comparable to the bounds** (e.g. `f32::NAN`) — see [`Self::new`] for
+    /// why those are the same case.
     pub fn try_new(value: T) -> Result<Self, T> {
-        if value < B::min() || value > B::max() {
-            Err(value)
-        } else {
+        if value >= B::min() && value <= B::max() {
             Ok(Self { value, _bounds: PhantomData })
+        } else {
+            Err(value)
         }
     }
 
@@ -263,6 +290,66 @@ mod tests {
         fn default() -> u32 { 8080 }
     }
     type Port = Refined<u32, PortBounds>;
+
+    // ── The incomparable-value rows ─────────────────────────────
+    //
+    // `PartialOrd` is PARTIAL: for `f32::NAN` every one of `<`, `>`, `<=`,
+    // `>=` is false. The original `new` tested for OUT-of-range and let
+    // anything that answered "no" to both tests through unrefined, so
+    // `Refined::<f32,_>::new(NAN)` returned NaN and `get`'s documented
+    // promise was false for it.
+    //
+    // These rows go red against that implementation.
+
+    #[test]
+    fn new_refines_nan_to_the_declared_default() {
+        let p = Percent::new(f32::NAN);
+        assert!(
+            !p.get().is_nan(),
+            "a refinement type must not pass NaN through — get() promises \
+             min() <= v <= max(), which no NaN satisfies"
+        );
+        assert_eq!(p.get(), PercentBounds::default());
+    }
+
+    #[test]
+    fn new_clamps_the_infinities() {
+        // These ARE comparable, so they clamp normally rather than
+        // taking the default — pinned so the new in-range test does not
+        // quietly reroute them.
+        assert_eq!(Percent::new(f32::INFINITY).get(), 1.0);
+        assert_eq!(Percent::new(f32::NEG_INFINITY).get(), 0.0);
+    }
+
+    #[test]
+    fn try_new_rejects_nan_rather_than_returning_ok() {
+        assert!(
+            Percent::try_new(f32::NAN).is_err(),
+            "try_new's contract is 'Err when not already in bounds', and \
+             NaN is never in bounds"
+        );
+    }
+
+    #[test]
+    fn every_constructed_value_satisfies_the_bounds_promise() {
+        // The invariant `get()` advertises, over the values most likely to
+        // break it.
+        for v in [
+            f32::NAN,
+            f32::INFINITY,
+            f32::NEG_INFINITY,
+            -1e30,
+            1e30,
+            -0.0,
+            0.5,
+        ] {
+            let got = Percent::new(v).get();
+            assert!(
+                got >= PercentBounds::min() && got <= PercentBounds::max(),
+                "new({v}) produced {got}, which violates the bounds promise"
+            );
+        }
+    }
 
     // ── Construction + clamping ─────────────────────────────────
 
