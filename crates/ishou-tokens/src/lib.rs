@@ -46,7 +46,7 @@ pub use vellum::{blend_linear, AlphaPaint, TerminalSurfaces, VellumPalette};
 pub use brand::Brand;
 pub use color::{ColorPalette, Rgb, SemanticRoles};
 pub use fleet_defaults::FleetDefaults;
-pub use fleet_keybinds::{FleetKeybinds, FleetKeybindsConsumer};
+pub use fleet_keybinds::{FleetKeybinds, FleetKeybindsConsumer, KeybindSurface};
 pub use fleet_session_names::{
     FleetSessionNames, NameContext, ResolvedName, SessionIdentity, SessionName, SessionNameStyle,
     SessionTheme,
