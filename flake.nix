@@ -192,10 +192,14 @@
     '';
 
     # Vellum skim/fzf `--color=k:v,…` string — generated from the BORN
-    # VellumPalette, byte-equivalent to the hand-authored
-    # `skim-tab::NORD_COLORS`. A file containing the single --color
-    # string (no trailing newline); skim-tab / the nix skim-theme can
-    # source it so every fleet picker follows one Vellum.
+    # VellumPalette. A file containing the single --color string (no
+    # trailing newline).
+    #
+    # NOBODY SOURCES THIS YET. It is byte-equal to skim-tab's dormant
+    # VELLUM_COLORS, not to the NORD_COLORS its pickers actually paint,
+    # and skim-tab carries no ishou dependency. Wiring both consumers
+    # (skim-tab + nix/lib/skim-theme.nix) to read this path is
+    # ishou-pente's M0 deletion. See ishou-render::vellum::render_skim.
     mkSkimVellum = system: let
       pkgs = import nixpkgs { inherit system; };
       ishouBin = base.packages.${system}.default;

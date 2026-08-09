@@ -137,9 +137,11 @@ pub fn render_svg_palette() -> String {
 
 // ─── skim / fzf `--color` string ────────────────────────────────────────────
 
-/// Resolve a Vellum token to its **uppercase** `#RRGGBB` hex — the skim
-/// `--color` wire format mirrors the hand-authored `skim-tab::NORD_COLORS`,
-/// which uses uppercase hex.
+/// Resolve a Vellum token to its **uppercase** `#RRGGBB` hex. Every
+/// hand-authored skim `--color` string on the fleet — both of
+/// `skim-tab`'s colour consts, both branches of `nix/lib/skim-theme.nix`
+/// — writes uppercase hex, so the generated string writes it too and
+/// stays byte-comparable against them.
 fn tok(p: &VellumPalette, name: &str) -> String {
     p.get(name)
         .unwrap_or_else(|| panic!("vellum token `{name}` missing"))
@@ -148,11 +150,45 @@ fn tok(p: &VellumPalette, name: &str) -> String {
 
 /// Render the skim/fzf `--color=k:v,…` string from the BORN `VellumPalette`.
 ///
-/// Byte-equivalent to the hand-authored `pleme-io/skim-tab::NORD_COLORS`:
-/// every colour resolves from a typed token, the `:bold`/`:underlined`
-/// attribute suffixes are the picker's fixed UX contract. The role→token
-/// map is the single source of truth — change a Vellum token and every
-/// picker on the fleet follows.
+/// Every colour resolves from a typed token; the `:bold`/`:underlined`
+/// attribute suffixes are the picker's fixed UX contract.
+///
+/// # What this string is, and what it is NOT (measured 2026-08-09)
+///
+/// It is byte-equal to `skim-tab::VELLUM_COLORS` and to the `vellum`
+/// branch of `nix/lib/skim-theme.nix`. **Both of those are saved-but-
+/// dormant.** Neither is what a picker paints: `skim-tab::base_options`
+/// passes `NORD_COLORS` (real Nord, `skim-tab/src/lib.rs:32`, set at
+/// `:196`) and `skim-theme.nix` selects `theme = "nord"`. All fourteen
+/// values differ between the two.
+///
+/// So this renderer generates a palette **nothing currently consumes**,
+/// and the earlier claim here — "byte-equivalent to `NORD_COLORS`" — was
+/// false from the moment skim-tab flipped to Nord (`63b74c7`, "pickers:
+/// classic Nord palette (ghostty parity), Vellum saved"). Do not read
+/// this function as parity with the shipped pickers. There is no parity
+/// to read, and no code path by which a change here reaches one: skim-tab
+/// has **no ishou dependency at all**.
+///
+/// # Orientation: three palettes render in one frost prompt
+///
+/// | Surface | Palette | Source |
+/// |---|---|---|
+/// | frost completion menu | Vellum | `frost-zle/src/lib.rs:203-211`, hand-typed RGB |
+/// | skim-tab pickers (Ctrl-R/T/F, Tab) | real Nord | `skim-tab::NORD_COLORS` |
+/// | `SKIM_DEFAULT_OPTIONS` | Borealis | frostmourne `lisp/61-tools-skim.lisp` — exported, but dead for the pickers: skim-tab drives the skim *library* with an explicit `--color`, so this only ever colours a bare `sk` |
+///
+/// # The destination
+///
+/// One authored ramp, projected. That is `ishou-pente`'s M0, whose exit
+/// criterion is stated as a **deletion** (`crates/ishou-pente/src/lib.rs`):
+/// `nix/lib/skim-theme.nix` and skim-tab's colour consts go away, and both
+/// consumers read the generated string (`nix run .#skim-vellum`) instead.
+/// Until skim-tab grows that dependency, the honest guard below pins this
+/// renderer's own bytes and claims nothing about skim-tab. **Do not
+/// "restore" parity by copying `NORD_COLORS` into this crate** — a copied
+/// constant asserted against itself is a green test that proves nothing,
+/// which is exactly the defect this comment replaces.
 ///
 /// Role → token:
 /// - `fg`      → `snow1`        (base05, the text fg)
@@ -407,11 +443,27 @@ mod tests {
         assert_eq!(render_skim(), render_skim());
     }
 
+    /// Pins the Vellum wire bytes this renderer emits.
+    ///
+    /// **What it guards:** a Vellum token edit, a role→token remap, a key
+    /// reorder, or a lost `:bold`/`:underlined` suffix — anything that
+    /// changes the `--color` string `nix run .#skim-vellum` writes into
+    /// the store. That file is the artifact a consumer would source, so
+    /// its bytes are a contract even while no consumer sources it yet.
+    ///
+    /// **What it deliberately does NOT claim:** parity with any palette
+    /// skim-tab actually paints. `skim-tab::base_options` passes
+    /// `NORD_COLORS`; these bytes are `VELLUM_COLORS`, the saved branch.
+    /// This test used to say it pinned `NORD_COLORS` and it never did —
+    /// see `render_skim`'s doc comment for the real relationship and for
+    /// the convergence (`ishou-pente` M0) that would make a genuine
+    /// two-sided parity test possible. Asserting against a `NORD_COLORS`
+    /// copied into this crate would be that lie with extra steps.
     #[test]
-    fn skim_string_matches_the_authored_vellum_string() {
-        // The exact byte sequence `pleme-io/skim-tab::NORD_COLORS` ships
-        // (joined with `,` — no trailing newline). Generated from the
-        // typed Vellum tokens.
+    fn skim_string_pins_the_born_vellum_wire_bytes() {
+        // Byte-equal (as of 2026-08-09) to `skim-tab::VELLUM_COLORS` and
+        // to skim-theme.nix's `vellum` branch — both dormant. Joined with
+        // `,`, no trailing newline.
         let expected = "\
 fg:#E2DBC8,\
 bg:#16140E,\
@@ -427,7 +479,12 @@ spinner:#99AABE,\
 header:#99AABE,\
 border:#6E6857,\
 query:#F4EFE2:bold";
-        assert_eq!(render_skim(), expected, "skim --color string drifted");
+        assert_eq!(
+            render_skim(),
+            expected,
+            "Vellum skim --color bytes drifted; the generated \
+             `nix run .#skim-vellum` artifact changed"
+        );
     }
 
     #[test]
