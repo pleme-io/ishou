@@ -87,7 +87,10 @@ impl Binding {
     /// Every (role, token) pair, in `CoreRole::ALL` order.
     #[must_use]
     pub fn pairs(&self) -> Vec<(CoreRole, &TokenName)> {
-        CoreRole::ALL.into_iter().map(|r| (r, self.token(r))).collect()
+        CoreRole::ALL
+            .into_iter()
+            .map(|r| (r, self.token(r)))
+            .collect()
     }
 
     /// Validate every bound token against the ramp it claims to draw from.

@@ -83,14 +83,22 @@ impl Signal {
     /// Construct a signal triple.
     #[must_use]
     pub const fn new(emoji: &'static str, glyph: &'static str, label: &'static str) -> Self {
-        Self { emoji, glyph, label }
+        Self {
+            emoji,
+            glyph,
+            label,
+        }
     }
 
     /// The empty signal — used by the bare tier for emoji + glyph while
     /// retaining the `label` so a bare app still communicates in text.
     #[must_use]
     pub const fn off(label: &'static str) -> Self {
-        Self { emoji: "", glyph: "", label }
+        Self {
+            emoji: "",
+            glyph: "",
+            label,
+        }
     }
 
     /// Render the field matching `mode`.

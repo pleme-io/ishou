@@ -106,9 +106,8 @@ mod tests {
     fn output_contains_all_16_base_slots() {
         let out = render(&TokenSet::pleme());
         for slot in [
-            "base00", "base01", "base02", "base03", "base04", "base05",
-            "base06", "base07", "base08", "base09", "base0A", "base0B",
-            "base0C", "base0D", "base0E", "base0F",
+            "base00", "base01", "base02", "base03", "base04", "base05", "base06", "base07",
+            "base08", "base09", "base0A", "base0B", "base0C", "base0D", "base0E", "base0F",
         ] {
             assert!(out.contains(&format!("{slot}: \"")), "missing {slot}");
         }
@@ -149,8 +148,11 @@ mod tests {
                 if let Some(value_part) = rest.split(": ").nth(1) {
                     let v = value_part.trim_matches('"');
                     assert_eq!(v.len(), 6, "wrong length: {line}");
-                    assert!(v.chars().all(|c| c.is_ascii_hexdigit() && !c.is_ascii_uppercase()),
-                        "expected lowercase hex without prefix in: {line}");
+                    assert!(
+                        v.chars()
+                            .all(|c| c.is_ascii_hexdigit() && !c.is_ascii_uppercase()),
+                        "expected lowercase hex without prefix in: {line}"
+                    );
                 }
             }
         }

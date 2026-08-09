@@ -113,7 +113,10 @@ pub struct Refined<T, B: Bounds<T>> {
 impl<T: Copy, B: Bounds<T>> Copy for Refined<T, B> {}
 impl<T: Clone, B: Bounds<T>> Clone for Refined<T, B> {
     fn clone(&self) -> Self {
-        Self { value: self.value.clone(), _bounds: PhantomData }
+        Self {
+            value: self.value.clone(),
+            _bounds: PhantomData,
+        }
     }
 }
 impl<T: PartialEq, B: Bounds<T>> PartialEq for Refined<T, B> {
@@ -173,7 +176,10 @@ impl<T: Copy + PartialOrd, B: Bounds<T>> Refined<T, B> {
             // so take the declared default.
             B::default()
         };
-        Self { value: refined, _bounds: PhantomData }
+        Self {
+            value: refined,
+            _bounds: PhantomData,
+        }
     }
 
     /// Construct from a `T`, returning `Err(value)` when the input is not
@@ -185,7 +191,10 @@ impl<T: Copy + PartialOrd, B: Bounds<T>> Refined<T, B> {
     /// why those are the same case.
     pub fn try_new(value: T) -> Result<Self, T> {
         if value >= B::min() && value <= B::max() {
-            Ok(Self { value, _bounds: PhantomData })
+            Ok(Self {
+                value,
+                _bounds: PhantomData,
+            })
         } else {
             Err(value)
         }
@@ -215,7 +224,10 @@ impl<T, B: Bounds<T>> Default for Refined<T, B> {
     /// `Refined` without bounds re-validation (the trait contract
     /// requires `min() <= default() <= max()`).
     fn default() -> Self {
-        Self { value: B::default(), _bounds: PhantomData }
+        Self {
+            value: B::default(),
+            _bounds: PhantomData,
+        }
     }
 }
 
@@ -277,17 +289,29 @@ mod tests {
 
     struct PercentBounds;
     impl Bounds<f32> for PercentBounds {
-        fn min() -> f32 { 0.0 }
-        fn max() -> f32 { 1.0 }
-        fn default() -> f32 { 0.5 }
+        fn min() -> f32 {
+            0.0
+        }
+        fn max() -> f32 {
+            1.0
+        }
+        fn default() -> f32 {
+            0.5
+        }
     }
     type Percent = Refined<f32, PercentBounds>;
 
     struct PortBounds;
     impl Bounds<u32> for PortBounds {
-        fn min() -> u32 { 1024 }
-        fn max() -> u32 { 65535 }
-        fn default() -> u32 { 8080 }
+        fn min() -> u32 {
+            1024
+        }
+        fn max() -> u32 {
+            65535
+        }
+        fn default() -> u32 {
+            8080
+        }
     }
     type Port = Refined<u32, PortBounds>;
 
@@ -396,7 +420,9 @@ mod tests {
     #[test]
     fn inc_by_saturates_at_max() {
         let mut p = Percent::new(0.5);
-        for _ in 0..1000 { p = p.inc_by(0.1); }
+        for _ in 0..1000 {
+            p = p.inc_by(0.1);
+        }
         assert_eq!(p.get(), 1.0);
         assert!(p.at_max());
     }
@@ -404,7 +430,9 @@ mod tests {
     #[test]
     fn dec_by_saturates_at_min() {
         let mut p = Percent::new(0.5);
-        for _ in 0..1000 { p = p.dec_by(0.1); }
+        for _ in 0..1000 {
+            p = p.dec_by(0.1);
+        }
         assert_eq!(p.get(), 0.0);
         assert!(p.at_min());
     }

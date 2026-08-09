@@ -24,7 +24,11 @@ fn parse_hex(s: &str) -> (u8, u8, u8) {
 
 fn chan_lin(c: u8) -> f64 {
     let c = f64::from(c) / 255.0;
-    if c <= 0.03928 { c / 12.92 } else { ((c + 0.055) / 1.055).powf(2.4) }
+    if c <= 0.03928 {
+        c / 12.92
+    } else {
+        ((c + 0.055) / 1.055).powf(2.4)
+    }
 }
 
 fn luminance(hex: &str) -> f64 {
@@ -50,10 +54,18 @@ fn library_is_complete() {
     for &t in FleetTheme::all() {
         let s = serde_yaml::to_string(&t).unwrap();
         let back: FleetTheme = serde_yaml::from_str(&s).unwrap();
-        assert_eq!(t, back, "theme {} does not round-trip through serde", t.name());
+        assert_eq!(
+            t,
+            back,
+            "theme {} does not round-trip through serde",
+            t.name()
+        );
     }
     // The two named anchors must be in the library.
-    assert!(FleetTheme::all().contains(&FleetTheme::bare()), "bare missing from library");
+    assert!(
+        FleetTheme::all().contains(&FleetTheme::bare()),
+        "bare missing from library"
+    );
     assert!(
         FleetTheme::all().contains(&FleetTheme::prescribed_default()),
         "prescribed default missing from library"
@@ -70,7 +82,11 @@ fn theme_names_are_unique() {
     for &t in FleetTheme::all() {
         assert!(seen.insert(t.name()), "duplicate theme name: {}", t.name());
         // name() must equal the resolved theme's `name` field.
-        assert_eq!(t.name(), t.resolve().name, "name() disagrees with resolve().name");
+        assert_eq!(
+            t.name(),
+            t.resolve().name,
+            "name() disagrees with resolve().name"
+        );
     }
 }
 
@@ -94,7 +110,11 @@ fn every_theme_has_a_complete_ansi_palette() {
             failures.push(format!("{}: bg/fg not #rrggbb", t.name()));
         }
     }
-    assert!(failures.is_empty(), "ANSI completeness failures:\n  - {}", failures.join("\n  - "));
+    assert!(
+        failures.is_empty(),
+        "ANSI completeness failures:\n  - {}",
+        failures.join("\n  - ")
+    );
 }
 
 /// LEGIBILITY FLOOR — the load-bearing forcing function. Body text on the
@@ -111,14 +131,17 @@ fn every_theme_body_text_clears_aaa() {
         if ratio < 7.0 {
             failures.push(format!(
                 "{}: fg {} / bg {} = {ratio:.2}:1 (< 7.0 AAA)",
-                t.name(), r.foreground, r.background
+                t.name(),
+                r.foreground,
+                r.background
             ));
         }
     }
     assert!(
         failures.is_empty(),
         "{} theme(s) fail the AAA body-text floor:\n  - {}",
-        failures.len(), failures.join("\n  - ")
+        failures.len(),
+        failures.join("\n  - ")
     );
 }
 
@@ -133,7 +156,11 @@ fn prescribed_default_is_nord_polar_night() {
     // Vellum's warm parchment. This is the assertion that would catch a
     // re-point to any warm palette, whatever it were named.
     let (br, _, bb) = parse_hex(&r.background);
-    assert!(bb > br, "nord background should be cool (B > R), got {}", r.background);
+    assert!(
+        bb > br,
+        "nord background should be cool (B > R), got {}",
+        r.background
+    );
 }
 
 /// Vellum is RETIRED from the prescribed role, never removed: its palette
@@ -147,5 +174,9 @@ fn vellum_is_retired_not_removed_and_still_warm() {
     assert_eq!(v.background.to_uppercase(), "#16140E");
     assert_eq!(v.foreground.to_uppercase(), "#E2DBC8");
     let (br, _, bb) = parse_hex(&v.background);
-    assert!(br >= bb, "vellum background should stay warm (R >= B), got {}", v.background);
+    assert!(
+        br >= bb,
+        "vellum background should stay warm (R >= B), got {}",
+        v.background
+    );
 }

@@ -44,8 +44,15 @@ pub fn render(t: &TokenSet) -> String {
     out.push_str("      fontSize: {\n");
     let s = &t.typography.scale;
     for (k, v) in [
-        ("xs", s.xs), ("sm", s.sm), ("base", s.base), ("md", s.md), ("lg", s.lg),
-        ("xl", s.xl), ("2xl", s.x2), ("3xl", s.x3), ("4xl", s.x4),
+        ("xs", s.xs),
+        ("sm", s.sm),
+        ("base", s.base),
+        ("md", s.md),
+        ("lg", s.lg),
+        ("xl", s.xl),
+        ("2xl", s.x2),
+        ("3xl", s.x3),
+        ("4xl", s.x4),
     ] {
         out.push_str(&format!("        \"{k}\": \"{v}rem\",\n"));
     }
@@ -80,8 +87,11 @@ pub fn render(t: &TokenSet) -> String {
     out.push_str("      transitionTimingFunction: {\n");
     let e = &t.motion.easing;
     for (k, c) in [
-        ("standard", e.standard), ("decelerate", e.decelerate), ("accelerate", e.accelerate),
-        ("sonic-boom", e.sonic_boom), ("saber", e.saber),
+        ("standard", e.standard),
+        ("decelerate", e.decelerate),
+        ("accelerate", e.accelerate),
+        ("sonic-boom", e.sonic_boom),
+        ("saber", e.saber),
     ] {
         out.push_str(&format!(
             "        \"{k}\": \"cubic-bezier({}, {}, {}, {})\",\n",
@@ -94,8 +104,11 @@ pub fn render(t: &TokenSet) -> String {
     out.push_str("      transitionDuration: {\n");
     let d = &t.motion.duration;
     for (k, v) in [
-        ("instant", d.instant_ms), ("fast", d.fast_ms), ("base", d.base_ms),
-        ("slow", d.slow_ms), ("hero", d.hero_ms),
+        ("instant", d.instant_ms),
+        ("fast", d.fast_ms),
+        ("base", d.base_ms),
+        ("slow", d.slow_ms),
+        ("hero", d.hero_ms),
     ] {
         out.push_str(&format!("        \"{k}\": \"{v}ms\",\n"));
     }

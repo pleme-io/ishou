@@ -146,21 +146,25 @@ impl Batente {
     /// `E0277` via [`capability::AtLeast`] and this branch is unreachable —
     /// both paths are real, only the static one is unrepresentable.
     pub fn resolve(&self, face: &str, motion: &Motion) -> Result<&Animation> {
-        let spec = self.faces.get(face).ok_or_else(|| BatenteError::UnboundMotion {
-            face: face.to_string(),
-            motion: motion.to_string(),
-        })?;
+        let spec = self
+            .faces
+            .get(face)
+            .ok_or_else(|| BatenteError::UnboundMotion {
+                face: face.to_string(),
+                motion: motion.to_string(),
+            })?;
 
         let name = match motion {
             Motion::Core(c) => self.choreography.motion(*c).clone(),
-            Motion::Face(f) => spec
-                .face_beats
-                .get(f)
-                .cloned()
-                .ok_or_else(|| BatenteError::UnboundMotion {
-                    face: face.to_string(),
-                    motion: f.to_string(),
-                })?,
+            Motion::Face(f) => {
+                spec.face_beats
+                    .get(f)
+                    .cloned()
+                    .ok_or_else(|| BatenteError::UnboundMotion {
+                        face: face.to_string(),
+                        motion: f.to_string(),
+                    })?
+            }
         };
 
         let anim = self
@@ -228,7 +232,10 @@ mod tests {
             vec![face("gpu", MotionClass::Continuous)],
         )
         .unwrap();
-        assert!(b.resolve("gpu", &Motion::Core(CoreMotion::CursorBlink)).is_ok());
+        assert!(
+            b.resolve("gpu", &Motion::Core(CoreMotion::CursorBlink))
+                .is_ok()
+        );
     }
 
     #[test]

@@ -85,7 +85,12 @@ impl Srgb {
     /// Promote to alpha-having sRGB. `255` = fully opaque.
     #[must_use]
     pub const fn with_alpha(self, a: u8) -> SrgbA {
-        SrgbA { r: self.r, g: self.g, b: self.b, a }
+        SrgbA {
+            r: self.r,
+            g: self.g,
+            b: self.b,
+            a,
+        }
     }
 
     /// **The** entry to GPU-correct rendering: convert to linear space
@@ -147,7 +152,12 @@ impl Linear {
     /// Promote to alpha-having linear.
     #[must_use]
     pub const fn with_alpha(self, a: f32) -> LinearRgba {
-        LinearRgba { r: self.r, g: self.g, b: self.b, a }
+        LinearRgba {
+            r: self.r,
+            g: self.g,
+            b: self.b,
+            a,
+        }
     }
 
     /// Convert back to sRGB. Inverse of `Srgb::to_linear` (lossy at
@@ -380,10 +390,8 @@ mod tests {
         // Nord polar night through the full pipeline: hex → Srgb →
         // Linear → Srgb → hex. Must return to the original hex.
         let palette = [
-            "#2e3440", "#3b4252", "#434c5e", "#4c566a",
-            "#d8dee9", "#e5e9f0", "#eceff4",
-            "#8fbcbb", "#88c0d0", "#81a1c1", "#5e81ac",
-            "#bf616a", "#d08770", "#ebcb8b", "#a3be8c", "#b48ead",
+            "#2e3440", "#3b4252", "#434c5e", "#4c566a", "#d8dee9", "#e5e9f0", "#eceff4", "#8fbcbb",
+            "#88c0d0", "#81a1c1", "#5e81ac", "#bf616a", "#d08770", "#ebcb8b", "#a3be8c", "#b48ead",
         ];
         for hex in palette {
             let s = Srgb::from_hex(hex).unwrap();
@@ -396,7 +404,12 @@ mod tests {
 
     #[test]
     fn linear_to_f64_array_matches_field_order() {
-        let l = LinearRgba { r: 0.1, g: 0.2, b: 0.3, a: 0.4 };
+        let l = LinearRgba {
+            r: 0.1,
+            g: 0.2,
+            b: 0.3,
+            a: 0.4,
+        };
         let arr = l.to_f64_array();
         // f32 → f64 widening introduces precision noise; pin the
         // ordering with a loose tolerance.
@@ -411,7 +424,12 @@ mod tests {
         // Alpha is linear by convention; converting sRGB-with-alpha
         // to LinearRgba should preserve alpha bit-for-bit (modulo
         // u8 → unit-f32 normalisation).
-        let s = SrgbA { r: 0x2e, g: 0x34, b: 0x40, a: 200 };
+        let s = SrgbA {
+            r: 0x2e,
+            g: 0x34,
+            b: 0x40,
+            a: 200,
+        };
         let l = s.to_linear();
         assert!((l.a - 200.0 / 255.0).abs() < EPS);
     }
@@ -464,7 +482,14 @@ mod tests {
         // Bug guard: in the gamma piecewise function, 0.0 must take
         // the linear branch (0.0 / 12.92 = 0.0), not the power branch.
         let l = Srgb::new(0, 0, 0).to_linear();
-        assert_eq!(l, Linear { r: 0.0, g: 0.0, b: 0.0 });
+        assert_eq!(
+            l,
+            Linear {
+                r: 0.0,
+                g: 0.0,
+                b: 0.0
+            }
+        );
     }
 
     #[test]
@@ -485,7 +510,12 @@ mod tests {
 
     #[test]
     fn srgba_serde_round_trip() {
-        let s = SrgbA { r: 1, g: 2, b: 3, a: 4 };
+        let s = SrgbA {
+            r: 1,
+            g: 2,
+            b: 3,
+            a: 4,
+        };
         let j = serde_json::to_string(&s).unwrap();
         let back: SrgbA = serde_json::from_str(&j).unwrap();
         assert_eq!(s, back);
@@ -498,7 +528,12 @@ mod tests {
     #[cfg(feature = "wgpu")]
     #[test]
     fn linear_rgba_is_only_path_to_wgpu_color() {
-        let l = LinearRgba { r: 0.1, g: 0.2, b: 0.3, a: 1.0 };
+        let l = LinearRgba {
+            r: 0.1,
+            g: 0.2,
+            b: 0.3,
+            a: 1.0,
+        };
         let _: wgpu_types::Color = l.into();
         // If someone adds `impl From<Srgb> for wgpu_types::Color`,
         // they're violating the architecture. There is no positive

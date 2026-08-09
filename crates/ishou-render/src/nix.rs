@@ -49,10 +49,10 @@ pub fn render(t: &TokenSet) -> String {
         AttrEntry::new("frost3", str_(hex(c.frost_3))),
     ]);
     let aurora = attrset(vec![
-        AttrEntry::new("red",    str_(hex(c.aurora_red))),
+        AttrEntry::new("red", str_(hex(c.aurora_red))),
         AttrEntry::new("orange", str_(hex(c.aurora_orange))),
         AttrEntry::new("yellow", str_(hex(c.aurora_yellow))),
-        AttrEntry::new("green",  str_(hex(c.aurora_green))),
+        AttrEntry::new("green", str_(hex(c.aurora_green))),
         AttrEntry::new("purple", str_(hex(c.aurora_purple))),
     ]);
 

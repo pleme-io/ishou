@@ -109,12 +109,7 @@ pub fn render(t: &TokenSet) -> String {
     push_rule(&mut out, "Comment", "comment", base03);
     push_rule(&mut out, "String", "string", base0b);
     push_rule(&mut out, "Number", "constant.numeric", base09);
-    push_rule(
-        &mut out,
-        "Built-in constant",
-        "constant.language",
-        base09,
-    );
+    push_rule(&mut out, "Built-in constant", "constant.language", base09);
     push_rule(
         &mut out,
         "User-defined constant",
@@ -124,78 +119,33 @@ pub fn render(t: &TokenSet) -> String {
     push_rule(&mut out, "Variable", "variable", base08);
     push_rule(&mut out, "Keyword", "keyword", base0e);
     push_rule(&mut out, "Storage", "storage", base0e);
-    push_rule(
-        &mut out,
-        "Storage type",
-        "storage.type",
-        base0d,
-    );
-    push_rule(
-        &mut out,
-        "Class name",
-        "entity.name.class",
-        base0a,
-    );
+    push_rule(&mut out, "Storage type", "storage.type", base0d);
+    push_rule(&mut out, "Class name", "entity.name.class", base0a);
     push_rule(
         &mut out,
         "Inherited class",
         "entity.other.inherited-class",
         base0c,
     );
-    push_rule(
-        &mut out,
-        "Function name",
-        "entity.name.function",
-        base0d,
-    );
-    push_rule(
-        &mut out,
-        "Function argument",
-        "variable.parameter",
-        base09,
-    );
-    push_rule(
-        &mut out,
-        "Tag name",
-        "entity.name.tag",
-        base08,
-    );
+    push_rule(&mut out, "Function name", "entity.name.function", base0d);
+    push_rule(&mut out, "Function argument", "variable.parameter", base09);
+    push_rule(&mut out, "Tag name", "entity.name.tag", base08);
     push_rule(
         &mut out,
         "Tag attribute",
         "entity.other.attribute-name",
         base0a,
     );
-    push_rule(
-        &mut out,
-        "Library function",
-        "support.function",
-        base0d,
-    );
-    push_rule(
-        &mut out,
-        "Library constant",
-        "support.constant",
-        base0c,
-    );
+    push_rule(&mut out, "Library function", "support.function", base0d);
+    push_rule(&mut out, "Library constant", "support.constant", base0c);
     push_rule(
         &mut out,
         "Library class/type",
         "support.type, support.class",
         base0a,
     );
-    push_rule(
-        &mut out,
-        "Invalid",
-        "invalid",
-        base08,
-    );
-    push_rule(
-        &mut out,
-        "Invalid deprecated",
-        "invalid.deprecated",
-        base0f,
-    );
+    push_rule(&mut out, "Invalid", "invalid", base08);
+    push_rule(&mut out, "Invalid deprecated", "invalid.deprecated", base0f);
 
     out.push_str("\t</array>\n");
     out.push_str("\t<key>uuid</key>\n");

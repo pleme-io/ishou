@@ -94,18 +94,20 @@ impl Ramp {
             Some(Visit::InProgress) => {
                 // Report the cycle from where it closes, not the whole stack.
                 let start = stack.iter().position(|n| *n == name).unwrap_or(0);
-                let mut path: Vec<String> =
-                    stack[start..].iter().map(|n| n.to_string()).collect();
+                let mut path: Vec<String> = stack[start..].iter().map(|n| n.to_string()).collect();
                 path.push(name.to_string());
                 return Err(PenteError::Cycle { path });
             }
             None => {}
         }
 
-        let origin = self.tokens.get(name).ok_or_else(|| PenteError::UnknownToken {
-            ramp: self.name.clone(),
-            token: name.clone(),
-        })?;
+        let origin = self
+            .tokens
+            .get(name)
+            .ok_or_else(|| PenteError::UnknownToken {
+                ramp: self.name.clone(),
+                token: name.clone(),
+            })?;
 
         state.insert(name, Visit::InProgress);
         stack.push(name);
@@ -237,7 +239,8 @@ mod tests {
     #[test]
     fn unknown_token_is_caught_at_resolve_not_at_render() {
         let mut ramp = Ramp::new("t");
-        ramp.insert("a", Origin::Alias { of: "nope".into() }).unwrap();
+        ramp.insert("a", Origin::Alias { of: "nope".into() })
+            .unwrap();
         let e = ramp.resolve().unwrap_err();
         assert_eq!(
             e,
@@ -268,8 +271,10 @@ mod tests {
         // check reports this as a cycle; the tri-state mark must not.
         let mut ramp = Ramp::new("t");
         ramp.insert("base", born(1, 2, 3)).unwrap();
-        ramp.insert("l", Origin::Alias { of: "base".into() }).unwrap();
-        ramp.insert("r", Origin::Alias { of: "base".into() }).unwrap();
+        ramp.insert("l", Origin::Alias { of: "base".into() })
+            .unwrap();
+        ramp.insert("r", Origin::Alias { of: "base".into() })
+            .unwrap();
         ramp.insert(
             "top",
             Origin::Blend {

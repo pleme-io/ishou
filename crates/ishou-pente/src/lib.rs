@@ -139,24 +139,34 @@ impl Pente {
         match role {
             Role::Core(core) => {
                 let token = self.binding.token(*core);
-                self.ramp.get(token).ok_or_else(|| PenteError::UnknownToken {
-                    ramp: self.ramp.name.clone(),
-                    token: token.clone(),
-                })
+                self.ramp
+                    .get(token)
+                    .ok_or_else(|| PenteError::UnknownToken {
+                        ramp: self.ramp.name.clone(),
+                        token: token.clone(),
+                    })
             }
             Role::Face(fr) => {
-                let spec = self.faces.get(face).ok_or_else(|| PenteError::UnboundRole {
-                    face: face.to_string(),
-                    role: fr.to_string(),
-                })?;
-                let token = spec.face_tokens.get(fr).ok_or_else(|| PenteError::UnboundRole {
-                    face: face.to_string(),
-                    role: fr.to_string(),
-                })?;
-                self.ramp.get(token).ok_or_else(|| PenteError::UnknownToken {
-                    ramp: self.ramp.name.clone(),
-                    token: token.clone(),
-                })
+                let spec = self
+                    .faces
+                    .get(face)
+                    .ok_or_else(|| PenteError::UnboundRole {
+                        face: face.to_string(),
+                        role: fr.to_string(),
+                    })?;
+                let token = spec
+                    .face_tokens
+                    .get(fr)
+                    .ok_or_else(|| PenteError::UnboundRole {
+                        face: face.to_string(),
+                        role: fr.to_string(),
+                    })?;
+                self.ramp
+                    .get(token)
+                    .ok_or_else(|| PenteError::UnknownToken {
+                        ramp: self.ramp.name.clone(),
+                        token: token.clone(),
+                    })
             }
         }
     }

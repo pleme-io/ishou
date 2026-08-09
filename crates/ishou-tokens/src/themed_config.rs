@@ -522,9 +522,7 @@ pub mod convergence {
         #[test]
         #[should_panic(expected = "scrollback_lines drift")]
         fn divergence_message_names_the_drifting_field() {
-            Guard::for_app("fixture")
-                .expect_scrollback_lines(42)
-                .run();
+            Guard::for_app("fixture").expect_scrollback_lines(42).run();
         }
 
         #[test]
@@ -556,7 +554,9 @@ pub mod convergence {
         #[test]
         #[should_panic(expected = "multiplexer_prefix chord drift")]
         fn divergent_multiplexer_prefix_panics() {
-            Guard::for_app("fixture").expect_multiplexer_prefix("C-a").run();
+            Guard::for_app("fixture")
+                .expect_multiplexer_prefix("C-a")
+                .run();
         }
 
         #[test]
@@ -649,7 +649,11 @@ mod tests {
         // inherits whatever the fleet prescribes, so this asserts the
         // DERIVATION rather than a specific theme name.
         assert_eq!(cfg.theme, FleetTheme::prescribed_default());
-        assert_eq!(cfg.theme, FleetTheme::PlemeDark, "the fleet look is Nord dark");
+        assert_eq!(
+            cfg.theme,
+            FleetTheme::PlemeDark,
+            "the fleet look is Nord dark"
+        );
         // Ghostty-aligned fleet font (see fleet_defaults.rs prescribed()).
         assert_eq!(cfg.font_family, "JetBrainsMono Nerd Font");
         assert_eq!(cfg.font_size, 13.0);
@@ -697,7 +701,11 @@ mod tests {
         }
         impl OtherApp {
             fn bare() -> Self {
-                Self { theme: FleetTheme::Bare, font_family: String::new(), scrollback: 0 }
+                Self {
+                    theme: FleetTheme::Bare,
+                    font_family: String::new(),
+                    scrollback: 0,
+                }
             }
         }
         impl FleetThemedConfig for OtherApp {

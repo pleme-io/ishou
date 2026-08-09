@@ -23,7 +23,11 @@ pub fn render(t: &TokenSet) -> String {
 fn palette_vars(out: &mut String, c: &ColorPalette) {
     out.push_str("  /* palette */\n");
     for (k, v) in c.entries() {
-        out.push_str(&format!("  --ishou-{}: {};\n", k.replace('_', "-"), v.hex()));
+        out.push_str(&format!(
+            "  --ishou-{}: {};\n",
+            k.replace('_', "-"),
+            v.hex()
+        ));
     }
 }
 
@@ -46,21 +50,34 @@ fn typography_vars(out: &mut String, t: &TokenSet) {
     out.push_str(&format!("  --ishou-font-display: {};\n", f.display));
     let s = &t.typography.scale;
     for (k, v) in [
-        ("xs", s.xs), ("sm", s.sm), ("base", s.base), ("md", s.md),
-        ("lg", s.lg), ("xl", s.xl), ("2xl", s.x2), ("3xl", s.x3), ("4xl", s.x4),
+        ("xs", s.xs),
+        ("sm", s.sm),
+        ("base", s.base),
+        ("md", s.md),
+        ("lg", s.lg),
+        ("xl", s.xl),
+        ("2xl", s.x2),
+        ("3xl", s.x3),
+        ("4xl", s.x4),
     ] {
         out.push_str(&format!("  --ishou-text-{k}: {v}rem;\n"));
     }
     let w = &t.typography.weight;
     for (k, v) in [
-        ("light", w.light), ("regular", w.regular), ("medium", w.medium),
-        ("semibold", w.semibold), ("bold", w.bold),
+        ("light", w.light),
+        ("regular", w.regular),
+        ("medium", w.medium),
+        ("semibold", w.semibold),
+        ("bold", w.bold),
     ] {
         out.push_str(&format!("  --ishou-weight-{k}: {v};\n"));
     }
     let lh = &t.typography.line_height;
     for (k, v) in [
-        ("tight", lh.tight), ("base", lh.base), ("relaxed", lh.relaxed), ("prose", lh.prose),
+        ("tight", lh.tight),
+        ("base", lh.base),
+        ("relaxed", lh.relaxed),
+        ("prose", lh.prose),
     ] {
         out.push_str(&format!("  --ishou-leading-{k}: {v};\n"));
     }
@@ -76,7 +93,11 @@ fn spacing_vars(out: &mut String, t: &TokenSet) {
 fn radius_vars(out: &mut String, t: &TokenSet) {
     out.push_str("  /* radius */\n");
     for (k, v) in t.radius.pairs() {
-        let suffix = if v >= 9999 { "9999px".to_string() } else { format!("{v}px") };
+        let suffix = if v >= 9999 {
+            "9999px".to_string()
+        } else {
+            format!("{v}px")
+        };
         out.push_str(&format!("  --ishou-radius-{k}: {suffix};\n"));
     }
 }
@@ -106,15 +127,21 @@ fn motion_vars(out: &mut String, t: &TokenSet) {
     out.push_str("  /* motion */\n");
     let d = &t.motion.duration;
     for (k, v) in [
-        ("instant", d.instant_ms), ("fast", d.fast_ms), ("base", d.base_ms),
-        ("slow", d.slow_ms), ("hero", d.hero_ms),
+        ("instant", d.instant_ms),
+        ("fast", d.fast_ms),
+        ("base", d.base_ms),
+        ("slow", d.slow_ms),
+        ("hero", d.hero_ms),
     ] {
         out.push_str(&format!("  --ishou-duration-{k}: {v}ms;\n"));
     }
     let e = &t.motion.easing;
     for (k, c) in [
-        ("standard", e.standard), ("decelerate", e.decelerate), ("accelerate", e.accelerate),
-        ("sonic-boom", e.sonic_boom), ("saber", e.saber),
+        ("standard", e.standard),
+        ("decelerate", e.decelerate),
+        ("accelerate", e.accelerate),
+        ("sonic-boom", e.sonic_boom),
+        ("saber", e.saber),
     ] {
         out.push_str(&format!(
             "  --ishou-ease-{k}: cubic-bezier({:.3}, {:.3}, {:.3}, {:.3});\n",
@@ -125,7 +152,7 @@ fn motion_vars(out: &mut String, t: &TokenSet) {
 
 fn utility_classes(out: &mut String) {
     out.push_str(
-r#"/* Minimal utility layer — brand-critical only. Use Tailwind for everything else. */
+        r#"/* Minimal utility layer — brand-critical only. Use Tailwind for everything else. */
 
 .ishou-shadow-brand {
   box-shadow: var(--ishou-shadow-brand-bold);

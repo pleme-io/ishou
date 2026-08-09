@@ -504,8 +504,21 @@ impl Palette {
     pub fn base24(&self) -> [(&'static str, Rgb); 24] {
         let b16 = self.base16();
         [
-            b16[0], b16[1], b16[2], b16[3], b16[4], b16[5], b16[6], b16[7],
-            b16[8], b16[9], b16[10], b16[11], b16[12], b16[13], b16[14],
+            b16[0],
+            b16[1],
+            b16[2],
+            b16[3],
+            b16[4],
+            b16[5],
+            b16[6],
+            b16[7],
+            b16[8],
+            b16[9],
+            b16[10],
+            b16[11],
+            b16[12],
+            b16[13],
+            b16[14],
             b16[15],
             ("base10", self.night_deep),
             ("base11", self.night_abyss),
@@ -550,10 +563,22 @@ impl Palette {
             search_current_background: self.first_light,
             search_current_foreground: self.night0,
             search_status_text: self.ice_cyan,
-            bell_flash: AlphaPaint { color: self.snow3, alpha: 0.06 },
-            url_underline: AlphaPaint { color: self.ice_cyan, alpha: 0.60 },
-            scrollbar_thumb: AlphaPaint { color: self.ice_cyan, alpha: 0.35 },
-            osc133_separator: AlphaPaint { color: self.ice_deep, alpha: 0.30 },
+            bell_flash: AlphaPaint {
+                color: self.snow3,
+                alpha: 0.06,
+            },
+            url_underline: AlphaPaint {
+                color: self.ice_cyan,
+                alpha: 0.60,
+            },
+            scrollbar_thumb: AlphaPaint {
+                color: self.ice_cyan,
+                alpha: 0.35,
+            },
+            osc133_separator: AlphaPaint {
+                color: self.ice_deep,
+                alpha: 0.30,
+            },
             split_divider: self.night3,
             unfocused_split_fill: self.night_deep,
             titlebar_band: self.night1,
@@ -647,7 +672,11 @@ mod tests {
                 failures.push(format!("{name}: got {got}, spec {hex}"));
             }
         }
-        assert!(failures.is_empty(), "token drift:\n  - {}", failures.join("\n  - "));
+        assert!(
+            failures.is_empty(),
+            "token drift:\n  - {}",
+            failures.join("\n  - ")
+        );
     }
 
     #[test]
@@ -692,7 +721,11 @@ mod tests {
                 failures.push(format!("{name}: got {got}, spec {hex}"));
             }
         }
-        assert!(failures.is_empty(), "polar_veil token drift:\n  - {}", failures.join("\n  - "));
+        assert!(
+            failures.is_empty(),
+            "polar_veil token drift:\n  - {}",
+            failures.join("\n  - ")
+        );
     }
 
     #[test]
@@ -701,9 +734,8 @@ mod tests {
         let p = Palette::polar_veil();
         let ansi: Vec<String> = p.ansi_16().iter().map(super::Rgb::hex).collect();
         let expect = [
-            "#2C3140", "#CC707A", "#A1BC8B", "#DCC287", "#88A8CC", "#B69CC2",
-            "#8CC0C6", "#A7AEBC", "#969EB1", "#D87F88", "#AEC79A", "#E6CE96",
-            "#9AB6D6", "#C4ACCE", "#9CCCD2", "#F0F3F8",
+            "#2C3140", "#CC707A", "#A1BC8B", "#DCC287", "#88A8CC", "#B69CC2", "#8CC0C6", "#A7AEBC",
+            "#969EB1", "#D87F88", "#AEC79A", "#E6CE96", "#9AB6D6", "#C4ACCE", "#9CCCD2", "#F0F3F8",
         ];
         assert_eq!(ansi, expect, "polar_veil ANSI-16 drift");
     }
@@ -715,26 +747,65 @@ mod tests {
         // published value can never diverge.
         let p = VellumPalette::vellum();
         let rows: [(&str, Rgb, &str); 8] = [
-            ("selection", blend_linear(p.night0, p.fable_violet, 0.08), "#3A343E"),
-            ("search_others", blend_linear(p.night0, p.first_light, 0.075), "#443E2A"),
-            ("red_glass", blend_linear(p.night0, p.aurora_red, 0.327), "#7B4F4A"),
-            ("green_glass", blend_linear(p.night0, p.aurora_green, 0.168), "#4D543E"),
-            ("amber_glass", blend_linear(p.night0, p.first_light, 0.137), "#595137"),
-            ("steel_glass", blend_linear(p.night0, p.ice_steel, 0.325), "#5D6773"),
-            ("cyan_glass", blend_linear(p.night0, p.ice_cyan, 0.173), "#445553"),
-            ("violet_glass", blend_linear(p.night0, p.fable_violet, 0.220), "#5B5063"),
+            (
+                "selection",
+                blend_linear(p.night0, p.fable_violet, 0.08),
+                "#3A343E",
+            ),
+            (
+                "search_others",
+                blend_linear(p.night0, p.first_light, 0.075),
+                "#443E2A",
+            ),
+            (
+                "red_glass",
+                blend_linear(p.night0, p.aurora_red, 0.327),
+                "#7B4F4A",
+            ),
+            (
+                "green_glass",
+                blend_linear(p.night0, p.aurora_green, 0.168),
+                "#4D543E",
+            ),
+            (
+                "amber_glass",
+                blend_linear(p.night0, p.first_light, 0.137),
+                "#595137",
+            ),
+            (
+                "steel_glass",
+                blend_linear(p.night0, p.ice_steel, 0.325),
+                "#5D6773",
+            ),
+            (
+                "cyan_glass",
+                blend_linear(p.night0, p.ice_cyan, 0.173),
+                "#445553",
+            ),
+            (
+                "violet_glass",
+                blend_linear(p.night0, p.fable_violet, 0.220),
+                "#5B5063",
+            ),
         ];
         let mut failures = Vec::new();
         for (name, blended, spec_hex) in rows {
             let stored = p.get(name).unwrap().hex();
             if stored != blended.hex() {
-                failures.push(format!("{name}: stored {stored} != blend {}", blended.hex()));
+                failures.push(format!(
+                    "{name}: stored {stored} != blend {}",
+                    blended.hex()
+                ));
             }
             if stored != spec_hex {
                 failures.push(format!("{name}: stored {stored} != spec {spec_hex}"));
             }
         }
-        assert!(failures.is_empty(), "blend drift:\n  - {}", failures.join("\n  - "));
+        assert!(
+            failures.is_empty(),
+            "blend drift:\n  - {}",
+            failures.join("\n  - ")
+        );
     }
 
     #[test]
@@ -805,14 +876,30 @@ mod tests {
 
     #[test]
     fn fg_promotion_map_is_total_over_the_six_sub_floor_tokens() {
-        let names: Vec<&str> = VellumPalette::fg_promotions().iter().map(|(f, _)| *f).collect();
-        for required in ["shadow0", "shadow1", "aurora_red", "ice_steel", "solar_magenta", "dusk_bronze"] {
-            assert!(names.contains(&required), "missing promotion for {required}");
+        let names: Vec<&str> = VellumPalette::fg_promotions()
+            .iter()
+            .map(|(f, _)| *f)
+            .collect();
+        for required in [
+            "shadow0",
+            "shadow1",
+            "aurora_red",
+            "ice_steel",
+            "solar_magenta",
+            "dusk_bronze",
+        ] {
+            assert!(
+                names.contains(&required),
+                "missing promotion for {required}"
+            );
         }
         // Every target resolves.
         let p = VellumPalette::vellum();
         for (from, to) in VellumPalette::fg_promotions() {
-            assert!(p.get(from).is_some() && p.get(to).is_some(), "{from}→{to} unresolvable");
+            assert!(
+                p.get(from).is_some() && p.get(to).is_some(),
+                "{from}→{to} unresolvable"
+            );
         }
     }
 }

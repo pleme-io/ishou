@@ -96,27 +96,22 @@ pub fn render(t: &TokenSet) -> String {
         AttrEntry::new("package", NixExpr::Null),
     ]);
 
-    let fallback_chain = list(
-        mono.fallback
-            .iter()
-            .map(|name| str_(*name))
-            .collect(),
-    );
+    let fallback_chain = list(mono.fallback.iter().map(|name| str_(*name)).collect());
 
     let body = attrset(vec![
-        AttrEntry::new("primary", primary)
-            .with_comment(["Primary monospace family.", "Source of every cell's regular glyph."]),
+        AttrEntry::new("primary", primary).with_comment([
+            "Primary monospace family.",
+            "Source of every cell's regular glyph.",
+        ]),
         AttrEntry::new("italic", italic)
             .with_comment(["Italic face — same family slanted (ghostty's model)."]),
-        AttrEntry::new("bold", bold)
-            .with_comment(["Bold face — shares the primary package."]),
+        AttrEntry::new("bold", bold).with_comment(["Bold face — shares the primary package."]),
         AttrEntry::new("symbols", symbols)
             .with_comment(["Nerd Font icons (powerline / starship / atuin)."]),
-        AttrEntry::new("emoji", emoji)
-            .with_comment([
-                "macOS uses Apple Color Emoji at the OS layer;",
-                "Linux substitutes Noto Color Emoji (operator-installed).",
-            ]),
+        AttrEntry::new("emoji", emoji).with_comment([
+            "macOS uses Apple Color Emoji at the OS layer;",
+            "Linux substitutes Noto Color Emoji (operator-installed).",
+        ]),
         AttrEntry::new("fallback_chain", fallback_chain)
             .with_comment(["Ordered fallback list cosmic-text walks for missing codepoints."]),
     ]);
@@ -171,8 +166,18 @@ mod tests {
     #[test]
     fn output_contains_all_canonical_slots() {
         let out = render(&TokenSet::pleme());
-        for slot in ["primary", "italic", "bold", "symbols", "emoji", "fallback_chain"] {
-            assert!(out.contains(&format!("{slot} = ")), "missing slot {slot}\n{out}");
+        for slot in [
+            "primary",
+            "italic",
+            "bold",
+            "symbols",
+            "emoji",
+            "fallback_chain",
+        ] {
+            assert!(
+                out.contains(&format!("{slot} = ")),
+                "missing slot {slot}\n{out}"
+            );
         }
     }
 
@@ -210,7 +215,10 @@ mod tests {
         let out = render(&TokenSet::pleme());
         let ts = TokenSet::pleme();
         for name in ts.typography.mono_fonts.fallback {
-            assert!(out.contains(&format!("\"{name}\"")), "missing fallback {name}");
+            assert!(
+                out.contains(&format!("\"{name}\"")),
+                "missing fallback {name}"
+            );
         }
     }
 
@@ -219,10 +227,7 @@ mod tests {
         let out = render(&TokenSet::pleme());
         // After the comment header, the first non-comment line should
         // be the lambda. Lambda printer renders `{ pkgs }:`.
-        let body = out
-            .lines()
-            .find(|l| !l.starts_with('#'))
-            .unwrap_or("");
+        let body = out.lines().find(|l| !l.starts_with('#')).unwrap_or("");
         assert_eq!(body, "{ pkgs }:");
     }
 }

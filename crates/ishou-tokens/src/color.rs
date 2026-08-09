@@ -51,8 +51,8 @@ pub struct ColorPalette {
     pub aurora_green: Rgb,
     pub aurora_purple: Rgb,
     // pleme-io brand monochrome — used for logo, shadow, swerve stroke.
-    pub ink: Rgb,        // bold-black (#0A0A0A) — deeper than polar_night_0
-    pub paper: Rgb,      // paper-white (#F5F5F0) — warmer than snow_storm_2
+    pub ink: Rgb,         // bold-black (#0A0A0A) — deeper than polar_night_0
+    pub paper: Rgb,       // paper-white (#F5F5F0) — warmer than snow_storm_2
     pub shadow_tone: Rgb, // tinted black used for drop shadows
 }
 
@@ -107,14 +107,14 @@ impl ColorPalette {
             frost_2: Rgb::new(0x7F, 0xA6, 0xD4),
             frost_3: Rgb::new(0xA7, 0xC2, 0xE0),
             // oxidized-metal semantic accents (functional, but cooled into steel)
-            aurora_red: Rgb::new(0xD9, 0x8C, 0x8C),    // oxide red
+            aurora_red: Rgb::new(0xD9, 0x8C, 0x8C), // oxide red
             aurora_orange: Rgb::new(0xD9, 0xB0, 0x8C), // tarnished copper
             aurora_yellow: Rgb::new(0xD9, 0xCE, 0x9E), // pale brass
-            aurora_green: Rgb::new(0x9C, 0xC2, 0xA8),  // patina
+            aurora_green: Rgb::new(0x9C, 0xC2, 0xA8), // patina
             aurora_purple: Rgb::new(0xB0, 0xA8, 0xC9), // gunmetal violet
             // brand monochrome anchors
-            ink: Rgb::new(0x05, 0x06, 0x08),        // deepest forged black
-            paper: Rgb::new(0xF4, 0xF7, 0xFA),      // chrome white
+            ink: Rgb::new(0x05, 0x06, 0x08),   // deepest forged black
+            paper: Rgb::new(0xF4, 0xF7, 0xFA), // chrome white
             shadow_tone: Rgb::new(0x06, 0x09, 0x0D), // blue-tinted shadow
         }
     }

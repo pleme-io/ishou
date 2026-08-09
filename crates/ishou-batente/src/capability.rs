@@ -152,13 +152,22 @@ mod tests {
     #[test]
     fn a_stronger_face_satisfies_a_weaker_demand() {
         assert_eq!(demands::<Discrete, _>(Continuous), MotionClass::Continuous);
-        assert_eq!(demands::<Static, _>(CellQuantized), MotionClass::CellQuantized);
-        assert_eq!(demands::<CellQuantized, _>(Continuous), MotionClass::Continuous);
+        assert_eq!(
+            demands::<Static, _>(CellQuantized),
+            MotionClass::CellQuantized
+        );
+        assert_eq!(
+            demands::<CellQuantized, _>(Continuous),
+            MotionClass::Continuous
+        );
     }
 
     #[test]
     fn reflexive_holds() {
-        assert_eq!(demands::<Continuous, _>(Continuous), MotionClass::Continuous);
+        assert_eq!(
+            demands::<Continuous, _>(Continuous),
+            MotionClass::Continuous
+        );
         assert_eq!(demands::<Static, _>(Static), MotionClass::Static);
     }
 

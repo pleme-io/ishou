@@ -26,7 +26,10 @@ pub fn render(t: &TokenSet) -> String {
     }
     out.push_str("}\n\npub mod radius {\n");
     for (k, v) in t.radius.pairs() {
-        out.push_str(&format!("    pub const RADIUS_{}: u16 = {v};\n", k.to_uppercase()));
+        out.push_str(&format!(
+            "    pub const RADIUS_{}: u16 = {v};\n",
+            k.to_uppercase()
+        ));
     }
     out.push_str("}\n");
     out

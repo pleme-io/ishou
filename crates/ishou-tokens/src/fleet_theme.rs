@@ -261,21 +261,21 @@ impl ResolvedTheme {
         // for whites + polar night for blacks.
         let ansi_16: [String; 16] = [
             palette.polar_night_0.hex(), // 0  black
-            palette.aurora_red.hex(),     // 1  red
-            palette.aurora_green.hex(),   // 2  green
-            palette.aurora_yellow.hex(),  // 3  yellow
-            palette.frost_3.hex(),        // 4  blue (deepest frost)
-            palette.aurora_purple.hex(),  // 5  magenta
-            palette.frost_1.hex(),        // 6  cyan (frost-teal)
-            palette.snow_storm_2.hex(),   // 7  white
-            palette.polar_night_3.hex(),  // 8  bright black
-            palette.aurora_red.hex(),     // 9  bright red (same as 1)
-            palette.aurora_green.hex(),   // 10 bright green
-            palette.aurora_yellow.hex(),  // 11 bright yellow
-            palette.frost_2.hex(),        // 12 bright blue
-            palette.aurora_purple.hex(),  // 13 bright magenta
-            palette.frost_0.hex(),        // 14 bright cyan
-            palette.snow_storm_2.hex(),   // 15 bright white
+            palette.aurora_red.hex(),    // 1  red
+            palette.aurora_green.hex(),  // 2  green
+            palette.aurora_yellow.hex(), // 3  yellow
+            palette.frost_3.hex(),       // 4  blue (deepest frost)
+            palette.aurora_purple.hex(), // 5  magenta
+            palette.frost_1.hex(),       // 6  cyan (frost-teal)
+            palette.snow_storm_2.hex(),  // 7  white
+            palette.polar_night_3.hex(), // 8  bright black
+            palette.aurora_red.hex(),    // 9  bright red (same as 1)
+            palette.aurora_green.hex(),  // 10 bright green
+            palette.aurora_yellow.hex(), // 11 bright yellow
+            palette.frost_2.hex(),       // 12 bright blue
+            palette.aurora_purple.hex(), // 13 bright magenta
+            palette.frost_0.hex(),       // 14 bright cyan
+            palette.snow_storm_2.hex(),  // 15 bright white
         ];
 
         Self {
@@ -366,12 +366,24 @@ mod tests {
     /// in every consumer.
     #[test]
     fn preset_name_is_the_palette_vocabulary_not_the_serde_wire() {
-        assert_eq!(FleetTheme::PlemeDark.name(), "pleme_dark", "serde wire, frozen");
-        assert_eq!(FleetTheme::PlemeDark.preset_name(), "nord", "palette vocabulary");
+        assert_eq!(
+            FleetTheme::PlemeDark.name(),
+            "pleme_dark",
+            "serde wire, frozen"
+        );
+        assert_eq!(
+            FleetTheme::PlemeDark.preset_name(),
+            "nord",
+            "palette vocabulary"
+        );
         assert_eq!(FleetTheme::prescribed_default().preset_name(), "nord");
         // Every other variant agrees on both spellings.
         for t in [FleetTheme::Bare, FleetTheme::Vellum, FleetTheme::PolarVeil] {
-            assert_eq!(t.name(), t.preset_name(), "{t:?} needs no distinct preset name");
+            assert_eq!(
+                t.name(),
+                t.preset_name(),
+                "{t:?} needs no distinct preset name"
+            );
         }
     }
 
@@ -381,7 +393,10 @@ mod tests {
     fn vellum_remains_a_selectable_first_class_theme() {
         assert!(FleetTheme::all().contains(&FleetTheme::Vellum));
         let v = FleetTheme::Vellum.resolve();
-        assert_eq!(v.background, "#16140E", "Vellum's parchment ground is intact");
+        assert_eq!(
+            v.background, "#16140E",
+            "Vellum's parchment ground is intact"
+        );
     }
 
     #[test]
@@ -428,7 +443,11 @@ mod tests {
         for t in FleetTheme::all() {
             let r = t.resolve();
             for (i, c) in r.ansi_16.iter().enumerate() {
-                assert!(c.starts_with('#'), "ANSI slot {i} in {} is not hex: {c:?}", r.name);
+                assert!(
+                    c.starts_with('#'),
+                    "ANSI slot {i} in {} is not hex: {c:?}",
+                    r.name
+                );
             }
         }
     }
@@ -469,6 +488,9 @@ mod tests {
         assert_eq!(r.ansi_16[8], "#969EB1");
         // Cool ground: background is bluer than it is warm (B > R).
         let to_u8 = |s: &str, i: usize| u8::from_str_radix(&s[i..i + 2], 16).unwrap();
-        assert!(to_u8(&r.background, 5) > to_u8(&r.background, 1), "polar_veil bg should be cool (B > R)");
+        assert!(
+            to_u8(&r.background, 5) > to_u8(&r.background, 1),
+            "polar_veil bg should be cool (B > R)"
+        );
     }
 }

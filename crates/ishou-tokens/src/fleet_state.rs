@@ -182,7 +182,11 @@ mod tests {
         let count = names.len();
         names.sort_unstable();
         names.dedup();
-        assert_eq!(names.len(), count, "duplicate env-var name in FleetStateVar");
+        assert_eq!(
+            names.len(),
+            count,
+            "duplicate env-var name in FleetStateVar"
+        );
         assert_eq!(count, 9);
     }
 

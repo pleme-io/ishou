@@ -56,8 +56,8 @@ fn main() -> Result<()> {
     match cli.cmd {
         Cmd::Render { target, theme, out } => {
             let tokens = token_set(&theme)?;
-            let target = Target::from_str(&target)
-                .ok_or_else(|| anyhow!("unknown target: {target}"))?;
+            let target =
+                Target::from_str(&target).ok_or_else(|| anyhow!("unknown target: {target}"))?;
             let content = target.render(&tokens);
             emit(content, out)?;
         }
@@ -132,6 +132,7 @@ fn filename(t: Target) -> &'static str {
         Target::StylixFonts => "stylix-fonts.nix",
         Target::FleetFonts => "fleet-fonts.nix",
         Target::StylixVellum => "vellum.yaml",
+        Target::StylixVellumNix => "stylix-base16-vellum.nix",
         Target::StylixVellumBase24 => "vellum-base24.yaml",
         Target::SvgVellumPalette => "vellum-palette.svg",
         Target::SkimVellum => "vellum.skim",
@@ -155,6 +156,7 @@ fn target_name(t: Target) -> &'static str {
         Target::Bat => "bat",
         Target::Nix => "nix",
         Target::StylixFonts => "stylix-fonts",
+        Target::StylixVellumNix => "stylix-vellum-nix",
         Target::FleetFonts => "fleet-fonts",
         Target::StylixVellum => "stylix-vellum",
         Target::StylixVellumBase24 => "stylix-vellum-base24",

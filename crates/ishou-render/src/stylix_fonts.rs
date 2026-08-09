@@ -75,16 +75,14 @@ pub fn render(t: &TokenSet) -> String {
             .with_comment(["Source of every ASCII glyph the fleet's terminals draw."]),
         AttrEntry::new("sansSerif", sans_serif)
             .with_comment(["Canonical pleme-io sans for GTK / Cocoa app text."]),
-        AttrEntry::new("serif", serif)
-            .with_comment([
-                "DejaVu Serif ships on every nixpkgs-supported platform —",
-                "earlier `pkgs.charter` reference broke flake-eval.",
-            ]),
-        AttrEntry::new("emoji", emoji)
-            .with_comment([
-                "nixpkgs renamed noto-fonts-emoji → noto-fonts-color-emoji;",
-                "macOS apps prefer the system Apple Color Emoji at runtime.",
-            ]),
+        AttrEntry::new("serif", serif).with_comment([
+            "DejaVu Serif ships on every nixpkgs-supported platform —",
+            "earlier `pkgs.charter` reference broke flake-eval.",
+        ]),
+        AttrEntry::new("emoji", emoji).with_comment([
+            "nixpkgs renamed noto-fonts-emoji → noto-fonts-color-emoji;",
+            "macOS apps prefer the system Apple Color Emoji at runtime.",
+        ]),
     ]);
 
     let file = NixFile::new(
@@ -116,8 +114,14 @@ mod tests {
     #[test]
     fn monospace_resolves_to_nerd_fonts_jetbrains_mono() {
         let out = render(&TokenSet::pleme());
-        assert!(out.contains("name = \"JetBrainsMono Nerd Font\""), "got:\n{out}");
-        assert!(out.contains("package = pkgs.nerd-fonts.jetbrains-mono"), "got:\n{out}");
+        assert!(
+            out.contains("name = \"JetBrainsMono Nerd Font\""),
+            "got:\n{out}"
+        );
+        assert!(
+            out.contains("package = pkgs.nerd-fonts.jetbrains-mono"),
+            "got:\n{out}"
+        );
     }
 
     #[test]
