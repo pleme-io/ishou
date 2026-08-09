@@ -15,10 +15,7 @@ use crate::capability::MotionClass;
 pub enum BatenteError {
     /// A motion referenced by a choreography or a beat does not exist.
     #[error("unknown motion `{motion}` in cadence `{cadence}`")]
-    UnknownMotion {
-        cadence: String,
-        motion: MotionName,
-    },
+    UnknownMotion { cadence: String, motion: MotionName },
 
     /// Beat references form a cycle. Reports the full path, because a bare
     /// "cycle detected" is not actionable.
@@ -37,10 +34,7 @@ pub enum BatenteError {
 
     /// A cadence declared the same motion twice.
     #[error("duplicate motion `{motion}` in cadence `{cadence}`")]
-    DuplicateMotion {
-        cadence: String,
-        motion: MotionName,
-    },
+    DuplicateMotion { cadence: String, motion: MotionName },
 
     /// A face was asked for a motion it does not bind.
     #[error("face `{face}` does not bind `{motion}`")]

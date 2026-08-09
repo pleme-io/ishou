@@ -20,7 +20,9 @@ pub fn render(t: &TokenSet) -> String {
             ident = k.to_uppercase(),
         ));
     }
-    out.push_str("\n    /// ratatui integration: `ratatui::style::Color::Rgb(r, g, b)` from a tuple.\n");
+    out.push_str(
+        "\n    /// ratatui integration: `ratatui::style::Color::Rgb(r, g, b)` from a tuple.\n",
+    );
     out.push_str(
         "    #[cfg(feature = \"ratatui\")]\n    \
          pub fn r(rgb: (u8, u8, u8)) -> ratatui::style::Color {\n        \

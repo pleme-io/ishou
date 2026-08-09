@@ -103,13 +103,13 @@ impl ShellSignal {
     pub fn from_errno(errno: i32) -> Self {
         // Canonical Linux/Darwin-shared errno numbers.
         match errno {
-            1 => ShellSignal::PermissionDenied,   // EPERM
-            2 => ShellSignal::NoSuchFile,         // ENOENT
-            8 => ShellSignal::ExecFormat,         // ENOEXEC
-            13 => ShellSignal::PermissionDenied,  // EACCES
-            20 => ShellSignal::NotADirectory,     // ENOTDIR
-            21 => ShellSignal::IsADirectory,      // EISDIR
-            28 => ShellSignal::DiskFull,          // ENOSPC
+            1 => ShellSignal::PermissionDenied,  // EPERM
+            2 => ShellSignal::NoSuchFile,        // ENOENT
+            8 => ShellSignal::ExecFormat,        // ENOEXEC
+            13 => ShellSignal::PermissionDenied, // EACCES
+            20 => ShellSignal::NotADirectory,    // ENOTDIR
+            21 => ShellSignal::IsADirectory,     // EISDIR
+            28 => ShellSignal::DiskFull,         // ENOSPC
             _ => ShellSignal::General,
         }
     }
@@ -260,7 +260,11 @@ impl ShellSignals {
     /// the caller must trim, because the caller appends only a non-empty
     /// suffix).
     #[must_use]
-    pub fn render_warm(&self, class: ShellSignal, mode: SignalMode) -> (&'static str, &'static str) {
+    pub fn render_warm(
+        &self,
+        class: ShellSignal,
+        mode: SignalMode,
+    ) -> (&'static str, &'static str) {
         (
             self.signal(class).render_or_fallback(mode),
             self.warmth.render(mode),
@@ -299,8 +303,14 @@ mod tests {
     #[test]
     fn command_not_found_is_a_lost_snowflake() {
         let s = ShellSignals::prescribed();
-        assert_eq!(s.render(ShellSignal::CommandNotFound, SignalMode::Emoji), "❄️");
-        assert_eq!(s.render(ShellSignal::CommandNotFound, SignalMode::Label), "command not found");
+        assert_eq!(
+            s.render(ShellSignal::CommandNotFound, SignalMode::Emoji),
+            "❄️"
+        );
+        assert_eq!(
+            s.render(ShellSignal::CommandNotFound, SignalMode::Label),
+            "command not found"
+        );
     }
 
     #[test]
@@ -327,7 +337,8 @@ mod tests {
         assert_eq!(suffix, "🌊");
         // bare → both degrade: prefix is the label (render_or_fallback),
         // suffix is empty (warmth has no label set), so no dangling accent.
-        let (bp, bs) = ShellSignals::bare().render_warm(ShellSignal::CommandNotFound, SignalMode::Emoji);
+        let (bp, bs) =
+            ShellSignals::bare().render_warm(ShellSignal::CommandNotFound, SignalMode::Emoji);
         assert_eq!(bp, "command not found");
         assert_eq!(bs, "");
     }
@@ -344,8 +355,14 @@ mod tests {
 
     #[test]
     fn exit_code_maps_the_decisive_ones() {
-        assert_eq!(ShellSignal::from_exit_code(127), ShellSignal::CommandNotFound);
-        assert_eq!(ShellSignal::from_exit_code(126), ShellSignal::PermissionDenied);
+        assert_eq!(
+            ShellSignal::from_exit_code(127),
+            ShellSignal::CommandNotFound
+        );
+        assert_eq!(
+            ShellSignal::from_exit_code(126),
+            ShellSignal::PermissionDenied
+        );
         assert_eq!(ShellSignal::from_exit_code(130), ShellSignal::Interrupted); // SIGINT
         assert_eq!(ShellSignal::from_exit_code(139), ShellSignal::Crashed); // SIGSEGV
         assert_eq!(ShellSignal::from_exit_code(3), ShellSignal::General);

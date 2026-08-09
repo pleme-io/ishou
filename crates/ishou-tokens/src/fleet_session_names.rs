@@ -134,7 +134,11 @@ impl ResolvedName {
     #[must_use]
     pub fn render(&self, style: SessionNameStyle) -> String {
         match self {
-            ResolvedName::Identity(id) => SessionName { identity: *id, style }.to_string(),
+            ResolvedName::Identity(id) => SessionName {
+                identity: *id,
+                style,
+            }
+            .to_string(),
             ResolvedName::Literal(s) => s.clone(),
         }
     }
@@ -158,51 +162,315 @@ pub struct FleetSessionNames;
 impl FleetSessionNames {
     /// The pool. Order is stable — `pick` indexes into it deterministically.
     pub const POOL: &'static [SessionIdentity] = &[
-        SessionIdentity { emoji: "🌊", glyph: "\u{2248}", word: "tide", theme: SessionTheme::Frost, keywords: &["wave","water","sea","ocean","surf"] },
-        SessionIdentity { emoji: "❄",  glyph: "\u{2744}", word: "frost", theme: SessionTheme::Frost, keywords: &["snow","ice","cold","winter"] },
-        SessionIdentity { emoji: "🔥", glyph: "\u{2588}", word: "ember", theme: SessionTheme::Frost, keywords: &["fire","flame","heat","coal"] },
-        SessionIdentity { emoji: "🌲", glyph: "\u{25b2}", word: "cedar", theme: SessionTheme::Frost, keywords: &["tree","pine","forest","wood"] },
-        SessionIdentity { emoji: "🔋", glyph: "\u{26a1}", word: "volt", theme: SessionTheme::Frost, keywords: &["power","energy","charge","battery"] },
-        SessionIdentity { emoji: "🌙", glyph: "\u{263d}", word: "luna", theme: SessionTheme::Frost, keywords: &["moon","night","crescent"] },
-        SessionIdentity { emoji: "🪨", glyph: "\u{25c6}", word: "stone", theme: SessionTheme::Frost, keywords: &["rock","boulder","granite"] },
-        SessionIdentity { emoji: "🍃", glyph: "\u{2767}", word: "fern", theme: SessionTheme::Frost, keywords: &["leaf","plant","green","frond"] },
-        SessionIdentity { emoji: "☄",  glyph: "\u{2736}", word: "comet", theme: SessionTheme::Frost, keywords: &["star","meteor","tail","space"] },
-        SessionIdentity { emoji: "🌋", glyph: "\u{25b3}", word: "magma", theme: SessionTheme::Frost, keywords: &["volcano","lava","eruption"] },
-        SessionIdentity { emoji: "🐚", glyph: "\u{273f}", word: "shell", theme: SessionTheme::Frost, keywords: &["sea","conch","beach","spiral"] },
-        SessionIdentity { emoji: "🦊", glyph: "\u{25d5}", word: "fox", theme: SessionTheme::Frost, keywords: &["animal","clever","kit","vixen"] },
-        SessionIdentity { emoji: "🦉", glyph: "\u{25c9}", word: "owl", theme: SessionTheme::Frost, keywords: &["bird","night","wise","hoot"] },
-        SessionIdentity { emoji: "🧭", glyph: "\u{2316}", word: "compass", theme: SessionTheme::Frost, keywords: &["direction","navigate","north","find"] },
-        SessionIdentity { emoji: "🌾", glyph: "\u{2058}", word: "wheat", theme: SessionTheme::Frost, keywords: &["grain","field","harvest","gold"] },
-        SessionIdentity { emoji: "🪵", glyph: "\u{2261}", word: "timber", theme: SessionTheme::Frost, keywords: &["wood","log","lumber","plank"] },
-        SessionIdentity { emoji: "🌒", glyph: "\u{25d1}", word: "dusk", theme: SessionTheme::Frost, keywords: &["evening","twilight","moon"] },
-        SessionIdentity { emoji: "🌅", glyph: "\u{25d0}", word: "dawn", theme: SessionTheme::Frost, keywords: &["sunrise","morning","daybreak"] },
-        SessionIdentity { emoji: "🏔", glyph: "\u{25b4}", word: "ridge", theme: SessionTheme::Frost, keywords: &["mountain","peak","summit","alp"] },
-        SessionIdentity { emoji: "🌀", glyph: "\u{29bf}", word: "vortex", theme: SessionTheme::Frost, keywords: &["spiral","cyclone","swirl","whirl"] },
-        SessionIdentity { emoji: "🪶", glyph: "\u{2710}", word: "quill", theme: SessionTheme::Frost, keywords: &["feather","pen","write","plume"] },
-        SessionIdentity { emoji: "🔭", glyph: "\u{2295}", word: "scope", theme: SessionTheme::Frost, keywords: &["telescope","look","see","far"] },
-        SessionIdentity { emoji: "⚓", glyph: "\u{2693}", word: "anchor", theme: SessionTheme::Frost, keywords: &["ship","sea","harbor","hold"] },
-        SessionIdentity { emoji: "🕯", glyph: "\u{2020}", word: "taper", theme: SessionTheme::Frost, keywords: &["candle","flame","light","wax"] },
-        SessionIdentity { emoji: "🌿", glyph: "\u{273d}", word: "sage", theme: SessionTheme::Frost, keywords: &["herb","plant","wise","green"] },
-        SessionIdentity { emoji: "🪐", glyph: "\u{2641}", word: "orbit", theme: SessionTheme::Frost, keywords: &["planet","saturn","ring","space"] },
-        SessionIdentity { emoji: "🦌", glyph: "\u{2638}", word: "stag", theme: SessionTheme::Frost, keywords: &["deer","antler","buck","animal"] },
-        SessionIdentity { emoji: "🐋", glyph: "\u{223f}", word: "whale", theme: SessionTheme::Frost, keywords: &["sea","ocean","blue","big"] },
-        SessionIdentity { emoji: "🜂", glyph: "\u{25b3}", word: "spark", theme: SessionTheme::Frost, keywords: &["fire","flame","ignite","flash"] },
-        SessionIdentity { emoji: "🌑", glyph: "\u{25cf}", word: "void", theme: SessionTheme::Frost, keywords: &["dark","black","empty","newmoon"] },
-        SessionIdentity { emoji: "🪷", glyph: "\u{2740}", word: "lotus", theme: SessionTheme::Frost, keywords: &["flower","bloom","pink","water"] },
-        SessionIdentity { emoji: "🦅", glyph: "\u{25b7}", word: "hawk", theme: SessionTheme::Frost, keywords: &["bird","eagle","sky","hunt"] },
+        SessionIdentity {
+            emoji: "🌊",
+            glyph: "\u{2248}",
+            word: "tide",
+            theme: SessionTheme::Frost,
+            keywords: &["wave", "water", "sea", "ocean", "surf"],
+        },
+        SessionIdentity {
+            emoji: "❄",
+            glyph: "\u{2744}",
+            word: "frost",
+            theme: SessionTheme::Frost,
+            keywords: &["snow", "ice", "cold", "winter"],
+        },
+        SessionIdentity {
+            emoji: "🔥",
+            glyph: "\u{2588}",
+            word: "ember",
+            theme: SessionTheme::Frost,
+            keywords: &["fire", "flame", "heat", "coal"],
+        },
+        SessionIdentity {
+            emoji: "🌲",
+            glyph: "\u{25b2}",
+            word: "cedar",
+            theme: SessionTheme::Frost,
+            keywords: &["tree", "pine", "forest", "wood"],
+        },
+        SessionIdentity {
+            emoji: "🔋",
+            glyph: "\u{26a1}",
+            word: "volt",
+            theme: SessionTheme::Frost,
+            keywords: &["power", "energy", "charge", "battery"],
+        },
+        SessionIdentity {
+            emoji: "🌙",
+            glyph: "\u{263d}",
+            word: "luna",
+            theme: SessionTheme::Frost,
+            keywords: &["moon", "night", "crescent"],
+        },
+        SessionIdentity {
+            emoji: "🪨",
+            glyph: "\u{25c6}",
+            word: "stone",
+            theme: SessionTheme::Frost,
+            keywords: &["rock", "boulder", "granite"],
+        },
+        SessionIdentity {
+            emoji: "🍃",
+            glyph: "\u{2767}",
+            word: "fern",
+            theme: SessionTheme::Frost,
+            keywords: &["leaf", "plant", "green", "frond"],
+        },
+        SessionIdentity {
+            emoji: "☄",
+            glyph: "\u{2736}",
+            word: "comet",
+            theme: SessionTheme::Frost,
+            keywords: &["star", "meteor", "tail", "space"],
+        },
+        SessionIdentity {
+            emoji: "🌋",
+            glyph: "\u{25b3}",
+            word: "magma",
+            theme: SessionTheme::Frost,
+            keywords: &["volcano", "lava", "eruption"],
+        },
+        SessionIdentity {
+            emoji: "🐚",
+            glyph: "\u{273f}",
+            word: "shell",
+            theme: SessionTheme::Frost,
+            keywords: &["sea", "conch", "beach", "spiral"],
+        },
+        SessionIdentity {
+            emoji: "🦊",
+            glyph: "\u{25d5}",
+            word: "fox",
+            theme: SessionTheme::Frost,
+            keywords: &["animal", "clever", "kit", "vixen"],
+        },
+        SessionIdentity {
+            emoji: "🦉",
+            glyph: "\u{25c9}",
+            word: "owl",
+            theme: SessionTheme::Frost,
+            keywords: &["bird", "night", "wise", "hoot"],
+        },
+        SessionIdentity {
+            emoji: "🧭",
+            glyph: "\u{2316}",
+            word: "compass",
+            theme: SessionTheme::Frost,
+            keywords: &["direction", "navigate", "north", "find"],
+        },
+        SessionIdentity {
+            emoji: "🌾",
+            glyph: "\u{2058}",
+            word: "wheat",
+            theme: SessionTheme::Frost,
+            keywords: &["grain", "field", "harvest", "gold"],
+        },
+        SessionIdentity {
+            emoji: "🪵",
+            glyph: "\u{2261}",
+            word: "timber",
+            theme: SessionTheme::Frost,
+            keywords: &["wood", "log", "lumber", "plank"],
+        },
+        SessionIdentity {
+            emoji: "🌒",
+            glyph: "\u{25d1}",
+            word: "dusk",
+            theme: SessionTheme::Frost,
+            keywords: &["evening", "twilight", "moon"],
+        },
+        SessionIdentity {
+            emoji: "🌅",
+            glyph: "\u{25d0}",
+            word: "dawn",
+            theme: SessionTheme::Frost,
+            keywords: &["sunrise", "morning", "daybreak"],
+        },
+        SessionIdentity {
+            emoji: "🏔",
+            glyph: "\u{25b4}",
+            word: "ridge",
+            theme: SessionTheme::Frost,
+            keywords: &["mountain", "peak", "summit", "alp"],
+        },
+        SessionIdentity {
+            emoji: "🌀",
+            glyph: "\u{29bf}",
+            word: "vortex",
+            theme: SessionTheme::Frost,
+            keywords: &["spiral", "cyclone", "swirl", "whirl"],
+        },
+        SessionIdentity {
+            emoji: "🪶",
+            glyph: "\u{2710}",
+            word: "quill",
+            theme: SessionTheme::Frost,
+            keywords: &["feather", "pen", "write", "plume"],
+        },
+        SessionIdentity {
+            emoji: "🔭",
+            glyph: "\u{2295}",
+            word: "scope",
+            theme: SessionTheme::Frost,
+            keywords: &["telescope", "look", "see", "far"],
+        },
+        SessionIdentity {
+            emoji: "⚓",
+            glyph: "\u{2693}",
+            word: "anchor",
+            theme: SessionTheme::Frost,
+            keywords: &["ship", "sea", "harbor", "hold"],
+        },
+        SessionIdentity {
+            emoji: "🕯",
+            glyph: "\u{2020}",
+            word: "taper",
+            theme: SessionTheme::Frost,
+            keywords: &["candle", "flame", "light", "wax"],
+        },
+        SessionIdentity {
+            emoji: "🌿",
+            glyph: "\u{273d}",
+            word: "sage",
+            theme: SessionTheme::Frost,
+            keywords: &["herb", "plant", "wise", "green"],
+        },
+        SessionIdentity {
+            emoji: "🪐",
+            glyph: "\u{2641}",
+            word: "orbit",
+            theme: SessionTheme::Frost,
+            keywords: &["planet", "saturn", "ring", "space"],
+        },
+        SessionIdentity {
+            emoji: "🦌",
+            glyph: "\u{2638}",
+            word: "stag",
+            theme: SessionTheme::Frost,
+            keywords: &["deer", "antler", "buck", "animal"],
+        },
+        SessionIdentity {
+            emoji: "🐋",
+            glyph: "\u{223f}",
+            word: "whale",
+            theme: SessionTheme::Frost,
+            keywords: &["sea", "ocean", "blue", "big"],
+        },
+        SessionIdentity {
+            emoji: "🜂",
+            glyph: "\u{25b3}",
+            word: "spark",
+            theme: SessionTheme::Frost,
+            keywords: &["fire", "flame", "ignite", "flash"],
+        },
+        SessionIdentity {
+            emoji: "🌑",
+            glyph: "\u{25cf}",
+            word: "void",
+            theme: SessionTheme::Frost,
+            keywords: &["dark", "black", "empty", "newmoon"],
+        },
+        SessionIdentity {
+            emoji: "🪷",
+            glyph: "\u{2740}",
+            word: "lotus",
+            theme: SessionTheme::Frost,
+            keywords: &["flower", "bloom", "pink", "water"],
+        },
+        SessionIdentity {
+            emoji: "🦅",
+            glyph: "\u{25b7}",
+            word: "hawk",
+            theme: SessionTheme::Frost,
+            keywords: &["bird", "eagle", "sky", "hunt"],
+        },
         // ── Brazil register — warm tropical (a nod to the operator) ──────
-        SessionIdentity { emoji: "🌴", glyph: "\u{2663}", word: "palmeira", theme: SessionTheme::Brazil, keywords: &["palm","tree","tropical","beach"] },
-        SessionIdentity { emoji: "☀",  glyph: "\u{263c}", word: "sol", theme: SessionTheme::Brazil, keywords: &["sun","sunshine","bright","day"] },
-        SessionIdentity { emoji: "🥁", glyph: "\u{266b}", word: "samba", theme: SessionTheme::Brazil, keywords: &["drum","beat","rhythm","dance"] },
-        SessionIdentity { emoji: "🦜", glyph: "\u{2748}", word: "arara", theme: SessionTheme::Brazil, keywords: &["macaw","parrot","bird","color"] },
-        SessionIdentity { emoji: "🥥", glyph: "\u{25cb}", word: "coco", theme: SessionTheme::Brazil, keywords: &["coconut","tropical","palm"] },
-        SessionIdentity { emoji: "☕", glyph: "\u{2615}", word: "cafe", theme: SessionTheme::Brazil, keywords: &["coffee","brew","bean","cafezinho"] },
-        SessionIdentity { emoji: "⚽", glyph: "\u{2688}", word: "futebol", theme: SessionTheme::Brazil, keywords: &["soccer","ball","football","goal"] },
-        SessionIdentity { emoji: "🏖", glyph: "\u{2602}", word: "praia", theme: SessionTheme::Brazil, keywords: &["beach","sand","shore","coast"] },
-        SessionIdentity { emoji: "🌳", glyph: "\u{2660}", word: "floresta", theme: SessionTheme::Brazil, keywords: &["forest","jungle","amazon","tree"] },
-        SessionIdentity { emoji: "🐆", glyph: "\u{25c8}", word: "onca", theme: SessionTheme::Brazil, keywords: &["jaguar","leopard","cat","spots"] },
-        SessionIdentity { emoji: "🥭", glyph: "\u{25d4}", word: "manga", theme: SessionTheme::Brazil, keywords: &["mango","fruit","tropical","sweet"] },
-        SessionIdentity { emoji: "🎸", glyph: "\u{266a}", word: "bossa", theme: SessionTheme::Brazil, keywords: &["guitar","music","violao","strings"] },
+        SessionIdentity {
+            emoji: "🌴",
+            glyph: "\u{2663}",
+            word: "palmeira",
+            theme: SessionTheme::Brazil,
+            keywords: &["palm", "tree", "tropical", "beach"],
+        },
+        SessionIdentity {
+            emoji: "☀",
+            glyph: "\u{263c}",
+            word: "sol",
+            theme: SessionTheme::Brazil,
+            keywords: &["sun", "sunshine", "bright", "day"],
+        },
+        SessionIdentity {
+            emoji: "🥁",
+            glyph: "\u{266b}",
+            word: "samba",
+            theme: SessionTheme::Brazil,
+            keywords: &["drum", "beat", "rhythm", "dance"],
+        },
+        SessionIdentity {
+            emoji: "🦜",
+            glyph: "\u{2748}",
+            word: "arara",
+            theme: SessionTheme::Brazil,
+            keywords: &["macaw", "parrot", "bird", "color"],
+        },
+        SessionIdentity {
+            emoji: "🥥",
+            glyph: "\u{25cb}",
+            word: "coco",
+            theme: SessionTheme::Brazil,
+            keywords: &["coconut", "tropical", "palm"],
+        },
+        SessionIdentity {
+            emoji: "☕",
+            glyph: "\u{2615}",
+            word: "cafe",
+            theme: SessionTheme::Brazil,
+            keywords: &["coffee", "brew", "bean", "cafezinho"],
+        },
+        SessionIdentity {
+            emoji: "⚽",
+            glyph: "\u{2688}",
+            word: "futebol",
+            theme: SessionTheme::Brazil,
+            keywords: &["soccer", "ball", "football", "goal"],
+        },
+        SessionIdentity {
+            emoji: "🏖",
+            glyph: "\u{2602}",
+            word: "praia",
+            theme: SessionTheme::Brazil,
+            keywords: &["beach", "sand", "shore", "coast"],
+        },
+        SessionIdentity {
+            emoji: "🌳",
+            glyph: "\u{2660}",
+            word: "floresta",
+            theme: SessionTheme::Brazil,
+            keywords: &["forest", "jungle", "amazon", "tree"],
+        },
+        SessionIdentity {
+            emoji: "🐆",
+            glyph: "\u{25c8}",
+            word: "onca",
+            theme: SessionTheme::Brazil,
+            keywords: &["jaguar", "leopard", "cat", "spots"],
+        },
+        SessionIdentity {
+            emoji: "🥭",
+            glyph: "\u{25d4}",
+            word: "manga",
+            theme: SessionTheme::Brazil,
+            keywords: &["mango", "fruit", "tropical", "sweet"],
+        },
+        SessionIdentity {
+            emoji: "🎸",
+            glyph: "\u{266a}",
+            word: "bossa",
+            theme: SessionTheme::Brazil,
+            keywords: &["guitar", "music", "violao", "strings"],
+        },
     ];
 
     /// The branded fleet-default identity — **`🌑 rime`**, our own
@@ -240,7 +508,10 @@ impl FleetSessionNames {
     /// (Emoji) / `◉ rime` (Glyph). Convenience over `resolve(Default)`.
     #[must_use]
     pub fn default_name(style: SessionNameStyle) -> SessionName {
-        SessionName { identity: Self::DEFAULT, style }
+        SessionName {
+            identity: Self::DEFAULT,
+            style,
+        }
     }
 
     /// Deterministic identity for a seed (e.g. tear's session counter or a hash
@@ -253,7 +524,10 @@ impl FleetSessionNames {
     /// A resolved [`SessionName`] for a seed in a style.
     #[must_use]
     pub fn name(seed: u64, style: SessionNameStyle) -> SessionName {
-        SessionName { identity: Self::identity(seed), style }
+        SessionName {
+            identity: Self::identity(seed),
+            style,
+        }
     }
 
     /// Deterministic identity drawn from a single THEME — the basis for
@@ -279,7 +553,10 @@ impl FleetSessionNames {
     /// A themed-random resolved [`SessionName`] for a seed + style.
     #[must_use]
     pub fn name_in_theme(seed: u64, theme: SessionTheme, style: SessionNameStyle) -> SessionName {
-        SessionName { identity: Self::in_theme(seed, theme), style }
+        SessionName {
+            identity: Self::in_theme(seed, theme),
+            style,
+        }
     }
 
     /// Every identity whose word or keywords match `query` — the search
@@ -287,7 +564,9 @@ impl FleetSessionNames {
     #[must_use]
     pub fn matching(query: &str) -> impl Iterator<Item = &'static SessionIdentity> {
         let q = query.trim().to_lowercase();
-        Self::POOL.iter().filter(move |i| q.is_empty() || i.matches(&q))
+        Self::POOL
+            .iter()
+            .filter(move |i| q.is_empty() || i.matches(&q))
     }
 
     /// Pick a name UNIQUE against a set of already-used words, scanning forward
@@ -299,7 +578,10 @@ impl FleetSessionNames {
         for off in 0..n {
             let id = Self::POOL[((seed + off) % n) as usize];
             if !taken.contains(&id.word) {
-                return SessionName { identity: id, style };
+                return SessionName {
+                    identity: id,
+                    style,
+                };
             }
         }
         Self::name(seed, style)
@@ -319,7 +601,10 @@ impl FleetSessionNames {
     /// Deterministic [`SessionName`] for a project root, in a style.
     #[must_use]
     pub fn from_project_path(path: &std::path::Path, style: SessionNameStyle) -> SessionName {
-        SessionName { identity: Self::identity_for_path(path), style }
+        SessionName {
+            identity: Self::identity_for_path(path),
+            style,
+        }
     }
 }
 
@@ -374,8 +659,7 @@ mod tests {
         // from_project_path (resolve is the one decider, not a new scheme).
         let p = std::path::Path::new("/code/pleme-io/mado");
         let r = FleetSessionNames::resolve(NameContext::Project(p));
-        let direct =
-            FleetSessionNames::from_project_path(p, SessionNameStyle::Emoji).to_string();
+        let direct = FleetSessionNames::from_project_path(p, SessionNameStyle::Emoji).to_string();
         assert_eq!(r.render(SessionNameStyle::Emoji), direct);
 
         // Override → verbatim, style-agnostic (no curated mark either way).
@@ -387,7 +671,10 @@ mod tests {
 
     #[test]
     fn identity_is_deterministic() {
-        assert_eq!(FleetSessionNames::identity(7), FleetSessionNames::identity(7));
+        assert_eq!(
+            FleetSessionNames::identity(7),
+            FleetSessionNames::identity(7)
+        );
         assert_eq!(
             FleetSessionNames::identity(7).word,
             FleetSessionNames::identity(7 + FleetSessionNames::POOL.len() as u64).word
@@ -415,17 +702,29 @@ mod tests {
             style: SessionNameStyle::Emoji,
         };
         assert_eq!(n.to_string(), "🌊 tide");
-        let g = SessionName { style: SessionNameStyle::Glyph, ..n };
+        let g = SessionName {
+            style: SessionNameStyle::Glyph,
+            ..n
+        };
         assert_eq!(g.to_string(), "≈ tide");
     }
 
     #[test]
     fn keyword_search_finds_the_emoji() {
         // The operator's example: type "wave", find 🌊 tide.
-        let tide = FleetSessionNames::POOL.iter().find(|i| i.word == "tide").unwrap();
-        assert!(tide.matches("wave"), "'wave' should match 🌊 tide via keyword");
+        let tide = FleetSessionNames::POOL
+            .iter()
+            .find(|i| i.word == "tide")
+            .unwrap();
+        assert!(
+            tide.matches("wave"),
+            "'wave' should match 🌊 tide via keyword"
+        );
         assert!(tide.matches("tide"), "the word itself always matches");
-        assert!(tide.matches("WAV"), "matching is case-insensitive + substring");
+        assert!(
+            tide.matches("WAV"),
+            "matching is case-insensitive + substring"
+        );
         assert!(!tide.matches("xyzzy"));
         // `matching` surfaces it from the whole pool.
         assert!(FleetSessionNames::matching("wave").any(|i| i.word == "tide"));
@@ -433,9 +732,19 @@ mod tests {
 
     #[test]
     fn themes_partition_the_pool_and_in_theme_stays_in_register() {
-        let frost = FleetSessionNames::POOL.iter().filter(|i| i.theme == SessionTheme::Frost).count();
-        let brazil = FleetSessionNames::POOL.iter().filter(|i| i.theme == SessionTheme::Brazil).count();
-        assert_eq!(frost + brazil, FleetSessionNames::POOL.len(), "every identity has a theme");
+        let frost = FleetSessionNames::POOL
+            .iter()
+            .filter(|i| i.theme == SessionTheme::Frost)
+            .count();
+        let brazil = FleetSessionNames::POOL
+            .iter()
+            .filter(|i| i.theme == SessionTheme::Brazil)
+            .count();
+        assert_eq!(
+            frost + brazil,
+            FleetSessionNames::POOL.len(),
+            "every identity has a theme"
+        );
         assert!(brazil >= 8, "brazil register populated");
         // in_theme(seed, Brazil) always returns a Brazil identity, deterministically.
         for seed in 0..50u64 {
@@ -448,7 +757,11 @@ mod tests {
     #[test]
     fn every_identity_has_keywords() {
         for id in FleetSessionNames::POOL {
-            assert!(!id.keywords.is_empty(), "{} has no search keywords", id.word);
+            assert!(
+                !id.keywords.is_empty(),
+                "{} has no search keywords",
+                id.word
+            );
         }
     }
 
@@ -465,7 +778,10 @@ mod tests {
         for id in FleetSessionNames::POOL {
             assert!(seen.insert(id.word), "duplicate word in pool: {}", id.word);
         }
-        assert!(FleetSessionNames::POOL.len() >= 24, "pool should be large enough to avoid frequent collisions");
+        assert!(
+            FleetSessionNames::POOL.len() >= 24,
+            "pool should be large enough to avoid frequent collisions"
+        );
     }
 
     #[test]
@@ -481,7 +797,8 @@ mod tests {
         assert_eq!(stable_seed(b"mado"), stable_seed(b"mado"));
         assert_ne!(stable_seed(b"mado"), stable_seed(b"nix"));
         // A different project resolves to a real identity.
-        let other = FleetSessionNames::identity_for_path(Path::new("/Users/x/code/github/pleme-io/nix"));
+        let other =
+            FleetSessionNames::identity_for_path(Path::new("/Users/x/code/github/pleme-io/nix"));
         assert!(!other.word.is_empty());
     }
 }

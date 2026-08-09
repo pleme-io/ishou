@@ -16,7 +16,7 @@
 //! * blend-exactness (byte-exact derived tokens), glass-Y
 //!   uniformity, FgPromotion targets, InversePair floors.
 
-use ishou_tokens::{blend_linear, Rgb, VellumPalette};
+use ishou_tokens::{Rgb, VellumPalette, blend_linear};
 
 // ─── WCAG 2.1 relative luminance (computed, never hardcoded) ──────────────────
 
@@ -75,10 +75,20 @@ struct Row {
 }
 
 const fn min(fg: &'static str, bg: &'static str, class: &'static str, m: f64) -> Row {
-    Row { fg, bg, class, floor: Floor::Min(m) }
+    Row {
+        fg,
+        bg,
+        class,
+        floor: Floor::Min(m),
+    }
 }
 const fn band(fg: &'static str, bg: &'static str, class: &'static str, lo: f64, hi: f64) -> Row {
-    Row { fg, bg, class, floor: Floor::Band(lo, hi) }
+    Row {
+        fg,
+        bg,
+        class,
+        floor: Floor::Band(lo, hi),
+    }
 }
 
 /// Every asserted pairing from spec §6. The promoted (FgPromotion)
@@ -166,7 +176,12 @@ fn matrix() -> Vec<Row> {
         // MutedOverSearch ≥3.0 (comments under match — M2 fix).
         min("shadow1", "search_others", "MutedOverSearch", 3.0),
         // FgPromotion over search (targets, ≥3.5 / ≥4.0).
-        min("red_bright", "search_others", "FgPromotion(red→red_bright)", 3.5),
+        min(
+            "red_bright",
+            "search_others",
+            "FgPromotion(red→red_bright)",
+            3.5,
+        ),
         min("ember", "search_others", "FgPromotion(bronze→ember)", 3.5),
         min("snow0", "search_others", "FgPromotion(shadow0→snow0)", 4.0),
         // InversePair ≥7.0.
@@ -264,11 +279,17 @@ fn night_grid_ladder_is_monotone_and_pins_the_authored_l() {
             failures.push(format!("{name}: L={l:.4}, target {target:.3} (±0.004)"));
         }
         if l <= prev {
-            failures.push(format!("{name}: L={l:.4} not strictly > previous {prev:.4}"));
+            failures.push(format!(
+                "{name}: L={l:.4} not strictly > previous {prev:.4}"
+            ));
         }
         prev = l;
     }
-    assert!(failures.is_empty(), "night ladder drift:\n  - {}", failures.join("\n  - "));
+    assert!(
+        failures.is_empty(),
+        "night ladder drift:\n  - {}",
+        failures.join("\n  - ")
+    );
 }
 
 #[test]
@@ -292,11 +313,17 @@ fn text_grid_is_monotone_and_pins_the_authored_l() {
             failures.push(format!("{name}: L={l:.4}, target {target:.3} (±0.004)"));
         }
         if l <= prev {
-            failures.push(format!("{name}: L={l:.4} not strictly > previous {prev:.4}"));
+            failures.push(format!(
+                "{name}: L={l:.4} not strictly > previous {prev:.4}"
+            ));
         }
         prev = l;
     }
-    assert!(failures.is_empty(), "text ladder drift:\n  - {}", failures.join("\n  - "));
+    assert!(
+        failures.is_empty(),
+        "text ladder drift:\n  - {}",
+        failures.join("\n  - ")
+    );
 }
 
 #[test]
@@ -318,8 +345,13 @@ fn per_tier_accent_l_spreads_within_caps() {
     let dual = spread(&["aurora_red", "ice_steel", "solar_magenta", "dusk_bronze"]);
     let glow = spread(&["aurora_green", "first_light", "ember", "fable_violet"]);
     let bright = spread(&[
-        "red_bright", "green_bright", "amber_bright", "steel_bright",
-        "magenta_bright", "cyan_bright", "violet_bright",
+        "red_bright",
+        "green_bright",
+        "amber_bright",
+        "steel_bright",
+        "magenta_bright",
+        "cyan_bright",
+        "violet_bright",
     ]);
     let mut failures = Vec::new();
     if dual > 0.08 {
@@ -331,7 +363,11 @@ fn per_tier_accent_l_spreads_within_caps() {
     if bright > 0.14 {
         failures.push(format!("bright spread {bright:.4} > 0.14"));
     }
-    assert!(failures.is_empty(), "tier spread cap breach:\n  - {}", failures.join("\n  - "));
+    assert!(
+        failures.is_empty(),
+        "tier spread cap breach:\n  - {}",
+        failures.join("\n  - ")
+    );
 }
 
 #[test]
@@ -361,10 +397,16 @@ fn brights_are_strictly_lighter_than_their_normals() {
         // Strictly lighter is the hard invariant; the band is the
         // documented per-pair envelope.
         if dl <= 0.0 || !(LO..=HI).contains(&dl) {
-            failures.push(format!("{normal}→{bright}: ΔL={dl:+.4} ∉ (0, [{LO:.3},{HI:.2}]]"));
+            failures.push(format!(
+                "{normal}→{bright}: ΔL={dl:+.4} ∉ (0, [{LO:.3},{HI:.2}]]"
+            ));
         }
     }
-    assert!(failures.is_empty(), "bright tier drift:\n  - {}", failures.join("\n  - "));
+    assert!(
+        failures.is_empty(),
+        "bright tier drift:\n  - {}",
+        failures.join("\n  - ")
+    );
 }
 
 #[test]
@@ -389,7 +431,11 @@ fn base16_ramp_is_monotone_and_has_no_duplicate_hexes() {
             dups.push(format!("{slot}={hex}"));
         }
     }
-    assert!(dups.is_empty(), "duplicate base16 hexes:\n  - {}", dups.join("\n  - "));
+    assert!(
+        dups.is_empty(),
+        "duplicate base16 hexes:\n  - {}",
+        dups.join("\n  - ")
+    );
 }
 
 #[test]
@@ -407,10 +453,17 @@ fn ansi_slots_meet_their_floors() {
         let floor = if i == 8 { 3.0 } else { 4.5 };
         let r = contrast(slot, bg);
         if r < floor {
-            failures.push(format!("ANSI {i} ({}) on night0: {r:.2} < {floor}", slot.hex()));
+            failures.push(format!(
+                "ANSI {i} ({}) on night0: {r:.2} < {floor}",
+                slot.hex()
+            ));
         }
     }
-    assert!(failures.is_empty(), "ANSI floor breach:\n  - {}", failures.join("\n  - "));
+    assert!(
+        failures.is_empty(),
+        "ANSI floor breach:\n  - {}",
+        failures.join("\n  - ")
+    );
 }
 
 #[test]
@@ -419,22 +472,35 @@ fn derived_tokens_equal_their_blend_recipes() {
     let p = VellumPalette::vellum();
     let rows: [(&str, Rgb); 8] = [
         ("selection", blend_linear(p.night0, p.fable_violet, 0.08)),
-        ("search_others", blend_linear(p.night0, p.first_light, 0.075)),
+        (
+            "search_others",
+            blend_linear(p.night0, p.first_light, 0.075),
+        ),
         ("red_glass", blend_linear(p.night0, p.aurora_red, 0.327)),
         ("green_glass", blend_linear(p.night0, p.aurora_green, 0.168)),
         ("amber_glass", blend_linear(p.night0, p.first_light, 0.137)),
         ("steel_glass", blend_linear(p.night0, p.ice_steel, 0.325)),
         ("cyan_glass", blend_linear(p.night0, p.ice_cyan, 0.173)),
-        ("violet_glass", blend_linear(p.night0, p.fable_violet, 0.220)),
+        (
+            "violet_glass",
+            blend_linear(p.night0, p.fable_violet, 0.220),
+        ),
     ];
     let mut failures = Vec::new();
     for (name, recipe) in rows {
         let stored = tok(&p, name).hex();
         if stored != recipe.hex() {
-            failures.push(format!("{name}: stored {stored} != recipe {}", recipe.hex()));
+            failures.push(format!(
+                "{name}: stored {stored} != recipe {}",
+                recipe.hex()
+            ));
         }
     }
-    assert!(failures.is_empty(), "blend drift:\n  - {}", failures.join("\n  - "));
+    assert!(
+        failures.is_empty(),
+        "blend drift:\n  - {}",
+        failures.join("\n  - ")
+    );
 }
 
 #[test]
@@ -444,7 +510,14 @@ fn glass_band_keeps_body_text_legible() {
     // luminance). The invariant that matters is that body text (snow1)
     // stays legible over EVERY glass surface — the UI-text floor ≥4.0.
     let p = VellumPalette::vellum();
-    let glasses = ["red_glass", "green_glass", "amber_glass", "steel_glass", "cyan_glass", "violet_glass"];
+    let glasses = [
+        "red_glass",
+        "green_glass",
+        "amber_glass",
+        "steel_glass",
+        "cyan_glass",
+        "violet_glass",
+    ];
     let mut failures = Vec::new();
     for name in glasses {
         let cr = contrast(p.snow1, tok(&p, name));
@@ -452,7 +525,11 @@ fn glass_band_keeps_body_text_legible() {
             failures.push(format!("snow1/{name}: {cr:.3} < 4.0"));
         }
     }
-    assert!(failures.is_empty(), "glass body-text legibility:\n  - {}", failures.join("\n  - "));
+    assert!(
+        failures.is_empty(),
+        "glass body-text legibility:\n  - {}",
+        failures.join("\n  - ")
+    );
 }
 
 #[test]
@@ -468,11 +545,13 @@ fn fg_promotion_targets_clear_their_floors() {
         for surf in surfaces {
             let cr = contrast(tok(&p, to), tok(&p, surf));
             if cr < 3.5 {
-                failures.push(format!(
-                    "{from}→{to} on {surf}: target {cr:.2} < 3.5"
-                ));
+                failures.push(format!("{from}→{to} on {surf}: target {cr:.2} < 3.5"));
             }
         }
     }
-    assert!(failures.is_empty(), "promotion target sub-floor:\n  - {}", failures.join("\n  - "));
+    assert!(
+        failures.is_empty(),
+        "promotion target sub-floor:\n  - {}",
+        failures.join("\n  - ")
+    );
 }

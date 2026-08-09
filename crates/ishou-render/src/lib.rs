@@ -21,11 +21,11 @@
 
 pub mod bat;
 pub mod css;
-pub mod md3;
 pub mod fleet_fonts;
 pub mod ghostty;
 pub mod glsl;
 pub mod json;
+pub mod md3;
 pub mod nix;
 pub mod nix_ast;
 pub mod rust;
@@ -73,6 +73,15 @@ pub enum Target {
     /// Vellum base16 stylix scheme YAML (the prescribed fleet theme).
     /// Sourced from the BORN `VellumPalette`, not the Nord `TokenSet`.
     StylixVellum,
+    /// Vellum base16 as a PARSED Nix attrset — the IFD-free form.
+    ///
+    /// Sibling of `StylixVellum` (same palette) and of `StylixFonts` (same
+    /// consumer, same reason). stylix reads a `{ yaml = <drv>; }` via
+    /// `readFile`, which is an import-from-derivation: it forces a build
+    /// during evaluation, and for NixOS consumers that build is a linux
+    /// one — so a Mac cannot evaluate any node. A literal attrset takes
+    /// stylix's already-parsed branch and costs nothing.
+    StylixVellumNix,
     /// Vellum base24 stylix scheme YAML — base16 + the real two-tier
     /// brights (base10–17).
     StylixVellumBase24,
@@ -107,6 +116,7 @@ impl Target {
             "nix" | "nord-palette-nix" => Self::Nix,
             "fleet-fonts" | "fleet_fonts" => Self::FleetFonts,
             "stylix-vellum" | "stylix-base16-vellum" => Self::StylixVellum,
+            "stylix-vellum-nix" | "stylix-base16-vellum-nix" => Self::StylixVellumNix,
             "stylix-vellum-base24" | "stylix-base24-vellum" => Self::StylixVellumBase24,
             "svg-vellum-palette" | "vellum-palette" => Self::SvgVellumPalette,
             "skim-vellum" | "skim" => Self::SkimVellum,
@@ -131,6 +141,7 @@ impl Target {
             Self::Bat => bat::render(tokens),
             Self::Nix => nix::render(tokens),
             Self::StylixFonts => stylix_fonts::render(tokens),
+            Self::StylixVellumNix => vellum::render_base16_nix(),
             Self::FleetFonts => fleet_fonts::render(tokens),
             // Vellum targets are their own BORN source — the Nord
             // `TokenSet` argument is unused.
@@ -142,7 +153,7 @@ impl Target {
         }
     }
 
-    pub fn all() -> [Target; 20] {
+    pub fn all() -> [Target; 21] {
         [
             Self::Css,
             Self::Md3,
@@ -160,6 +171,7 @@ impl Target {
             Self::StylixFonts,
             Self::FleetFonts,
             Self::StylixVellum,
+            Self::StylixVellumNix,
             Self::StylixVellumBase24,
             Self::SvgVellumPalette,
             Self::SkimVellum,

@@ -22,9 +22,9 @@
 //! therefore paired with a positive that must compile, so a rename breaks
 //! the pair rather than quietly turning the negative into a tautology.
 
-
-
-use ishou_batente::capability::{AtLeast, CellQuantized, Continuous, Discrete, MotionClass, Rung, Static};
+use ishou_batente::capability::{
+    AtLeast, CellQuantized, Continuous, Discrete, MotionClass, Rung, Static,
+};
 
 fn class_of<R: Rung, W: AtLeast<R>>(_face: W) -> MotionClass {
     W::CLASS
@@ -38,18 +38,30 @@ fn class_of<R: Rung, W: AtLeast<R>>(_face: W) -> MotionClass {
 fn every_upward_edge_is_satisfiable() {
     assert_eq!(class_of::<Static, _>(Static), MotionClass::Static);
     assert_eq!(class_of::<Static, _>(Discrete), MotionClass::Discrete);
-    assert_eq!(class_of::<Static, _>(CellQuantized), MotionClass::CellQuantized);
+    assert_eq!(
+        class_of::<Static, _>(CellQuantized),
+        MotionClass::CellQuantized
+    );
     assert_eq!(class_of::<Static, _>(Continuous), MotionClass::Continuous);
 
     assert_eq!(class_of::<Discrete, _>(Discrete), MotionClass::Discrete);
-    assert_eq!(class_of::<Discrete, _>(CellQuantized), MotionClass::CellQuantized);
+    assert_eq!(
+        class_of::<Discrete, _>(CellQuantized),
+        MotionClass::CellQuantized
+    );
     assert_eq!(class_of::<Discrete, _>(Continuous), MotionClass::Continuous);
 
     assert_eq!(
         class_of::<CellQuantized, _>(CellQuantized),
         MotionClass::CellQuantized
     );
-    assert_eq!(class_of::<CellQuantized, _>(Continuous), MotionClass::Continuous);
+    assert_eq!(
+        class_of::<CellQuantized, _>(Continuous),
+        MotionClass::Continuous
+    );
 
-    assert_eq!(class_of::<Continuous, _>(Continuous), MotionClass::Continuous);
+    assert_eq!(
+        class_of::<Continuous, _>(Continuous),
+        MotionClass::Continuous
+    );
 }

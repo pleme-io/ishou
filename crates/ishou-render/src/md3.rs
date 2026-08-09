@@ -95,15 +95,39 @@ mod tests {
 
     /// The exact `--md-sys-color-*` set `pleme-mui::theme::Md3Tokens` consumes.
     const MD3_SYSTEM_COLORS: [&str; 34] = [
-        "primary", "on-primary", "primary-container", "on-primary-container",
-        "secondary", "on-secondary", "secondary-container", "on-secondary-container",
-        "tertiary", "on-tertiary", "tertiary-container", "on-tertiary-container",
-        "error", "on-error", "error-container", "on-error-container",
-        "background", "on-background", "surface", "on-surface",
-        "surface-variant", "on-surface-variant", "outline", "outline-variant",
-        "inverse-surface", "inverse-on-surface", "inverse-primary",
-        "surface-dim", "surface-bright", "surface-container-lowest",
-        "surface-container-low", "surface-container", "surface-container-high",
+        "primary",
+        "on-primary",
+        "primary-container",
+        "on-primary-container",
+        "secondary",
+        "on-secondary",
+        "secondary-container",
+        "on-secondary-container",
+        "tertiary",
+        "on-tertiary",
+        "tertiary-container",
+        "on-tertiary-container",
+        "error",
+        "on-error",
+        "error-container",
+        "on-error-container",
+        "background",
+        "on-background",
+        "surface",
+        "on-surface",
+        "surface-variant",
+        "on-surface-variant",
+        "outline",
+        "outline-variant",
+        "inverse-surface",
+        "inverse-on-surface",
+        "inverse-primary",
+        "surface-dim",
+        "surface-bright",
+        "surface-container-lowest",
+        "surface-container-low",
+        "surface-container",
+        "surface-container-high",
         "surface-container-highest",
     ];
 
@@ -125,7 +149,11 @@ mod tests {
             "an MD3 role failed to resolve from ishou tokens"
         );
         // Exactly 34 resolved hex values (one per system color), no more.
-        assert_eq!(out.matches('#').count(), 34, "expected 34 resolved hex values");
+        assert_eq!(
+            out.matches('#').count(),
+            34,
+            "expected 34 resolved hex values"
+        );
     }
 
     #[test]

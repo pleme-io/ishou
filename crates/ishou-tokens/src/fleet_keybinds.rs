@@ -163,7 +163,6 @@ pub struct FleetKeybinds {
     // namimado, escriba, hibiki, hikki, fumi, kekkai, taimen. App-
     // specific chords (e.g. mado's tear-attach split nav) stay in
     // the app's own config and don't belong on the atlas.
-
     /// Copy selection to system clipboard. macOS Cmd-C / Linux Ctrl-C.
     pub copy: &'static str,
     /// Paste from system clipboard. Cmd-V / Ctrl-V.
@@ -211,7 +210,6 @@ pub struct FleetKeybinds {
     // an arrow key does — it needs no fleet coordination, so it is
     // an app-level alias, not an atlas intent. The atlas exists for
     // chords operators could otherwise find in different places.
-
     /// Move the selection one row toward the end of the list.
     pub select_next: &'static str,
     /// Move the selection one row toward the start of the list.

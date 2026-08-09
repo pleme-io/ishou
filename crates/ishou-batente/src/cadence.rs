@@ -77,7 +77,8 @@ impl Cadence {
             Some(Visit::Done) => return Ok(out[name].clone()),
             Some(Visit::InProgress) => {
                 let start = stack.iter().position(|n| *n == name).unwrap_or(0);
-                let mut path: Vec<String> = stack[start..].iter().map(ToString::to_string).collect();
+                let mut path: Vec<String> =
+                    stack[start..].iter().map(ToString::to_string).collect();
                 path.push(name.to_string());
                 return Err(BatenteError::Cycle { path });
             }
@@ -212,12 +213,12 @@ mod tests {
 
         let r = c.resolve().unwrap();
         assert_eq!(r.get(&"alias".into()).unwrap().duration.get(), 250);
-        assert_eq!(
-            r.get(&"fade".into()).unwrap().half_life.unwrap().get(),
-            100
-        );
+        assert_eq!(r.get(&"fade".into()).unwrap().half_life.unwrap().get(), 100);
         // Damping forces the strongest capability demand.
-        assert_eq!(r.get(&"fade".into()).unwrap().demands, MotionClass::Continuous);
+        assert_eq!(
+            r.get(&"fade".into()).unwrap().demands,
+            MotionClass::Continuous
+        );
     }
 
     #[test]

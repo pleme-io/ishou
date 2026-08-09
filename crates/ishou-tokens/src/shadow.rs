@@ -31,13 +31,49 @@ pub struct ShadowSpec {
 impl Default for Shadow {
     fn default() -> Self {
         Self {
-            none: ShadowSpec { offset_x: 0, offset_y: 0, blur: 0, spread: 0, alpha_pct: 0 },
-            sm: ShadowSpec { offset_x: 0, offset_y: 1, blur: 2, spread: 0, alpha_pct: 20 },
-            md: ShadowSpec { offset_x: 0, offset_y: 4, blur: 8, spread: 0, alpha_pct: 30 },
-            lg: ShadowSpec { offset_x: 0, offset_y: 8, blur: 24, spread: -2, alpha_pct: 40 },
-            xl: ShadowSpec { offset_x: 0, offset_y: 16, blur: 48, spread: -4, alpha_pct: 50 },
+            none: ShadowSpec {
+                offset_x: 0,
+                offset_y: 0,
+                blur: 0,
+                spread: 0,
+                alpha_pct: 0,
+            },
+            sm: ShadowSpec {
+                offset_x: 0,
+                offset_y: 1,
+                blur: 2,
+                spread: 0,
+                alpha_pct: 20,
+            },
+            md: ShadowSpec {
+                offset_x: 0,
+                offset_y: 4,
+                blur: 8,
+                spread: 0,
+                alpha_pct: 30,
+            },
+            lg: ShadowSpec {
+                offset_x: 0,
+                offset_y: 8,
+                blur: 24,
+                spread: -2,
+                alpha_pct: 40,
+            },
+            xl: ShadowSpec {
+                offset_x: 0,
+                offset_y: 16,
+                blur: 48,
+                spread: -4,
+                alpha_pct: 50,
+            },
             // The bold brand drop — hard, opaque, slightly offset.
-            brand_bold: ShadowSpec { offset_x: 6, offset_y: 8, blur: 0, spread: 0, alpha_pct: 100 },
+            brand_bold: ShadowSpec {
+                offset_x: 6,
+                offset_y: 8,
+                blur: 0,
+                spread: 0,
+                alpha_pct: 100,
+            },
         }
     }
 }
