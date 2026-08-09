@@ -106,14 +106,37 @@ pub fn render_base16_nix() -> String {
     use crate::nix_ast::{AttrEntry, NixFile, attrset, str_};
 
     let p = VellumPalette::vellum();
-    let entries: Vec<AttrEntry> = p
-        .base16()
-        .into_iter()
-        // Hex WITHOUT a leading `#`, matching the YAML this replaces —
-        // stylix's own scheme format is bare hex, and a `#` here would be
-        // a silent colour change rather than a parse error.
-        .map(|(slot, rgb)| AttrEntry::new(slot, str_(slot_hex(rgb))))
-        .collect();
+    let meta = scheme("base16", IndexMap::new());
+
+    // The METADATA is not decoration — omitting it silently renames things.
+    //
+    // base16.nix's `input-meta` defaults every absent field:
+    // `scheme`/`author` -> "untitled", `variant` -> "unspecified". Those
+    // strings are interpolated into generated artefact NAMES —
+    // `base16-${slug}` (fish), `"Base16 ${scheme-name}"` (zed),
+    // `${slug}-gnome-shell-theme` — so a metadata-less attrset keeps every
+    // colour byte-identical while turning `base16-vellum` into
+    // `base16-untitled` and renaming a pile of store paths.
+    //
+    // `name` rather than `scheme`: base16.nix's
+    // `convert-scheme-to-common-format` maps `name` -> `scheme`, and `name`
+    // is what the YAML render beside this one already emits, so the two
+    // stay spellable the same way.
+    let mut entries: Vec<AttrEntry> = vec![
+        AttrEntry::new("system", str_(meta.system)),
+        AttrEntry::new("name", str_(meta.name)),
+        AttrEntry::new("author", str_(meta.author)),
+        AttrEntry::new("variant", str_(meta.variant)),
+        AttrEntry::new("slug", str_(meta.slug)),
+    ];
+    entries.extend(
+        p.base16()
+            .into_iter()
+            // Hex WITHOUT a leading `#`, matching the YAML this replaces —
+            // stylix's own scheme format is bare hex, and a `#` here would
+            // be a silent colour change rather than a parse error.
+            .map(|(slot, rgb)| AttrEntry::new(slot, str_(slot_hex(rgb)))),
+    );
 
     NixFile::new(
         [
@@ -506,6 +529,32 @@ mod tests {
             assert!(
                 nixs.contains(&format!("{slot} = \"{hex}\";")),
                 "nix missing {slot}"
+            );
+        }
+    }
+
+    /// The scheme's IDENTITY survives the YAML -> attrset move.
+    ///
+    /// base16.nix defaults every absent metadata field — `scheme`/`author`
+    /// to "untitled", `variant` to "unspecified" — and those strings are
+    /// interpolated into generated artefact NAMES (`base16-${slug}`,
+    /// `"Base16 ${scheme-name}"`, `${slug}-gnome-shell-theme`). So a
+    /// metadata-less attrset is not a smaller scheme; it is an ANONYMOUS
+    /// one, byte-identical in colour and renaming a pile of store paths.
+    /// Nothing breaks, which is exactly why nothing would have caught it.
+    #[test]
+    fn the_nix_render_keeps_the_scheme_identity_not_just_the_colours() {
+        let out = super::render_base16_nix();
+        for (k, v) in [
+            ("system", "base16"),
+            ("name", "Vellum"),
+            ("author", "pleme-io (ishou)"),
+            ("variant", "dark"),
+            ("slug", "vellum"),
+        ] {
+            assert!(
+                out.contains(&format!("{k} = \"{v}\";")),
+                "missing {k}; without it base16.nix names the scheme \"untitled\""
             );
         }
     }

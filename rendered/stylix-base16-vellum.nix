@@ -8,6 +8,11 @@
 # readFile a derivation — an IFD — which forced a linux build during
 # evaluation and left every NixOS node unevaluable from a Mac.
 {
+  system = "base16";
+  name = "Vellum";
+  author = "pleme-io (ishou)";
+  variant = "dark";
+  slug = "vellum";
   base00 = "16140e";
   base01 = "1f1c15";
   base02 = "3a343e";
