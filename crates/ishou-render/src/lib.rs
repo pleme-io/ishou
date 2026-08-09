@@ -78,9 +78,11 @@ pub enum Target {
     StylixVellumBase24,
     /// Vellum palette preview SVG — one labelled chip per BORN token.
     SvgVellumPalette,
-    /// Vellum skim/fzf `--color=k:v,…` string — the fleet picker theme.
-    /// Generated from the BORN `VellumPalette`, byte-equivalent to the
-    /// hand-authored `skim-tab::NORD_COLORS`.
+    /// Vellum skim/fzf `--color=k:v,…` string, generated from the BORN
+    /// `VellumPalette`. Byte-equal to `skim-tab::VELLUM_COLORS` — the
+    /// SAVED branch, not the live picker theme (skim-tab paints
+    /// `NORD_COLORS`, and has no ishou dependency). See
+    /// `vellum::render_skim` for the full relationship + the destination.
     SkimVellum,
     /// Vellum escriba theme `*.lisp` — `(deftheme)` + `(defpalette)` +
     /// `(defhighlight …)` over escriba's `CANONICAL_GROUPS`, sourced from
