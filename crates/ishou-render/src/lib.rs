@@ -19,6 +19,7 @@
 //! | `TokenSet`     | stylix base16 YAML                     | `stylix`     |
 //! | `TokenSet`     | base16 bat `.tmTheme` (Sublime plist)  | `bat`        |
 
+pub mod base16_nix;
 pub mod bat;
 pub mod css;
 pub mod fleet_fonts;
@@ -82,6 +83,8 @@ pub enum Target {
     /// one — so a Mac cannot evaluate any node. A literal attrset takes
     /// stylix's already-parsed branch and costs nothing.
     StylixVellumNix,
+    /// Nord base16 as an already-parsed Nix attrset — the IFD-free shape.
+    StylixNordNix,
     /// Vellum base24 stylix scheme YAML — base16 + the real two-tier
     /// brights (base10–17).
     StylixVellumBase24,
@@ -119,6 +122,7 @@ impl Target {
             "fleet-fonts" | "fleet_fonts" => Self::FleetFonts,
             "stylix-vellum" | "stylix-base16-vellum" => Self::StylixVellum,
             "stylix-vellum-nix" | "stylix-base16-vellum-nix" => Self::StylixVellumNix,
+            "stylix-nord-nix" | "stylix-base16-nord-nix" => Self::StylixNordNix,
             "stylix-vellum-base24" | "stylix-base24-vellum" => Self::StylixVellumBase24,
             "svg-vellum-palette" | "vellum-palette" => Self::SvgVellumPalette,
             "skim-vellum" | "skim" => Self::SkimVellum,
@@ -144,6 +148,7 @@ impl Target {
             Self::Nix => nix::render(tokens),
             Self::StylixFonts => stylix_fonts::render(tokens),
             Self::StylixVellumNix => vellum::render_base16_nix(),
+            Self::StylixNordNix => stylix::render_nix(tokens),
             Self::FleetFonts => fleet_fonts::render(tokens),
             // Vellum targets are their own BORN source — the Nord
             // `TokenSet` argument is unused.
@@ -155,7 +160,7 @@ impl Target {
         }
     }
 
-    pub fn all() -> [Target; 21] {
+    pub fn all() -> [Target; 22] {
         [
             Self::Css,
             Self::Md3,
@@ -174,6 +179,7 @@ impl Target {
             Self::FleetFonts,
             Self::StylixVellum,
             Self::StylixVellumNix,
+            Self::StylixNordNix,
             Self::StylixVellumBase24,
             Self::SvgVellumPalette,
             Self::SkimVellum,
