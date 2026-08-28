@@ -306,7 +306,7 @@ checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
 
 [[package]]
 name = "ishou-batente"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "ishou-tokens",
  "serde",
@@ -315,7 +315,7 @@ dependencies = [
 
 [[package]]
 name = "ishou-cli"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "anyhow",
  "clap",
@@ -326,14 +326,14 @@ dependencies = [
 
 [[package]]
 name = "ishou-emoji"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "serde_json",
 ]
 
 [[package]]
 name = "ishou-pente"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "ishou-tokens",
  "serde",
@@ -342,7 +342,7 @@ dependencies = [
 
 [[package]]
 name = "ishou-render"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "indexmap",
  "insta",
@@ -354,7 +354,7 @@ dependencies = [
 
 [[package]]
 name = "ishou-tokens"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "insta",
  "irodori",
