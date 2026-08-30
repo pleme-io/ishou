@@ -137,7 +137,10 @@ mod tests {
         // than failing, so pin both halves of the wire format.
         let out = render(&META, &slots(), "src", "expr");
         assert!(out.contains(r#"base00 = "2e3440";"#), "got:\n{out}");
-        assert!(!out.contains("\"#2e3440\""), "hex must not carry a `#`:\n{out}");
+        assert!(
+            !out.contains("\"#2e3440\""),
+            "hex must not carry a `#`:\n{out}"
+        );
     }
 
     #[test]
@@ -146,7 +149,10 @@ mod tests {
         // silently rather than failing, so assert all five are present.
         let out = render(&META, &slots(), "src", "expr");
         for key in ["system", "name", "author", "variant", "slug"] {
-            assert!(out.contains(&format!("{key} = ")), "missing {key} in:\n{out}");
+            assert!(
+                out.contains(&format!("{key} = ")),
+                "missing {key} in:\n{out}"
+            );
         }
     }
 

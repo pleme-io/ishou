@@ -142,6 +142,15 @@ pub mod convergence {
         fd: FleetDefaults,
         kb: FleetKeybinds,
         failures: Vec<String>,
+        /// How many expectations were actually recorded.
+        ///
+        /// ★ THE DENOMINATOR, INSIDE THE VALUE. Without it `run()` cannot tell
+        /// "nothing drifted" from "nothing was examined", and those two render
+        /// as the same silence. A Guard that checked nothing reporting success
+        /// is the vacuous-guard class: it does not go red and it does not go
+        /// quiet, it goes unfalsifiably green, which is worse than absent
+        /// because absence is visible and green is trusted.
+        checked: usize,
     }
 
     impl Guard {
@@ -153,12 +162,14 @@ pub mod convergence {
                 fd: FleetDefaults::prescribed(),
                 kb: FleetKeybinds::prescribed(),
                 failures: Vec::new(),
+                checked: 0,
             }
         }
 
         /// Assert `actual` matches `FleetDefaults::prescribed().font_family`.
         #[must_use]
         pub fn expect_font_family(mut self, actual: &str) -> Self {
+            self.checked += 1;
             if actual != self.fd.font_family {
                 self.failures.push(format!(
                     "{}: font_family drift — actual {:?} != fleet {:?}",
@@ -172,6 +183,7 @@ pub mod convergence {
         /// (within 0.001 epsilon — f32 round-trips through serde).
         #[must_use]
         pub fn expect_font_size(mut self, actual: f32) -> Self {
+            self.checked += 1;
             if (actual - self.fd.font_size).abs() >= 0.001 {
                 self.failures.push(format!(
                     "{}: font_size drift — actual {} != fleet {}",
@@ -188,6 +200,7 @@ pub mod convergence {
         /// fleet prescribes (the old Iosevka-vs-JetBrainsMono mismatch).
         #[must_use]
         pub fn expect_font_italic(mut self, actual: &str) -> Self {
+            self.checked += 1;
             if actual != self.fd.font_italic {
                 self.failures.push(format!(
                     "{}: font_italic drift — actual {:?} != fleet {:?}",
@@ -206,6 +219,7 @@ pub mod convergence {
         /// +25% = 1.65).
         #[must_use]
         pub fn expect_line_height(mut self, actual: f32) -> Self {
+            self.checked += 1;
             if (actual - self.fd.line_height).abs() >= 0.001 {
                 self.failures.push(format!(
                     "{}: line_height drift — actual {} != fleet {}",
@@ -218,6 +232,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetDefaults::prescribed().padding`.
         #[must_use]
         pub fn expect_padding(mut self, actual: u32) -> Self {
+            self.checked += 1;
             if actual != self.fd.padding {
                 self.failures.push(format!(
                     "{}: padding drift — actual {} != fleet {}",
@@ -230,6 +245,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetDefaults::prescribed().cursor_style`.
         #[must_use]
         pub fn expect_cursor_style(mut self, actual: &str) -> Self {
+            self.checked += 1;
             if actual != self.fd.cursor_style {
                 self.failures.push(format!(
                     "{}: cursor_style drift — actual {:?} != fleet {:?}",
@@ -242,6 +258,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetDefaults::prescribed().scrollback_lines`.
         #[must_use]
         pub fn expect_scrollback_lines(mut self, actual: usize) -> Self {
+            self.checked += 1;
             if actual != self.fd.scrollback_lines {
                 self.failures.push(format!(
                     "{}: scrollback_lines drift — actual {} != fleet {}",
@@ -254,6 +271,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetDefaults::prescribed().theme`.
         #[must_use]
         pub fn expect_theme(mut self, actual: FleetTheme) -> Self {
+            self.checked += 1;
             if actual != self.fd.theme {
                 self.failures.push(format!(
                     "{}: theme drift — actual {:?} != fleet {:?}",
@@ -272,6 +290,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().history_picker`.
         #[must_use]
         pub fn expect_history_picker(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("history_picker", actual, self.kb.history_picker);
             self
         }
@@ -279,6 +298,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().files_picker`.
         #[must_use]
         pub fn expect_files_picker(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("files_picker", actual, self.kb.files_picker);
             self
         }
@@ -286,6 +306,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().dir_picker`.
         #[must_use]
         pub fn expect_dir_picker(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("dir_picker", actual, self.kb.dir_picker);
             self
         }
@@ -293,6 +314,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().content_picker`.
         #[must_use]
         pub fn expect_content_picker(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("content_picker", actual, self.kb.content_picker);
             self
         }
@@ -300,6 +322,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().clear_buffer`.
         #[must_use]
         pub fn expect_clear_buffer(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("clear_buffer", actual, self.kb.clear_buffer);
             self
         }
@@ -307,6 +330,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().kill_line`.
         #[must_use]
         pub fn expect_kill_line(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("kill_line", actual, self.kb.kill_line);
             self
         }
@@ -314,6 +338,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().edit_in_editor`.
         #[must_use]
         pub fn expect_edit_in_editor(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("edit_in_editor", actual, self.kb.edit_in_editor);
             self
         }
@@ -321,6 +346,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().help`.
         #[must_use]
         pub fn expect_help(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("help", actual, self.kb.help);
             self
         }
@@ -328,6 +354,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().clipboard_copy`.
         #[must_use]
         pub fn expect_clipboard_copy(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("clipboard_copy", actual, self.kb.clipboard_copy);
             self
         }
@@ -335,6 +362,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().clipboard_paste`.
         #[must_use]
         pub fn expect_clipboard_paste(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("clipboard_paste", actual, self.kb.clipboard_paste);
             self
         }
@@ -342,6 +370,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().toggle_sudo`.
         #[must_use]
         pub fn expect_toggle_sudo(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("toggle_sudo", actual, self.kb.toggle_sudo);
             self
         }
@@ -349,6 +378,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().insert_last_arg`.
         #[must_use]
         pub fn expect_insert_last_arg(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("insert_last_arg", actual, self.kb.insert_last_arg);
             self
         }
@@ -356,6 +386,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().multiplexer_prefix`.
         #[must_use]
         pub fn expect_multiplexer_prefix(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("multiplexer_prefix", actual, self.kb.multiplexer_prefix);
             self
         }
@@ -365,6 +396,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().copy`.
         #[must_use]
         pub fn expect_copy(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("copy", actual, self.kb.copy);
             self
         }
@@ -372,6 +404,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().paste`.
         #[must_use]
         pub fn expect_paste(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("paste", actual, self.kb.paste);
             self
         }
@@ -379,6 +412,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().select_all`.
         #[must_use]
         pub fn expect_select_all(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("select_all", actual, self.kb.select_all);
             self
         }
@@ -386,6 +420,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().search_open`.
         #[must_use]
         pub fn expect_search_open(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("search_open", actual, self.kb.search_open);
             self
         }
@@ -393,6 +428,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().search_close`.
         #[must_use]
         pub fn expect_search_close(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("search_close", actual, self.kb.search_close);
             self
         }
@@ -400,6 +436,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().search_next`.
         #[must_use]
         pub fn expect_search_next(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("search_next", actual, self.kb.search_next);
             self
         }
@@ -407,6 +444,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().search_prev`.
         #[must_use]
         pub fn expect_search_prev(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("search_prev", actual, self.kb.search_prev);
             self
         }
@@ -414,6 +452,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().font_increase`.
         #[must_use]
         pub fn expect_font_increase(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("font_increase", actual, self.kb.font_increase);
             self
         }
@@ -421,6 +460,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().font_decrease`.
         #[must_use]
         pub fn expect_font_decrease(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("font_decrease", actual, self.kb.font_decrease);
             self
         }
@@ -428,6 +468,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().font_reset`.
         #[must_use]
         pub fn expect_font_reset(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("font_reset", actual, self.kb.font_reset);
             self
         }
@@ -435,6 +476,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().toggle_fullscreen`.
         #[must_use]
         pub fn expect_toggle_fullscreen(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("toggle_fullscreen", actual, self.kb.toggle_fullscreen);
             self
         }
@@ -442,6 +484,7 @@ pub mod convergence {
         /// Assert `actual` matches `FleetKeybinds::prescribed().clear_screen`.
         #[must_use]
         pub fn expect_clear_screen(mut self, actual: &str) -> Self {
+            self.checked += 1;
             self.check_chord("clear_screen", actual, self.kb.clear_screen);
             self
         }
@@ -472,6 +515,20 @@ pub mod convergence {
         /// message listing every field that drifted from the fleet
         /// baseline.
         pub fn run(self) {
+            // ★ A GUARD THAT EXAMINED NOTHING MUST NOT REPORT SUCCESS.
+            //
+            // Measured 2026-08-30 across the fleet: 12 expectations in mado and
+            // namimado were tautologies, and every app that derives from
+            // `FleetDefaults` but pins nothing had a Guard that could not fail.
+            // Refusing here converts "I forgot to assert anything" from a green
+            // run into a loud one, at the only place that can see it.
+            assert!(
+                self.checked > 0,
+                "{}: convergence::Guard ran with ZERO expectations. A guard that \
+                 examined nothing cannot report convergence — add at least one \
+                 `expect_*`, or do not construct a Guard.",
+                self.app
+            );
             assert!(
                 self.failures.is_empty(),
                 "{} drifted from FleetDefaults::prescribed():\n  - {}",
@@ -485,8 +542,12 @@ pub mod convergence {
     mod tests {
         use super::*;
 
+        /// ★ INVERTED 2026-08-30. This was `empty_guard_passes`, and it
+        /// enshrined the vacuity as intended behaviour — a Guard that examined
+        /// nothing was asserted to report success.
         #[test]
-        fn empty_guard_passes() {
+        #[should_panic(expected = "ZERO expectations")]
+        fn a_guard_that_examined_nothing_refuses_to_report_convergence() {
             Guard::for_app("fixture").run();
         }
 

@@ -18,7 +18,7 @@ name: ci
 #  2. `macos-15` FOR NO REASON — no Package.swift, no .xcodeproj, no
 #     apple-darwin target. macOS minutes bill at 10x Linux on a private repo.
 #  3. A HARDCODED PUBLIC RUNNER, where the reusable resolves by repo
-#     visibility (private → the camelot ARC pool).
+#     visibility (private → the self-hosted ARC pool).
 #
 # Test coverage goes UP: the reusable defaults to
 # `--workspace --all-features --no-fail-fast` against the old bare
