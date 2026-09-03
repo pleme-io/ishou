@@ -164,6 +164,30 @@ impl ColorPalette {
 /// sees a populated value on both themes.
 #[derive(Debug, Clone, Serialize)]
 pub struct SemanticRoles {
+    /// The COMPOSITOR's ground — the plane a desktop shows where no window
+    /// covers it.
+    ///
+    /// ── ★ WHY THIS IS A SEPARATE ROLE FROM `background` ──────────────────
+    /// `background` is an APPLICATION's base plane. Nord's whole model is one
+    /// application — a background plus elevated elements on it — and it names
+    /// no compositor, desktop-root or window-manager surface at all. So when
+    /// a compositor and its clients both resolve `background`, they paint the
+    /// SAME colour and every window loses its edge.
+    ///
+    /// Measured on plo 2026-09-03: omoya's desktop, every mado window and
+    /// tobira all painted `#2E3440` — a **1.00:1** contrast ratio, i.e. no
+    /// boundary anywhere on screen. The operator's report was "the look and
+    /// feel is absolutely just bad", and this was the cause; it was not the
+    /// absence of rounding, shadows or blur (two of the three reference riced
+    /// Wayland compositors ship with every effect OFF and read well).
+    ///
+    /// ★ It binds to a tone the palette ALREADY carries rather than minting a
+    /// colour. `shadow_tone` is #141822 under `pleme`, which sits **1.421:1**
+    /// below `polar_night_0` — against the 1.448:1 that `polar_night_0` sits
+    /// below `polar_night_2`. So ground → window → chrome is an even
+    /// elevation ladder, derived rather than chosen. Vellum's own comment
+    /// already calls its `shadow_tone` "ground_2".
+    pub desktop: &'static str,
     pub background: &'static str,
     pub surface: &'static str,
     pub surface_elevated: &'static str,
@@ -211,6 +235,9 @@ impl SemanticRoles {
     #[must_use]
     pub const fn pleme_dark() -> Self {
         Self {
+            // The compositor ground — one rung below the app background,
+            // so a window has an edge even when its client paints `background`.
+            desktop: "shadow_tone",
             background: "polar_night_0",
             surface: "polar_night_1",
             surface_elevated: "polar_night_2",
@@ -248,6 +275,14 @@ impl SemanticRoles {
     #[must_use]
     pub const fn vellum() -> Self {
         Self {
+            // The compositor ground — one rung below the app background,
+            // The compositor ground. ★ `ink`, NOT `shadow_tone` — vellum is a
+            // WARM theme (`night0` is #16140E) while `shadow_tone` is Nord's
+            // COOL #141822, which is both the wrong hue family and, at
+            // lum 23 vs 19, LIGHTER than the background it would sit under.
+            // Binding it there inverted the elevation ladder; the ladder gate
+            // below caught it within minutes of the change being written.
+            desktop: "ink",
             background: "night0",
             surface: "night1",
             surface_elevated: "night2",
@@ -281,8 +316,9 @@ impl SemanticRoles {
     /// Lookup table of every role → palette-key pair, in stable order.
     /// Used by renderers to iterate.
     #[must_use]
-    pub fn pairs(&self) -> [(&'static str, &'static str); 26] {
+    pub fn pairs(&self) -> [(&'static str, &'static str); 27] {
         [
+            ("desktop", self.desktop),
             ("background", self.background),
             ("surface", self.surface),
             ("surface-elevated", self.surface_elevated),
@@ -366,5 +402,88 @@ impl ColorPalette {
             ("paper", self.paper),
             ("shadow_tone", self.shadow_tone),
         ]
+    }
+}
+
+#[cfg(test)]
+mod ground_tests {
+    use super::*;
+
+    /// ★ THE LADDER GATE — the defect this role exists to make impossible.
+    ///
+    /// `desktop` must resolve to a DIFFERENT colour from `background`, in
+    /// every theme. When they resolve the same, a compositor and its clients
+    /// paint the same plane and every window on screen loses its edge — a
+    /// 1.00:1 contrast ratio, measured live on plo 2026-09-03 and reported by
+    /// the operator as "the look and feel is absolutely just bad".
+    ///
+    /// The failure is invisible in source (both roles read correct, both
+    /// resolve, nothing errors) and obvious on screen, which is exactly the
+    /// shape that needs a test rather than a comment.
+    #[test]
+    fn the_desktop_ground_is_never_the_same_plane_as_an_app_background() {
+        // ★ Each role set is checked against ITS OWN palette — vellum
+        // resolves through `VellumPalette`, not `ColorPalette`. Testing both
+        // against one palette would silently pass by resolving vellum's keys
+        // in Nord's table.
+        let cases: [(&str, SemanticRoles, &dyn Fn(&str) -> Option<Rgb>); 2] = [
+            ("pleme", SemanticRoles::pleme_dark(), &|k| {
+                ColorPalette::pleme().get(k)
+            }),
+            ("vellum", SemanticRoles::vellum(), &|k| {
+                crate::vellum::VellumPalette::vellum().get(k)
+            }),
+        ];
+        for (theme, roles, palette) in cases {
+            let ground = palette(roles.desktop)
+                .unwrap_or_else(|| panic!("{theme}: `desktop` resolves to nothing"));
+            let bg = palette(roles.background)
+                .unwrap_or_else(|| panic!("{theme}: `background` resolves to nothing"));
+            assert_ne!(
+                (ground.r, ground.g, ground.b),
+                (bg.r, bg.g, bg.b),
+                "{theme}: the compositor ground and an app background resolve to \
+                 the SAME colour, so no window has an edge"
+            );
+            // And the ground must be the DARKER of the two — it is what
+            // everything else sits on. A ground brighter than the surfaces
+            // above it inverts the elevation ladder.
+            let lum = |c: Rgb| {
+                0.2126 * f64::from(c.r) + 0.7152 * f64::from(c.g) + 0.0722 * f64::from(c.b)
+            };
+            assert!(
+                lum(ground) < lum(bg),
+                "{theme}: the ground is lighter than the background it sits under"
+            );
+        }
+    }
+
+    #[test]
+    fn every_role_resolves_in_every_theme() {
+        // Anti-vacuity for the gate above: it proves two roles differ, which
+        // passes trivially if `pairs()` has shrunk or a role stopped
+        // resolving. Assert the denominator.
+        let cases: [(&str, SemanticRoles, &dyn Fn(&str) -> Option<Rgb>); 2] = [
+            ("pleme", SemanticRoles::pleme_dark(), &|k| {
+                ColorPalette::pleme().get(k)
+            }),
+            ("vellum", SemanticRoles::vellum(), &|k| {
+                crate::vellum::VellumPalette::vellum().get(k)
+            }),
+        ];
+        for (theme, roles, palette) in cases {
+            let pairs = roles.pairs();
+            assert!(
+                pairs.len() >= 27,
+                "{theme}: role table shrank to {}",
+                pairs.len()
+            );
+            for (name, key) in pairs {
+                assert!(
+                    palette(key).is_some(),
+                    "{theme}: role `{name}` names key `{key}`, which the palette cannot resolve"
+                );
+            }
+        }
     }
 }
