@@ -24,6 +24,10 @@ default = []
 wgpu = ["dep:wgpu-types"]
 
 [dev-dependencies]
+# The motion algebra's arms ship property tests (a tween never overshoots,
+# a decay never rises, an oscillator's period is stable) — they came with
+# the evaluator and are the reason to trust it.
+proptest = "1"
 insta = { version = "1", features = ["json"] }
 serde_yaml = "0.9"
 

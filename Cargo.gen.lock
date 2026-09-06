@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "cargo_lock_sha256": "7438916c96678060f241baf82abb8b18fe333d87441d8e11b8802c6433391968",
+  "cargo_lock_sha256": "ec34351d9ab4d0f436367a96550c59ff7a8967cf6269fdc743985cc225e985e6",
   "manifest_sha256": {
     "Cargo.toml": "bc4086a03caedc79bf346d7f0a0d46c6be2bffdf924a3f0cb36650c755458bb3",
     "crates/ishou-batente/Cargo.toml": "8e371a75983282e46b2de9e503e0c7baf20fc219ef47ec8e543f72dddffe5f77",
@@ -8,7 +8,7 @@
     "crates/ishou-emoji/Cargo.toml": "76cc91abbd2c6765ca1bdc8ed2092c65b25b5b26583fe82d0dbc3ca02e385ee4",
     "crates/ishou-pente/Cargo.toml": "2e61a40a3182af14c66a5e1f2fcfb5d7a09729ee92adbe71b2a7706dafc716b1",
     "crates/ishou-render/Cargo.toml": "88f2d2f8bf37b9ccaf1a32052250e43628657b20865d7505b52105ae688c29bd",
-    "crates/ishou-tokens/Cargo.toml": "723f4e232e164aa9ad98dc017ecfb1c3434f005d6b99b1e2a2bc1a144ae2e936"
+    "crates/ishou-tokens/Cargo.toml": "31911cf01e8e13be3296d224d3adac9607f7205b19a010e287c4c6dfc6529577"
   },
   "target_resolves": {
     "base": {
@@ -122,6 +122,38 @@
         "features": []
       },
       "anyhow-1.0.102": {
+        "runtime_dependencies": [],
+        "build_dependencies": [],
+        "features": [
+          "default",
+          "std"
+        ]
+      },
+      "autocfg-1.5.1": {
+        "runtime_dependencies": [],
+        "build_dependencies": [],
+        "features": []
+      },
+      "bit-set-0.8.0": {
+        "runtime_dependencies": [
+          {
+            "name": "bit_vec",
+            "package_key": "bit-vec-0.8.0",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": false,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          }
+        ],
+        "build_dependencies": [],
+        "features": [
+          "default",
+          "std"
+        ]
+      },
+      "bit-vec-0.8.0": {
         "runtime_dependencies": [],
         "build_dependencies": [],
         "features": [
@@ -357,6 +389,112 @@
         "features": [
           "alloc",
           "default",
+          "std"
+        ]
+      },
+      "fnv-1.0.7": {
+        "runtime_dependencies": [],
+        "build_dependencies": [],
+        "features": [
+          "default",
+          "std"
+        ]
+      },
+      "getrandom-0.3.4": {
+        "runtime_dependencies": [
+          {
+            "name": "cfg_if",
+            "package_key": "cfg-if-1.0.4",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "libc",
+            "package_key": "libc-0.2.186",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": false,
+            "optional": false,
+            "target": "cfg(all(any(target_os = \"linux\", target_os = \"android\"), not(any(all(target_os = \"linux\", target_env = \"\"), getrandom_backend = \"custom\", getrandom_backend = \"linux_raw\", getrandom_backend = \"rdrand\", getrandom_backend = \"rndr\"))))",
+            "tree": "target"
+          },
+          {
+            "name": "libc",
+            "package_key": "libc-0.2.186",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": false,
+            "optional": false,
+            "target": "cfg(any(target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"hurd\", target_os = \"illumos\", target_os = \"cygwin\", all(target_os = \"horizon\", target_arch = \"arm\")))",
+            "tree": "target"
+          },
+          {
+            "name": "libc",
+            "package_key": "libc-0.2.186",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": false,
+            "optional": false,
+            "target": "cfg(any(target_os = \"haiku\", target_os = \"redox\", target_os = \"nto\", target_os = \"aix\"))",
+            "tree": "target"
+          },
+          {
+            "name": "libc",
+            "package_key": "libc-0.2.186",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": false,
+            "optional": false,
+            "target": "cfg(any(target_os = \"ios\", target_os = \"visionos\", target_os = \"watchos\", target_os = \"tvos\"))",
+            "tree": "target"
+          },
+          {
+            "name": "libc",
+            "package_key": "libc-0.2.186",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": false,
+            "optional": false,
+            "target": "cfg(any(target_os = \"macos\", target_os = \"openbsd\", target_os = \"vita\", target_os = \"emscripten\"))",
+            "tree": "target"
+          },
+          {
+            "name": "libc",
+            "package_key": "libc-0.2.186",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": false,
+            "optional": false,
+            "target": "cfg(target_os = \"netbsd\")",
+            "tree": "target"
+          },
+          {
+            "name": "libc",
+            "package_key": "libc-0.2.186",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": false,
+            "optional": false,
+            "target": "cfg(target_os = \"solaris\")",
+            "tree": "target"
+          },
+          {
+            "name": "libc",
+            "package_key": "libc-0.2.186",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": false,
+            "optional": false,
+            "target": "cfg(target_os = \"vxworks\")",
+            "tree": "target"
+          }
+        ],
+        "build_dependencies": [],
+        "features": [
           "std"
         ]
       },
@@ -885,6 +1023,24 @@
           "std"
         ]
       },
+      "num-traits-0.2.19": {
+        "runtime_dependencies": [],
+        "build_dependencies": [
+          {
+            "name": "autocfg",
+            "package_key": "autocfg-1.5.1",
+            "kind": "build",
+            "features": [],
+            "uses_default_features": true,
+            "optional": false,
+            "target": null,
+            "tree": "host"
+          }
+        ],
+        "features": [
+          "std"
+        ]
+      },
       "once_cell-1.21.4": {
         "runtime_dependencies": [],
         "build_dependencies": [],
@@ -892,6 +1048,27 @@
           "alloc",
           "default",
           "race",
+          "std"
+        ]
+      },
+      "ppv-lite86-0.2.21": {
+        "runtime_dependencies": [
+          {
+            "name": "zerocopy",
+            "package_key": "zerocopy-0.8.56",
+            "kind": "normal",
+            "features": [
+              "simd"
+            ],
+            "uses_default_features": true,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          }
+        ],
+        "build_dependencies": [],
+        "features": [
+          "simd",
           "std"
         ]
       },
@@ -914,6 +1091,138 @@
           "proc-macro"
         ]
       },
+      "proptest-1.11.0": {
+        "runtime_dependencies": [
+          {
+            "name": "bit_set",
+            "package_key": "bit-set-0.8.0",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": true,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "bit_vec",
+            "package_key": "bit-vec-0.8.0",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": true,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "bitflags",
+            "package_key": "bitflags-2.11.1",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "num_traits",
+            "package_key": "num-traits-0.2.19",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": false,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "rand",
+            "package_key": "rand-0.9.5",
+            "kind": "normal",
+            "features": [
+              "alloc"
+            ],
+            "uses_default_features": false,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "rand_chacha",
+            "package_key": "rand_chacha-0.9.0",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": false,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "rand_xorshift",
+            "package_key": "rand_xorshift-0.4.0",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "regex_syntax",
+            "package_key": "regex-syntax-0.8.10",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": true,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "rusty_fork",
+            "package_key": "rusty-fork-0.3.1",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": false,
+            "optional": true,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "tempfile",
+            "package_key": "tempfile-3.27.0",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": true,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "unarray",
+            "package_key": "unarray-0.1.4",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          }
+        ],
+        "build_dependencies": [],
+        "features": [
+          "bit-set",
+          "default",
+          "fork",
+          "regex-syntax",
+          "rusty-fork",
+          "std",
+          "tempfile",
+          "timeout"
+        ]
+      },
+      "quick-error-1.2.3": {
+        "runtime_dependencies": [],
+        "build_dependencies": [],
+        "features": []
+      },
       "quote-1.0.45": {
         "runtime_dependencies": [
           {
@@ -932,6 +1241,91 @@
           "default",
           "proc-macro"
         ]
+      },
+      "rand-0.9.5": {
+        "runtime_dependencies": [
+          {
+            "name": "rand_core",
+            "package_key": "rand_core-0.9.5",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": false,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          }
+        ],
+        "build_dependencies": [],
+        "features": [
+          "alloc",
+          "os_rng",
+          "std"
+        ]
+      },
+      "rand_chacha-0.9.0": {
+        "runtime_dependencies": [
+          {
+            "name": "ppv_lite86",
+            "package_key": "ppv-lite86-0.2.21",
+            "kind": "normal",
+            "features": [
+              "simd"
+            ],
+            "uses_default_features": false,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "rand_core",
+            "package_key": "rand_core-0.9.5",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          }
+        ],
+        "build_dependencies": [],
+        "features": [
+          "std"
+        ]
+      },
+      "rand_core-0.9.5": {
+        "runtime_dependencies": [
+          {
+            "name": "getrandom",
+            "package_key": "getrandom-0.3.4",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": true,
+            "target": null,
+            "tree": "target"
+          }
+        ],
+        "build_dependencies": [],
+        "features": [
+          "os_rng",
+          "std"
+        ]
+      },
+      "rand_xorshift-0.4.0": {
+        "runtime_dependencies": [
+          {
+            "name": "rand_core",
+            "package_key": "rand_core-0.9.5",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          }
+        ],
+        "build_dependencies": [],
+        "features": []
       },
       "regex-1.12.3": {
         "runtime_dependencies": [
@@ -1010,6 +1404,7 @@
         "runtime_dependencies": [],
         "build_dependencies": [],
         "features": [
+          "default",
           "std",
           "unicode",
           "unicode-age",
@@ -1019,6 +1414,55 @@
           "unicode-perl",
           "unicode-script",
           "unicode-segment"
+        ]
+      },
+      "rusty-fork-0.3.1": {
+        "runtime_dependencies": [
+          {
+            "name": "fnv",
+            "package_key": "fnv-1.0.7",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "quick_error",
+            "package_key": "quick-error-1.2.3",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "tempfile",
+            "package_key": "tempfile-3.27.0",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": false,
+            "target": null,
+            "tree": "target"
+          },
+          {
+            "name": "wait_timeout",
+            "package_key": "wait-timeout-0.2.1",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": true,
+            "target": null,
+            "tree": "target"
+          }
+        ],
+        "build_dependencies": [],
+        "features": [
+          "timeout",
+          "wait-timeout"
         ]
       },
       "ryu-1.0.23": {
@@ -1388,6 +1832,11 @@
         "build_dependencies": [],
         "features": []
       },
+      "unarray-0.1.4": {
+        "runtime_dependencies": [],
+        "build_dependencies": [],
+        "features": []
+      },
       "unicode-ident-1.0.24": {
         "runtime_dependencies": [],
         "build_dependencies": [],
@@ -1403,6 +1852,29 @@
         "build_dependencies": [],
         "features": [
           "default"
+        ]
+      },
+      "wait-timeout-0.2.1": {
+        "runtime_dependencies": [
+          {
+            "name": "libc",
+            "package_key": "libc-0.2.186",
+            "kind": "normal",
+            "features": [],
+            "uses_default_features": true,
+            "optional": false,
+            "target": "cfg(unix)",
+            "tree": "target"
+          }
+        ],
+        "build_dependencies": [],
+        "features": []
+      },
+      "zerocopy-0.8.56": {
+        "runtime_dependencies": [],
+        "build_dependencies": [],
+        "features": [
+          "simd"
         ]
       },
       "zmij-1.0.21": {
@@ -2056,6 +2528,15 @@
       "edition": "2021",
       "build_script": "build.rs"
     },
+    "autocfg-1.5.1": {
+      "edition": "2015"
+    },
+    "bit-set-0.8.0": {
+      "edition": "2015"
+    },
+    "bit-vec-0.8.0": {
+      "edition": "2015"
+    },
     "bitflags-2.11.1": {
       "edition": "2021"
     },
@@ -2095,6 +2576,17 @@
     },
     "fastrand-2.4.1": {
       "edition": "2018"
+    },
+    "fnv-1.0.7": {
+      "edition": "2015",
+      "lib_target": {
+        "name": "fnv",
+        "path": "lib.rs"
+      }
+    },
+    "getrandom-0.3.4": {
+      "edition": "2021",
+      "build_script": "build.rs"
     },
     "getrandom-0.4.2": {
       "edition": "2024",
@@ -2176,16 +2668,41 @@
     "memchr-2.8.0": {
       "edition": "2021"
     },
+    "num-traits-0.2.19": {
+      "edition": "2021",
+      "build_script": "build.rs"
+    },
     "once_cell-1.21.4": {
+      "edition": "2021"
+    },
+    "ppv-lite86-0.2.21": {
       "edition": "2021"
     },
     "proc-macro2-1.0.106": {
       "edition": "2021",
       "build_script": "build.rs"
     },
+    "proptest-1.11.0": {
+      "edition": "2021"
+    },
+    "quick-error-1.2.3": {
+      "edition": "2015"
+    },
     "quote-1.0.45": {
       "edition": "2021",
       "build_script": "build.rs"
+    },
+    "rand-0.9.5": {
+      "edition": "2021"
+    },
+    "rand_chacha-0.9.0": {
+      "edition": "2021"
+    },
+    "rand_core-0.9.5": {
+      "edition": "2021"
+    },
+    "rand_xorshift-0.4.0": {
+      "edition": "2021"
     },
     "regex-1.12.3": {
       "edition": "2021"
@@ -2199,6 +2716,9 @@
     "rustix-1.1.4": {
       "edition": "2021",
       "build_script": "build.rs"
+    },
+    "rusty-fork-0.3.1": {
+      "edition": "2018"
     },
     "ryu-1.0.23": {
       "edition": "2021"
@@ -2242,6 +2762,9 @@
       "edition": "2021",
       "proc_macro": true
     },
+    "unarray-0.1.4": {
+      "edition": "2018"
+    },
     "unicode-ident-1.0.24": {
       "edition": "2021"
     },
@@ -2260,6 +2783,27 @@
     },
     "utf8parse-0.2.2": {
       "edition": "2018"
+    },
+    "wait-timeout-0.2.1": {
+      "edition": "2015",
+      "binaries": [
+        {
+          "name": "exit",
+          "path": "src/bin/exit.rs"
+        },
+        {
+          "name": "reader",
+          "path": "src/bin/reader.rs"
+        },
+        {
+          "name": "sleep",
+          "path": "src/bin/sleep.rs"
+        }
+      ]
+    },
+    "zerocopy-0.8.56": {
+      "edition": "2021",
+      "build_script": "build.rs"
     },
     "zmij-1.0.21": {
       "edition": "2021",
