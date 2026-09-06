@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "cargo_lock_sha256": "ec34351d9ab4d0f436367a96550c59ff7a8967cf6269fdc743985cc225e985e6",
+  "cargo_lock_sha256": "3972ac97ca7bdc5c582274d8dfe67b1942a3fa1d54f33c2c75d6f3d99d4a60e4",
   "manifest_sha256": {
-    "Cargo.toml": "bc4086a03caedc79bf346d7f0a0d46c6be2bffdf924a3f0cb36650c755458bb3",
+    "Cargo.toml": "52388dcd1a87ff0108abf6dbab3dc5645fbdf682ca2cabf0bb4471767ac281e8",
     "crates/ishou-batente/Cargo.toml": "8e371a75983282e46b2de9e503e0c7baf20fc219ef47ec8e543f72dddffe5f77",
     "crates/ishou-cli/Cargo.toml": "446469e42afb9126299ffdff7768b3df79a7b919c6f85ef0e3ea50e9976d0f51",
     "crates/ishou-emoji/Cargo.toml": "76cc91abbd2c6765ca1bdc8ed2092c65b25b5b26583fe82d0dbc3ca02e385ee4",
@@ -750,11 +750,11 @@
           "default"
         ]
       },
-      "ishou-batente-0.1.17": {
+      "ishou-batente-0.1.18": {
         "runtime_dependencies": [
           {
             "name": "ishou_tokens",
-            "package_key": "ishou-tokens-0.1.17",
+            "package_key": "ishou-tokens-0.1.18",
             "kind": "normal",
             "features": [],
             "uses_default_features": true,
@@ -789,7 +789,7 @@
         "build_dependencies": [],
         "features": []
       },
-      "ishou-cli-0.1.17": {
+      "ishou-cli-0.1.18": {
         "runtime_dependencies": [
           {
             "name": "anyhow",
@@ -815,7 +815,7 @@
           },
           {
             "name": "ishou_render",
-            "package_key": "ishou-render-0.1.17",
+            "package_key": "ishou-render-0.1.18",
             "kind": "normal",
             "features": [],
             "uses_default_features": true,
@@ -825,7 +825,7 @@
           },
           {
             "name": "ishou_tokens",
-            "package_key": "ishou-tokens-0.1.17",
+            "package_key": "ishou-tokens-0.1.18",
             "kind": "normal",
             "features": [],
             "uses_default_features": true,
@@ -847,7 +847,7 @@
         "build_dependencies": [],
         "features": []
       },
-      "ishou-emoji-0.1.17": {
+      "ishou-emoji-0.1.18": {
         "runtime_dependencies": [],
         "build_dependencies": [
           {
@@ -863,11 +863,11 @@
         ],
         "features": []
       },
-      "ishou-pente-0.1.17": {
+      "ishou-pente-0.1.18": {
         "runtime_dependencies": [
           {
             "name": "ishou_tokens",
-            "package_key": "ishou-tokens-0.1.17",
+            "package_key": "ishou-tokens-0.1.18",
             "kind": "normal",
             "features": [],
             "uses_default_features": true,
@@ -902,7 +902,7 @@
         "build_dependencies": [],
         "features": []
       },
-      "ishou-render-0.1.17": {
+      "ishou-render-0.1.18": {
         "runtime_dependencies": [
           {
             "name": "indexmap",
@@ -918,7 +918,7 @@
           },
           {
             "name": "ishou_tokens",
-            "package_key": "ishou-tokens-0.1.17",
+            "package_key": "ishou-tokens-0.1.18",
             "kind": "normal",
             "features": [],
             "uses_default_features": true,
@@ -962,7 +962,7 @@
         "build_dependencies": [],
         "features": []
       },
-      "ishou-tokens-0.1.17": {
+      "ishou-tokens-0.1.18": {
         "runtime_dependencies": [
           {
             "name": "irodori",
@@ -2610,14 +2610,14 @@
     "is_terminal_polyfill-1.70.2": {
       "edition": "2021"
     },
-    "ishou-batente-0.1.17": {
+    "ishou-batente-0.1.18": {
       "edition": "2024",
       "lib_target": {
         "name": "ishou_batente",
         "path": "src/lib.rs"
       }
     },
-    "ishou-cli-0.1.17": {
+    "ishou-cli-0.1.18": {
       "edition": "2024",
       "binaries": [
         {
@@ -2626,7 +2626,7 @@
         }
       ]
     },
-    "ishou-emoji-0.1.17": {
+    "ishou-emoji-0.1.18": {
       "edition": "2024",
       "build_script": "build.rs",
       "lib_target": {
@@ -2634,21 +2634,21 @@
         "path": "src/lib.rs"
       }
     },
-    "ishou-pente-0.1.17": {
+    "ishou-pente-0.1.18": {
       "edition": "2024",
       "lib_target": {
         "name": "ishou_pente",
         "path": "src/lib.rs"
       }
     },
-    "ishou-render-0.1.17": {
+    "ishou-render-0.1.18": {
       "edition": "2024",
       "lib_target": {
         "name": "ishou_render",
         "path": "src/lib.rs"
       }
     },
-    "ishou-tokens-0.1.17": {
+    "ishou-tokens-0.1.18": {
       "edition": "2024",
       "lib_target": {
         "name": "ishou_tokens",
