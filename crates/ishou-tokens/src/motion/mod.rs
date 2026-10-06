@@ -58,11 +58,13 @@ pub use tokens::{Cubic, Durations, Easings, Motion};
 
 pub mod curve;
 pub mod decay;
+pub mod glide;
 pub mod oscillator;
 pub mod tween;
 
 pub use curve::{Curve, EasingKind};
 pub use decay::{Decay, frame_decay};
+pub use glide::Glide;
 pub use oscillator::{Oscillator, blink_on};
 pub use tween::Tween;
 
