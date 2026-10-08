@@ -3,10 +3,10 @@
   "cargo_lock_sha256": "ec18989cd2650d137be0c02132227de801cf8156f46f67924e08cc840d63ccf8",
   "manifest_sha256": {
     "Cargo.toml": "dd06f16e5fa9da4129598ed18ae92602bf43769271fb9c0a3d8d224c3f0b9fb0",
-    "crates/ishou-batente/Cargo.toml": "8e371a75983282e46b2de9e503e0c7baf20fc219ef47ec8e543f72dddffe5f77",
+    "crates/ishou-batente/Cargo.toml": "2575a162a9e9e3dd8bc65cc8f45e76dcaf47d72809770b1d21ffd697df54b923",
     "crates/ishou-cli/Cargo.toml": "446469e42afb9126299ffdff7768b3df79a7b919c6f85ef0e3ea50e9976d0f51",
     "crates/ishou-emoji/Cargo.toml": "76cc91abbd2c6765ca1bdc8ed2092c65b25b5b26583fe82d0dbc3ca02e385ee4",
-    "crates/ishou-pente/Cargo.toml": "2e61a40a3182af14c66a5e1f2fcfb5d7a09729ee92adbe71b2a7706dafc716b1",
+    "crates/ishou-pente/Cargo.toml": "e873261b5e38ddb523789ac4b20b2267c20e619251f0ffc5f419e67bcfc8bf18",
     "crates/ishou-render/Cargo.toml": "88f2d2f8bf37b9ccaf1a32052250e43628657b20865d7505b52105ae688c29bd",
     "crates/ishou-tokens/Cargo.toml": "31911cf01e8e13be3296d224d3adac9607f7205b19a010e287c4c6dfc6529577"
   },
