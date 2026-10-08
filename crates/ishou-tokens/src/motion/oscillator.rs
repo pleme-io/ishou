@@ -16,18 +16,50 @@
 //! hand-kept copies. [`Oscillator`] wraps it with an accumulated clock
 //! for callers that own their own time.
 
+use std::time::Duration;
+
 use super::{Advance, Seconds};
 
 /// Whether a blink is in its *on* half at `elapsed_secs`, given the full
 /// on-off `period_secs` (on for the first half of each period). A
 /// non-positive period is always on (blink disabled). This is the one
-/// law the three `render.rs` cursor-blink sites share.
+/// law the three `render.rs` cursor-blink sites share; it is
+/// [`blink_phase`]'s `on`, so a caller that sleeps until the phase's
+/// `flips_in` wakes to the flip this answer then shows.
 #[must_use]
 pub fn blink_on(elapsed_secs: f32, period_secs: f32) -> bool {
-    if period_secs <= 0.0 {
-        return true;
+    blink_phase(elapsed_secs, period_secs).on
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BlinkPhase {
+    pub on: bool,
+    pub flips_in: Option<Duration>,
+}
+
+#[must_use]
+pub fn blink_phase(elapsed_secs: f32, period_secs: f32) -> BlinkPhase {
+    if period_secs <= 0.0 || !period_secs.is_finite() {
+        return BlinkPhase {
+            on: true,
+            flips_in: None,
+        };
     }
-    elapsed_secs.rem_euclid(period_secs) < period_secs * 0.5
+    let half = f64::from(period_secs) * 0.5;
+    let at = f64::from(elapsed_secs);
+    let index = (at / half).floor();
+    BlinkPhase {
+        on: index.rem_euclid(2.0) == 0.0,
+        flips_in: wait_until(elapsed_secs, (index + 1.0) * half),
+    }
+}
+
+#[must_use]
+pub fn wait_until(elapsed_secs: f32, at_secs: f64) -> Option<Duration> {
+    let magnitude = elapsed_secs.abs();
+    let resolution = f64::from(magnitude.next_up() - magnitude);
+    let wait = (at_secs - f64::from(elapsed_secs)).max(resolution);
+    Duration::try_from_secs_f64(wait).ok()
 }
 
 /// A periodic oscillator with an accumulated clock. `phase_on` gives the
@@ -155,6 +187,76 @@ mod tests {
             elapsed += dt;
             assert_eq!(o.phase_on(), blink_on(elapsed, 0.8));
         }
+    }
+
+    #[allow(clippy::cast_possible_truncation)]
+    fn clock(start: f64, real: f64) -> f32 {
+        (start + real) as f32
+    }
+
+    #[allow(clippy::cast_precision_loss)]
+    fn flips_seen(start: f64, rate_ms: u32, flips: u32) -> (u32, u32) {
+        let period = rate_ms as f32 / 1000.0 * 2.0;
+        let mut real = 0.0f64;
+        let mut shown = blink_on(clock(start, real), period);
+        let mut seen = 0;
+        let mut wakes = 0;
+        while seen < flips {
+            let phase = blink_phase(clock(start, real), period);
+            assert_eq!(phase.on, shown, "the phase changed without a wake");
+            real += phase
+                .flips_in
+                .expect("a blinking period flips")
+                .as_secs_f64();
+            wakes += 1;
+            assert!(wakes < flips * 4, "{wakes} wakes for {seen} flips");
+            let now = blink_on(clock(start, real), period);
+            if now != shown {
+                seen += 1;
+                shown = now;
+            }
+        }
+        (seen, wakes)
+    }
+
+    #[test]
+    fn sleeping_until_the_flip_wakes_to_the_flip_on_a_long_running_clock() {
+        for start in [0.0, 8.0 * 3600.0, 7.0 * 86_400.0, 30.0 * 86_400.0] {
+            for rate_ms in [333u32, 500, 530, 600, 1000] {
+                let (seen, wakes) = flips_seen(start, rate_ms, 100);
+                assert_eq!(seen, 100);
+                assert!(
+                    wakes <= 200,
+                    "rate {rate_ms} ms at {start} s: {wakes} wakes for 100 flips"
+                );
+            }
+        }
+    }
+
+    #[test]
+    #[allow(clippy::cast_possible_truncation)]
+    fn a_wait_is_never_shorter_than_the_clock_can_show() {
+        let week = (7.0 * 86_400.0) as f32;
+        let step = week.next_up() - week;
+        assert!(step >= 0.06, "a week into an f32 clock it steps {step} s");
+        let wait = wait_until(week, f64::from(week) + 0.001).unwrap();
+        assert!(wait.as_secs_f64() >= f64::from(step));
+        assert_eq!(
+            wait_until(1.0, 1.25),
+            Some(Duration::from_secs_f64(0.25)),
+            "a wait longer than the step is exact"
+        );
+        assert!(
+            blink_phase(f32::INFINITY, 1.0).flips_in.is_none(),
+            "an unrepresentable wait is None, never a panic"
+        );
+        assert_eq!(
+            blink_phase(3.7, 0.0),
+            BlinkPhase {
+                on: true,
+                flips_in: None
+            }
+        );
     }
 
     proptest! {
