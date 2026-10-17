@@ -221,9 +221,31 @@
     } ''
       ${ishouBin}/bin/ishou render --target escriba-vellum > $out
     '';
+
+    rendered = {
+      "nord-palette.nix" = "nix";
+      "fleet-fonts.nix" = "fleet-fonts";
+      "stylix-fonts.nix" = "stylix-fonts";
+      "stylix-base16-nord-dark.nix" = "stylix-nord-nix";
+      "stylix-base16-vellum.nix" = "stylix-vellum-nix";
+    };
+
+    mkRenderedFresh = system: let
+      pkgs = import nixpkgs { inherit system; };
+      ishouBin = base.packages.${system}.default;
+    in pkgs.runCommand "ishou-rendered-fresh" { } (
+      nixpkgs.lib.concatStrings (nixpkgs.lib.mapAttrsToList (file: target: ''
+        ${ishouBin}/bin/ishou render --target ${target} > ${file}
+        ${pkgs.diffutils}/bin/diff -u ${./rendered + "/${file}"} ${file} || { echo "rendered/${file} is stale: nix run .#${target} > rendered/${file}"; exit 1; }
+      '') rendered)
+      + "touch $out\n"
+    );
   in
     base
     // {
+      checks = nixpkgs.lib.genAttrs systems (system:
+        (base.checks.${system} or {}) // { rendered-fresh = mkRenderedFresh system; }
+      );
       apps = nixpkgs.lib.genAttrs systems (system:
         (base.apps.${system} or {}) // (mkRenderApps system)
       );
