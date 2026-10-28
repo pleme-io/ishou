@@ -74,7 +74,7 @@ pub fn render_base16() -> String {
         palette.insert(slot.to_string(), slot_hex(rgb));
     }
     let body =
-        serde_yaml::to_string(&scheme("base16", palette)).expect("Scheme is always serializable");
+        serde_norway::to_string(&scheme("base16", palette)).expect("Scheme is always serializable");
     format!("{HEADER}{body}")
 }
 
@@ -129,7 +129,7 @@ pub fn render_base24() -> String {
         palette.insert(slot.to_string(), slot_hex(rgb));
     }
     let body =
-        serde_yaml::to_string(&scheme("base24", palette)).expect("Scheme is always serializable");
+        serde_norway::to_string(&scheme("base24", palette)).expect("Scheme is always serializable");
     format!("{HEADER}{body}")
 }
 

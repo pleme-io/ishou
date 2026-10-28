@@ -13,7 +13,7 @@ serde_json.workspace = true
 # Typed emission of the Vellum stylix base16/base24 YAML — the scheme
 # is an `IndexMap` (slot order = authored slot order) and serde_yaml owns
 # the escaping. No string-concatenated YAML for the new target.
-serde_yaml = "0.9"
+serde_norway = "0.9"
 indexmap = { version = "2", features = ["serde"] }
 
 [dev-dependencies]

@@ -430,8 +430,8 @@ mod tests {
     #[test]
     fn fleet_theme_round_trips_through_serde() {
         for &t in FleetTheme::all() {
-            let s = serde_yaml::to_string(&t).unwrap();
-            let back: FleetTheme = serde_yaml::from_str(&s).unwrap();
+            let s = serde_norway::to_string(&t).unwrap();
+            let back: FleetTheme = serde_norway::from_str(&s).unwrap();
             assert_eq!(t, back);
         }
     }

@@ -626,7 +626,7 @@ mod tests {
         // Serialize-only (no round-trip) — the atlas is code, not
         // config. Snapshots (frost-mcp, mado config_get) emit it.
         let p = FleetKeybinds::prescribed();
-        let s = serde_yaml::to_string(&p).unwrap();
+        let s = serde_norway::to_string(&p).unwrap();
         assert!(s.contains("history_picker: C-r"), "yaml: {s}");
         assert!(s.contains("multiplexer_prefix: C-b"), "yaml: {s}");
     }

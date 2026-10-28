@@ -269,8 +269,8 @@ mod tests {
     #[test]
     fn fleet_defaults_round_trip_via_serde() {
         let p = FleetDefaults::prescribed();
-        let s = serde_yaml::to_string(&p).unwrap();
-        let back: FleetDefaults = serde_yaml::from_str(&s).unwrap();
+        let s = serde_norway::to_string(&p).unwrap();
+        let back: FleetDefaults = serde_norway::from_str(&s).unwrap();
         assert_eq!(p, back);
     }
 

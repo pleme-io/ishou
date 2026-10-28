@@ -458,15 +458,15 @@ mod tests {
     #[test]
     fn serde_round_trip_clamps_oob() {
         let yaml = "9999.0";
-        let parsed: Percent = serde_yaml::from_str(yaml).unwrap();
+        let parsed: Percent = serde_norway::from_str(yaml).unwrap();
         assert_eq!(parsed.get(), 1.0);
     }
 
     #[test]
     fn serde_round_trip_preserves_in_range() {
         let p = Percent::new(0.75);
-        let s = serde_yaml::to_string(&p).unwrap();
-        let back: Percent = serde_yaml::from_str(&s).unwrap();
+        let s = serde_norway::to_string(&p).unwrap();
+        let back: Percent = serde_norway::from_str(&s).unwrap();
         assert_eq!(back, p);
     }
 

@@ -52,8 +52,8 @@ fn library_is_complete() {
     // Round-trip every listed theme through serde and back — proves each
     // entry in `all()` is a real, serialisable variant with a stable name.
     for &t in FleetTheme::all() {
-        let s = serde_yaml::to_string(&t).unwrap();
-        let back: FleetTheme = serde_yaml::from_str(&s).unwrap();
+        let s = serde_norway::to_string(&t).unwrap();
+        let back: FleetTheme = serde_norway::from_str(&s).unwrap();
         assert_eq!(
             t,
             back,
