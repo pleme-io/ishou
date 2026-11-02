@@ -181,6 +181,7 @@ mod tests {
 mod committed_artifacts {
     const VELLUM: &str = include_str!("../../../rendered/stylix-base16-vellum.nix");
     const NORD: &str = include_str!("../../../rendered/stylix-base16-nord-dark.nix");
+    const MONO: &str = include_str!("../../../rendered/stylix-base16-mono-dark.nix");
 
     #[test]
     fn vellum_matches_its_generator() {
@@ -204,7 +205,18 @@ mod committed_artifacts {
         );
     }
 
-    /// Both artefacts must be the literal-attrset shape, never `{ yaml = …; }`.
+    #[test]
+    fn mono_matches_its_generator() {
+        assert_eq!(
+            crate::mono::render_base16_nix(),
+            MONO,
+            "rendered/stylix-base16-mono-dark.nix is STALE. Regenerate:\n  \
+             cargo run -p ishou-cli -- render --target stylix-mono-nix \
+             > rendered/stylix-base16-mono-dark.nix"
+        );
+    }
+
+    /// Every artefact must be the literal-attrset shape, never `{ yaml = …; }`.
     ///
     /// This is the whole reason the target exists: the `yaml` form makes stylix
     /// `readFile` a derivation mid-evaluation, and that per-system build leaves
@@ -212,7 +224,7 @@ mod committed_artifacts {
     /// invisible on Linux CI and fatal on the workstation that deploys.
     #[test]
     fn neither_artifact_reintroduces_the_ifd_shape() {
-        for (name, body) in [("vellum", VELLUM), ("nord", NORD)] {
+        for (name, body) in [("vellum", VELLUM), ("nord", NORD), ("mono", MONO)] {
             // Comment lines are stripped first: the provenance header
             // deliberately QUOTES the `{ yaml = <drv>; }` shape to explain what
             // it replaced, and matching against the raw file makes the header's

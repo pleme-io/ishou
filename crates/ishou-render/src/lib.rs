@@ -27,6 +27,7 @@ pub mod ghostty;
 pub mod glsl;
 pub mod json;
 pub mod md3;
+pub mod mono;
 pub mod nix;
 pub mod nix_ast;
 pub mod rust;
@@ -85,6 +86,8 @@ pub enum Target {
     StylixVellumNix,
     /// Nord base16 as an already-parsed Nix attrset — the IFD-free shape.
     StylixNordNix,
+    /// Mono, as an already-parsed Nix attrset.
+    StylixMonoNix,
     /// Vellum base24 stylix scheme YAML — base16 + the real two-tier
     /// brights (base10–17).
     StylixVellumBase24,
@@ -123,6 +126,7 @@ impl Target {
             "stylix-vellum" | "stylix-base16-vellum" => Self::StylixVellum,
             "stylix-vellum-nix" | "stylix-base16-vellum-nix" => Self::StylixVellumNix,
             "stylix-nord-nix" | "stylix-base16-nord-nix" => Self::StylixNordNix,
+            "stylix-mono-nix" => Self::StylixMonoNix,
             "stylix-vellum-base24" | "stylix-base24-vellum" => Self::StylixVellumBase24,
             "svg-vellum-palette" | "vellum-palette" => Self::SvgVellumPalette,
             "skim-vellum" | "skim" => Self::SkimVellum,
@@ -149,6 +153,7 @@ impl Target {
             Self::StylixFonts => stylix_fonts::render(tokens),
             Self::StylixVellumNix => vellum::render_base16_nix(),
             Self::StylixNordNix => stylix::render_nix(tokens),
+            Self::StylixMonoNix => mono::render_base16_nix(),
             Self::FleetFonts => fleet_fonts::render(tokens),
             // Vellum targets are their own BORN source — the Nord
             // `TokenSet` argument is unused.
@@ -160,7 +165,7 @@ impl Target {
         }
     }
 
-    pub fn all() -> [Target; 22] {
+    pub fn all() -> [Target; 23] {
         [
             Self::Css,
             Self::Md3,
@@ -180,6 +185,7 @@ impl Target {
             Self::StylixVellum,
             Self::StylixVellumNix,
             Self::StylixNordNix,
+            Self::StylixMonoNix,
             Self::StylixVellumBase24,
             Self::SvgVellumPalette,
             Self::SkimVellum,
