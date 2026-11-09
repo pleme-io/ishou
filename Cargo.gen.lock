@@ -8,7 +8,7 @@
     "crates/ishou-emoji/Cargo.toml": "76cc91abbd2c6765ca1bdc8ed2092c65b25b5b26583fe82d0dbc3ca02e385ee4",
     "crates/ishou-pente/Cargo.toml": "e873261b5e38ddb523789ac4b20b2267c20e619251f0ffc5f419e67bcfc8bf18",
     "crates/ishou-render/Cargo.toml": "25ce9fbe53f8ba0215d8c7d9c7c9dedbbc39c263a26dc1d7d5820b2725dd8cbe",
-    "crates/ishou-tokens/Cargo.toml": "197ef64455bbcd460f1c15fb7ea2e771676782248961d3c54a014e02c1f45eca"
+    "crates/ishou-tokens/Cargo.toml": "627afccb95c48f4ac6ecc48cd5e223a68733ffb47b434613305489b24fb52f25"
   },
   "target_resolves": {
     "base": {
