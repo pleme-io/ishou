@@ -136,7 +136,7 @@
     # `import (inputs.ishou.packages.${system}.nord-palette-nix)` and
     # get the same `{ polar = …; snow = …; frost = …; aurora = …; }`
     # shape they had locally — one Nord across the fleet's foreign-app
-    # wrappers. See pleme-io/theory/THEME-ARCHITECTURE.md.
+    # wrappers.
     mkNordPaletteNix = system: let
       pkgs = import nixpkgs { inherit system; };
       ishouBin = base.packages.${system}.default;
@@ -271,7 +271,7 @@
           # the theme architecture rollout.
           nord-palette-nix = mkNordPaletteNix system;
           # Typed stylix.fonts attrset — sourced from ishou's
-          # Typography primitive. See pleme-io/theory/THEME-ARCHITECTURE.md.
+          # Typography primitive.
           stylix-fonts = mkStylixFonts system;
           # GPU-app-shaped fleet-fonts attrset. Every pleme-io GPU
           # app's HM module (mado, ghostty, fumi, kagi, …) imports

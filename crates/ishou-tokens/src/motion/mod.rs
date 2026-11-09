@@ -44,8 +44,8 @@
 //! A duration is a [`Seconds`] and normalized progress a [`Unit`], both
 //! [`crate::Refined`]. Being precise: this is a **runtime clamp**, not a
 //! compile-time refusal. `Seconds::new(-5.0)` is a legal call that succeeds
-//! by clamping to 0, and `Refined::default()` can bypass the bound. Per
-//! `theory/UNREPRESENTABILITY.md` §III.3, f32-backed `Refined` is graded
+//! by clamping to 0, and `Refined::default()` can bypass the bound.
+//! f32-backed `Refined` is graded
 //! **only-mitigated** — const generics preclude compile-time f32 bounds
 //! today. The honest claim is "an out-of-range value *saturates* at the
 //! boundary and never flows into a curve as, say, `1.3`", NOT "illegal

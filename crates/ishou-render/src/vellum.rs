@@ -98,7 +98,7 @@ pub fn render_base16() -> String {
 /// derivation, no build, no platform coupling.
 ///
 /// Emitted through the typed `nix_ast` printer rather than by formatting
-/// strings — `format!()` of Nix syntax is banned (theory/NIX-AST.md), and
+/// strings — `format!()` of Nix syntax is banned, and
 /// the failure it prevents is silent: an unbalanced brace or a missing
 /// semicolon ships as a file that parses to the wrong thing.
 #[must_use]

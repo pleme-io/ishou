@@ -20,7 +20,7 @@ wgpu-types = { version = "25", optional = true }
 default = []
 # Enable the `From<LinearRgba> for wgpu_types::Color` integration.
 # Consumed by every pleme-io GUI app (mado, hibiki, kagi, kekkai, fumi,
-# namimado, …) — see `pleme-io/theory/THEME-ARCHITECTURE.md`.
+# namimado, …).
 wgpu = ["dep:wgpu-types"]
 
 [dev-dependencies]

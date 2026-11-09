@@ -1,5 +1,5 @@
 //! Typed colour spaces — the load-bearing piece of the pleme-io theme
-//! architecture (see `pleme-io/theory/THEME-ARCHITECTURE.md`).
+//! architecture.
 //!
 //! Three orthogonal facts about a colour:
 //!

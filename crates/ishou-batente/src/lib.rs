@@ -6,8 +6,8 @@
 //! every thread lands.
 //!
 //! **Pente governs uniformity in space. Batente governs uniformity in time.**
-//! Canonical spec: `pleme-io/theory/BATENTE.md`. Read `PENTE.md` first — every
-//! structural argument here is that argument one axis over.
+//! Read `ishou-pente` first — every structural argument here is that argument
+//! one axis over.
 //!
 //! ## The thesis
 //!

@@ -13,7 +13,7 @@
 ;;;   on the monorepo line (tatara/tatara-lisp-derive), with zero cross-hits.
 ;;;   ishou is depended on by escriba, garasu and madori, so adopting either
 ;;;   line here is a flag-day, not an increment. It waits for the tatara-lisp
-;;;   consolidation (theory/TATARA-LISP-CONSOLIDATION.md).
+;;;   consolidation.
 ;;;
 ;;; Until then this file is a design artifact. Treat any claim that pente is
 ;;; "Lisp-authored" as false until a loader exists and this header is deleted.

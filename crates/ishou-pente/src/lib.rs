@@ -6,7 +6,7 @@
 //! across the whole width of the cloth*.
 //!
 //! Every colour, every role, every face the fleet renders passes through one
-//! pente. Canonical spec: `pleme-io/theory/PENTE.md`.
+//! pente.
 //!
 //! ## The one rule that makes it land
 //!
@@ -17,7 +17,7 @@
 //!
 //! ## The invariants, at their HONEST tiers
 //!
-//! Graded per `theory/UNREPRESENTABILITY.md`. A `Result::Err` is *mitigation*;
+//! A `Result::Err` is *mitigation*;
 //! a compile error or an absent method is *unrepresentability*. Nothing here
 //! is rounded up.
 //!
